@@ -832,6 +832,52 @@
             <button class="secondary-btn" id="copyIdBtn">Копировать ID</button>
         </div>
     </div>
+    <!-- Modal управления правами доступа -->
+<div id="permissionsModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3><i class="fas fa-lock"></i> Права доступа</h3>
+            <span class="close-modal closePermissions">&times;</span>
+        </div>
+        <div id="permissionsUserInfo"></div>
+        <div class="permissions-list" id="permissionsList">
+            <div class="permission-item">
+                <label><input type="checkbox" id="perm_tasks_add"> Добавлять задачи</label>
+            </div>
+            <div class="permission-item">
+                <label><input type="checkbox" id="perm_tasks_complete"> Выполнять задачи</label>
+            </div>
+            <div class="permission-item">
+                <label><input type="checkbox" id="perm_shopping_add"> Добавлять покупки</label>
+            </div>
+            <div class="permission-item">
+                <label><input type="checkbox" id="perm_shopping_buy"> Покупать товары</label>
+            </div>
+            <div class="permission-item">
+                <label><input type="checkbox" id="perm_expenses_add"> Добавлять расходы</label>
+            </div>
+            <div class="permission-item">
+                <label><input type="checkbox" id="perm_expenses_view"> Просматривать расходы</label>
+            </div>
+            <div class="permission-item">
+                <label><input type="checkbox" id="perm_events_add"> Добавлять события</label>
+            </div>
+            <div class="permission-item">
+                <label><input type="checkbox" id="perm_events_edit"> Редактировать события</label>
+            </div>
+            <div class="permission-item">
+                <label><input type="checkbox" id="perm_schedule_add"> Добавлять расписание</label>
+            </div>
+            <div class="permission-item">
+                <label><input type="checkbox" id="perm_invite"> Приглашать участников</label>
+            </div>
+            <div class="permission-item">
+                <label><input type="checkbox" id="perm_approve"> Одобрять заявки</label>
+            </div>
+        </div>
+        <button class="primary-btn" id="savePermissionsBtn">Сохранить права</button>
+    </div>
+</div>
     
     <script src="script.js"></script>
 </body>
