@@ -1,6 +1,3 @@
-الملف: static/script.js (كامل ومعدل)
-
-```javascript
 // ============= إعدادات API =============
 const API_BASE = window.location.origin;
 
@@ -94,15 +91,32 @@ async function apiCall(endpoint, method = 'GET', data = null) {
     }
 }
 
-// ============= التحقق من الجلسة =============
-async function checkSession() {
+// ============= دالة إنشاء العائلة للمستخدم الحالي =============
+async function ensureUserHasFamily() {
+    if (!currentUser) return false;
+    
+    // التحقق من وجود عائلة
+    const family = getCurrentFamily();
+    if (family) {
+        console.log('✅ المستخدم لديه عائلة بالفعل:', family);
+        return true;
+    }
+    
+    console.log('🔄 المستخدم ليس لديه عائلة، جاري الإنشاء...');
+    
     try {
-        const result = await apiCall('/api/check_session');
-        if (result.success && settings.rememberMe) {
+        const result = await apiCall('/api/create_family_for_user', 'POST');
+        if (result.success) {
+            console.log('✅ تم إنشاء العائلة بنجاح:', result.family);
+            // إعادة تحميل البيانات
+            await loadAllData();
             return true;
+        } else {
+            console.error('❌ فشل إنشاء العائلة:', result.message);
+            return false;
         }
-        return false;
     } catch (error) {
+        console.error('❌ خطأ في إنشاء العائلة:', error);
         return false;
     }
 }
@@ -445,7 +459,6 @@ async function loadAllData() {
     checkEventReminders();
     checkDailyReminders();
     
-    // تحديث واجهة المستخدم حسب الصلاحيات
     updateUIByPermissions();
 }
 
@@ -572,7 +585,6 @@ function renderFamilyMembers() {
         return;
     }
     
-    // جلب جميع أفراد العائلة
     const familyMembers = users.filter(u => family.members && family.members.includes(u.uniqueId));
     
     if (familyMembers.length === 0) {
@@ -580,7 +592,6 @@ function renderFamilyMembers() {
         return;
     }
     
-    // التحقق من أن المستخدم الحالي هو رب الأسرة
     const isHead = isFamilyHead();
     
     container.innerHTML = familyMembers.map(member => {
@@ -606,7 +617,6 @@ function renderFamilyMembers() {
         `;
     }).join('');
     
-    // إضافة مستمعي الأحداث لأزرار الصلاحيات
     document.querySelectorAll('.permissions-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -1503,10 +1513,21 @@ document.querySelectorAll('.tab-item').forEach(tab => {
     tab.addEventListener('click', () => { switchTab(tab.dataset.tab); });
 });
 
-// التهيئة
+// ============= دالة إنشاء العائلة عند التحميل =============
 async function init() {
     const loggedIn = await loadCurrentUser();
     if (loggedIn) {
+        // التأكد من وجود عائلة
+        const hasFamily = await ensureUserHasFamily();
+        if (!hasFamily) {
+            console.log('⚠️ لا توجد عائلة، محاولة مرة أخرى...');
+            setTimeout(async () => {
+                await ensureUserHasFamily();
+                await loadAllData();
+                updateDashboard();
+            }, 1000);
+        }
+        
         showScreen('main');
         switchTab('home');
         updateDashboard();
@@ -1524,4 +1545,3 @@ async function init() {
 }
 
 init();
-```
