@@ -1467,6 +1467,7 @@ document.querySelectorAll('.tab-item').forEach(tab => {
 });
 
 // التهيئة
+// التهيئة
 async function init() {
     const loggedIn = await loadCurrentUser();
     if (loggedIn) {
@@ -1478,6 +1479,8 @@ async function init() {
         renderShopping();
         renderExpenses();
         renderSchedules();
+        // تشغيل إصلاح العائلة بعد 1 ثانية
+        setTimeout(autoFixFamily, 1000);
     } else {
         showScreen('login');
     }
