@@ -18,10 +18,12 @@ let settings = {
     monthlyBudget: 0,
     taskReminders: true,
     eventReminders: true,
-    dailyReminders: true
+    dailyReminders: true,
+    rememberMe: true
 };
 
 let currentReportMonth = new Date();
+let selectedUserForPermissions = null;
 
 // ============= دوال مساعدة =============
 function escapeHtml(text) {
@@ -71,10 +73,6 @@ function generateUniqueID(name) {
     return `FAM-${prefix}${random}`;
 }
 
-function generateFamilyCode() {
-    return 'FAMILY-' + Math.random().toString(36).substring(2, 8).toUpperCase();
-}
-
 // ============= دوال API =============
 async function apiCall(endpoint, method = 'GET', data = null) {
     const options = {
@@ -90,6 +88,19 @@ async function apiCall(endpoint, method = 'GET', data = null) {
     } catch (error) {
         console.error('API Error:', error);
         return { success: false, message: 'Ошибка соединения' };
+    }
+}
+
+// ============= التحقق من الجلسة =============
+async function checkSession() {
+    try {
+        const result = await apiCall('/api/check_session');
+        if (result.success && settings.rememberMe) {
+            return true;
+        }
+        return false;
+    } catch (error) {
+        return false;
     }
 }
 
@@ -110,11 +121,9 @@ function addNotification(title, message, type = 'info', relatedId = null, relate
     saveNotifications();
     updateNotificationBadge();
     
-    // عرض الإشعار في المتصفح (إذا كان مسموحاً)
-    if (Notification.permission === 'granted') {
+    if (Notification.permission === 'granted' && settings.taskReminders) {
         new Notification(title, { body: message, icon: '/favicon.ico' });
     }
-    
     return notification;
 }
 
@@ -162,7 +171,7 @@ function renderNotifications() {
     if (!container) return;
     
     const unreadNotifications = notifications.filter(n => !n.read);
-    const readNotifications = notifications.filter(n => n.read).slice(0, 20);
+    const readNotifications = notifications.filter(n => n.read).slice(0, 30);
     
     if (notifications.length === 0) {
         container.innerHTML = '<div style="text-align:center; padding: 40px; color:#8e8e93;"><i class="fas fa-bell-slash" style="font-size: 32px; margin-bottom: 8px; display: block;"></i>Нет уведомлений</div>';
@@ -216,24 +225,20 @@ function checkEventReminders() {
     events.forEach(event => {
         const eventDate = new Date(event.date);
         eventDate.setHours(0, 0, 0, 0);
-        
         const daysDiff = Math.ceil((eventDate - today) / (1000 * 60 * 60 * 24));
         
-        // تذكير قبل 5 أيام
-        if (daysDiff === 5) {
-            const existingNotif = notifications.find(n => n.relatedId === event.id && n.title.includes('5 дней'));
+        if (event.reminderDays && daysDiff === event.reminderDays) {
+            const existingNotif = notifications.find(n => n.relatedId === event.id && n.title.includes(event.reminderDays));
             if (!existingNotif) {
                 addNotification(
                     `⏰ Напоминание: ${event.title}`,
-                    `Событие "${event.title}" через 5 дней!`,
+                    `Событие "${event.title}" через ${event.reminderDays} дней!`,
                     'warning',
                     event.id,
                     'event'
                 );
             }
-        }
-        // تذكير قبل يوم واحد
-        else if (daysDiff === 1) {
+        } else if (daysDiff === 1) {
             const existingNotif = notifications.find(n => n.relatedId === event.id && n.title.includes('завтра'));
             if (!existingNotif) {
                 addNotification(
@@ -244,9 +249,7 @@ function checkEventReminders() {
                     'event'
                 );
             }
-        }
-        // تذكير في نفس اليوم
-        else if (daysDiff === 0) {
+        } else if (daysDiff === 0) {
             const existingNotif = notifications.find(n => n.relatedId === event.id && n.title.includes('сегодня'));
             if (!existingNotif) {
                 addNotification(
@@ -270,42 +273,21 @@ function checkDailyReminders() {
     if (lastCheck !== today) {
         localStorage.setItem('lastDailyCheck', today);
         
-        // تذكير بالمهام المعلقة
         const pendingTasks = tasks.filter(t => !t.completed && t.familyId === currentUser?.familyId);
         if (pendingTasks.length > 0) {
-            addNotification(
-                '📋 Задачи на сегодня',
-                `У вас ${pendingTasks.length} ${getTaskDeclension(pendingTasks.length)}`,
-                'info',
-                null,
-                'daily'
-            );
+            addNotification('📋 Задачи на сегодня', `У вас ${pendingTasks.length} ${getTaskDeclension(pendingTasks.length)}`, 'info');
         }
         
-        // تذكير بالمشتريات المعلقة
         const pendingShopping = shopping.filter(s => !s.purchased && s.familyId === currentUser?.familyId);
         if (pendingShopping.length > 0) {
-            addNotification(
-                '🛒 Список покупок',
-                `${pendingShopping.length} ${getShoppingDeclension(pendingShopping.length)} ожидают покупки`,
-                'info',
-                null,
-                'daily'
-            );
+            addNotification('🛒 Список покупок', `${pendingShopping.length} ${getShoppingDeclension(pendingShopping.length)} ожидают покупки`, 'info');
         }
         
-        // تذكير بالميزانية
         if (settings.monthlyBudget > 0) {
             const monthlyExpenses = getCurrentMonthExpenses().reduce((sum, e) => sum + e.amount, 0);
             const remaining = settings.monthlyBudget - monthlyExpenses;
             if (remaining < settings.monthlyBudget * 0.2 && remaining > 0) {
-                addNotification(
-                    '💰 Бюджет',
-                    `Осталось ${remaining} ${settings.currency} до конца месяца`,
-                    'warning',
-                    null,
-                    'budget'
-                );
+                addNotification('💰 Бюджет', `Осталось ${remaining} ${settings.currency} до конца месяца`, 'warning');
             }
         }
     }
@@ -407,6 +389,14 @@ function getExpensesForMonth(year, month) {
     });
 }
 
+function isFamilyHead() {
+    return currentUser && currentUser.isFamilyHead === true;
+}
+
+function hasPermission(permission) {
+    return currentUser && currentUser.permissions && currentUser.permissions[permission] === true;
+}
+
 // ============= تحميل البيانات =============
 async function loadCurrentUser() {
     const result = await apiCall('/api/current_user');
@@ -449,9 +439,36 @@ async function loadAllData() {
     const settingsResult = await apiCall('/api/settings');
     if (settingsResult.success) settings = { ...settings, ...settingsResult.settings };
     
-    // التحقق من التذكيرات
     checkEventReminders();
     checkDailyReminders();
+    
+    // تحديث واجهة المستخدم حسب الصلاحيات
+    updateUIByPermissions();
+}
+
+function updateUIByPermissions() {
+    const managePermissionsBtn = document.getElementById('managePermissionsBtn');
+    if (managePermissionsBtn) {
+        managePermissionsBtn.style.display = isFamilyHead() ? 'inline-block' : 'none';
+    }
+    
+    const addTaskBtn = document.getElementById('addTaskBtn');
+    if (addTaskBtn) addTaskBtn.style.display = hasPermission('can_add_tasks') ? 'flex' : 'none';
+    
+    const addShoppingBtn = document.getElementById('addShoppingBtn');
+    if (addShoppingBtn) addShoppingBtn.style.display = hasPermission('can_add_shopping') ? 'flex' : 'none';
+    
+    const addExpenseBtn = document.getElementById('addExpenseBtn');
+    if (addExpenseBtn) addExpenseBtn.style.display = hasPermission('can_add_expenses') ? 'flex' : 'none';
+    
+    const addEventBtn = document.getElementById('addEventBtn');
+    if (addEventBtn) addEventBtn.style.display = hasPermission('can_add_events') ? 'flex' : 'none';
+    
+    const addScheduleBtn = document.getElementById('addScheduleBtn');
+    if (addScheduleBtn) addScheduleBtn.style.display = hasPermission('can_add_schedule') ? 'flex' : 'none';
+    
+    const inviteMemberBtn = document.getElementById('inviteMemberBtn');
+    if (inviteMemberBtn) inviteMemberBtn.style.display = hasPermission('can_invite_members') ? 'inline-block' : 'none';
 }
 
 // ============= تحديث الإحصائيات =============
@@ -475,8 +492,7 @@ function getDaysRemaining(dateString) {
     today.setHours(0, 0, 0, 0);
     const eventDate = new Date(dateString);
     eventDate.setHours(0, 0, 0, 0);
-    const diffDays = Math.ceil((eventDate - today) / (1000 * 60 * 60 * 24));
-    return diffDays;
+    return Math.ceil((eventDate - today) / (1000 * 60 * 60 * 24));
 }
 
 function renderEvents() {
@@ -507,7 +523,7 @@ function renderEvents() {
             reminderText = '⚠️ Завтра!';
             reminderClass = 'event-reminder-badge';
         } else if (daysRemaining > 1 && daysRemaining <= 5) {
-            reminderText = `📅 Через ${daysRemaining} дня`;
+            reminderText = `📅 Через ${daysRemaining} дн`;
             reminderClass = 'event-reminder-badge';
         }
         
@@ -523,7 +539,7 @@ function renderEvents() {
                     ${person ? `<div class="event-person"><i class="fas fa-user"></i> ${escapeHtml(person.fullName)} (${person.role})</div>` : ''}
                 </div>
                 <div class="event-actions">
-                    <button class="delete-event" data-id="${event.id}"><i class="fas fa-trash-alt"></i></button>
+                    ${hasPermission('can_edit_events') ? `<button class="delete-event" data-id="${event.id}"><i class="fas fa-trash-alt"></i></button>` : ''}
                 </div>
             </div>
         `;
@@ -542,7 +558,7 @@ function renderEvents() {
     });
 }
 
-// ============= عرض أعضاء العائلة =============
+// ============= عرض أعضاء العائلة مع إدارة الصلاحيات =============
 function renderFamilyMembers() {
     if (!currentUser) return;
     const family = getCurrentFamily();
@@ -562,19 +578,97 @@ function renderFamilyMembers() {
     
     container.innerHTML = familyMembers.map(member => {
         const age = calculateAge(member.birthDate);
+        const isHead = member.isFamilyHead;
         return `
             <div class="member-item">
                 <div class="member-avatar-small">
                     <i class="fas fa-user"></i>
                 </div>
                 <div class="member-details">
-                    <h4>${escapeHtml(member.fullName)} ${member.uniqueId === currentUser.uniqueId ? '(Вы)' : ''}</h4>
+                    <h4>${escapeHtml(member.fullName)} ${member.uniqueId === currentUser.uniqueId ? '(Вы)' : ''} ${isHead ? '👑' : ''}</h4>
                     <p>${member.email || 'Нет email'} ${age ? ` • ${age} лет` : ''}</p>
                 </div>
                 <div class="member-badge">${member.role}</div>
+                ${isFamilyHead() && member.uniqueId !== currentUser.uniqueId ? 
+                    `<button class="small-btn permissions-btn" data-id="${member.uniqueId}" data-name="${escapeHtml(member.fullName)}" style="margin-left: 8px;">
+                        <i class="fas fa-lock"></i>
+                    </button>` : ''}
             </div>
         `;
     }).join('');
+    
+    document.querySelectorAll('.permissions-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const userId = btn.dataset.id;
+            const userName = btn.dataset.name;
+            openPermissionsModal(userId, userName);
+        });
+    });
+}
+
+function openPermissionsModal(userId, userName) {
+    const user = users.find(u => u.uniqueId === userId);
+    if (!user) return;
+    
+    selectedUserForPermissions = userId;
+    document.getElementById('permissionsUserInfo').innerHTML = `
+        <div style="text-align:center; margin-bottom: 16px;">
+            <strong>${escapeHtml(userName)}</strong>
+            <p style="font-size: 12px; color:#8e8e93;">${user.role}</p>
+        </div>
+    `;
+    
+    const perms = user.permissions || {
+        can_add_tasks: true, can_complete_tasks: true,
+        can_add_shopping: true, can_buy_shopping: true,
+        can_add_expenses: true, can_view_expenses: true,
+        can_add_events: true, can_edit_events: false,
+        can_add_schedule: true, can_invite_members: false,
+        can_approve_requests: false, can_manage_permissions: false
+    };
+    
+    document.getElementById('perm_tasks_add').checked = perms.can_add_tasks;
+    document.getElementById('perm_tasks_complete').checked = perms.can_complete_tasks;
+    document.getElementById('perm_shopping_add').checked = perms.can_add_shopping;
+    document.getElementById('perm_shopping_buy').checked = perms.can_buy_shopping;
+    document.getElementById('perm_expenses_add').checked = perms.can_add_expenses;
+    document.getElementById('perm_expenses_view').checked = perms.can_view_expenses;
+    document.getElementById('perm_events_add').checked = perms.can_add_events;
+    document.getElementById('perm_events_edit').checked = perms.can_edit_events;
+    document.getElementById('perm_schedule_add').checked = perms.can_add_schedule;
+    document.getElementById('perm_invite').checked = perms.can_invite_members;
+    document.getElementById('perm_approve').checked = perms.can_approve_requests;
+    
+    document.getElementById('permissionsModal').style.display = 'flex';
+}
+
+async function saveUserPermissions() {
+    if (!selectedUserForPermissions) return;
+    
+    const permissions = {
+        can_add_tasks: document.getElementById('perm_tasks_add').checked,
+        can_complete_tasks: document.getElementById('perm_tasks_complete').checked,
+        can_add_shopping: document.getElementById('perm_shopping_add').checked,
+        can_buy_shopping: document.getElementById('perm_shopping_buy').checked,
+        can_add_expenses: document.getElementById('perm_expenses_add').checked,
+        can_view_expenses: document.getElementById('perm_expenses_view').checked,
+        can_add_events: document.getElementById('perm_events_add').checked,
+        can_edit_events: document.getElementById('perm_events_edit').checked,
+        can_add_schedule: document.getElementById('perm_schedule_add').checked,
+        can_invite_members: document.getElementById('perm_invite').checked,
+        can_approve_requests: document.getElementById('perm_approve').checked,
+        can_manage_permissions: false
+    };
+    
+    const result = await apiCall(`/api/users/${selectedUserForPermissions}/permissions`, 'PUT', permissions);
+    if (result.success) {
+        addNotification('Права обновлены', 'Права доступа пользователя обновлены', 'success');
+        await loadAllData();
+        renderFamilyMembers();
+        document.getElementById('permissionsModal').style.display = 'none';
+    } else {
+        alert(result.message || 'Ошибка при сохранении прав');
+    }
 }
 
 // ============= عرض المهام =============
@@ -594,7 +688,9 @@ function renderTasks() {
                 <div class="task-title">${escapeHtml(task.title)}</div>
                 <div class="task-assignee"><i class="fas fa-user"></i> ${task.assignee || 'Не назначен'}</div>
             </div>
-            ${!task.completed ? `<button class="complete-btn" data-id="${task.id}">Выполнено</button>` : '<span style="color:#34c759;">✓ Выполнено</span>'}
+            ${!task.completed && hasPermission('can_complete_tasks') ? 
+                `<button class="complete-btn" data-id="${task.id}">Выполнено</button>` : 
+                (task.completed ? '<span style="color:#34c759;">✓ Выполнено</span>' : '')}
         </div>
     `).join('');
     
@@ -609,9 +705,6 @@ function renderTasks() {
                     renderTasks();
                     updateStats();
                     addNotification('✅ Задача выполнена', `Задача "${task.title}" выполнена!`, 'success', task.id, 'task');
-                    if (settings.taskReminders) {
-                        addNotification('Отлично!', `Вы выполнили задачу "${task.title}"`, 'success');
-                    }
                 }
             }
         });
@@ -635,7 +728,9 @@ function renderShopping() {
                 <div class="shopping-name">${escapeHtml(item.name)}</div>
                 <div class="shopping-price">${item.price ? item.price + ' ' + settings.currency : 'Цена не указана'}</div>
             </div>
-            ${!item.purchased ? `<button class="buy-btn" data-id="${item.id}">Куплено</button>` : '<span style="color:#34c759;">✓ Куплено</span>'}
+            ${!item.purchased && hasPermission('can_buy_shopping') ? 
+                `<button class="buy-btn" data-id="${item.id}">Куплено</button>` : 
+                (item.purchased ? '<span style="color:#34c759;">✓ Куплено</span>' : '')}
         </div>
     `).join('');
     
@@ -674,7 +769,8 @@ function renderExpenses() {
                 <div class="expense-amount">${exp.amount} ${settings.currency} - ${exp.category}</div>
                 <div class="expense-date">${formatDate(exp.date)}</div>
             </div>
-            <button class="delete-expense" data-id="${exp.id}"><i class="fas fa-trash-alt"></i></button>
+            ${hasPermission('can_view_expenses') ? 
+                `<button class="delete-expense" data-id="${exp.id}"><i class="fas fa-trash-alt"></i></button>` : ''}
         </div>
     `).join('');
     
@@ -760,7 +856,7 @@ function renderPendingRequests() {
     const section = document.getElementById('pendingApprovalsSection');
     const container = document.getElementById('pendingRequestsList');
     
-    if (familyRequests.length > 0 && (currentUser.role === 'Отец' || currentUser.role === 'Мать' || currentUser.role === 'Муж')) {
+    if (familyRequests.length > 0 && hasPermission('can_approve_requests')) {
         section.style.display = 'block';
         container.innerHTML = familyRequests.map(req => {
             const requester = users.find(u => u.uniqueId === req.userId);
@@ -830,6 +926,12 @@ function updateProfile() {
 function updateDashboard() {
     document.getElementById('dashboardUserName').innerHTML = currentUser.fullName.split(' ')[0];
     document.getElementById('dashboardUserRole').innerHTML = `Роль: ${currentUser.role}`;
+    if (isFamilyHead()) {
+        document.getElementById('dashboardUserBadge').innerHTML = '👑 Глава семьи';
+        document.getElementById('dashboardUserBadge').style.display = 'inline-block';
+    } else {
+        document.getElementById('dashboardUserBadge').style.display = 'none';
+    }
     renderFamilyMembers();
     updateStats();
     renderEvents();
@@ -915,8 +1017,8 @@ async function sendJoinRequest() {
 async function showInviteCode() {
     const family = getCurrentFamily();
     if (!family) { alert('У вас нет семьи. Сначала создайте семью.'); return; }
-    if (currentUser.role !== 'Отец' && currentUser.role !== 'Мать' && currentUser.role !== 'Муж') {
-        alert('Только глава семьи может создавать код приглашения');
+    if (!hasPermission('can_invite_members')) {
+        alert('У вас нет прав для приглашения участников');
         return;
     }
     
@@ -947,6 +1049,7 @@ function loadSettingsToModal() {
     document.getElementById('taskReminders').checked = settings.taskReminders;
     document.getElementById('eventReminders').checked = settings.eventReminders;
     document.getElementById('dailyReminders').checked = settings.dailyReminders;
+    document.getElementById('rememberMe').checked = settings.rememberMe !== false;
     
     if (settings.monthlyBudget > 0) {
         const monthlyExpenses = getCurrentMonthExpenses().reduce((sum, e) => sum + e.amount, 0);
@@ -966,7 +1069,8 @@ async function saveSettings() {
         monthlyBudget: parseFloat(document.getElementById('monthlyBudget').value) || 0,
         taskReminders: document.getElementById('taskReminders').checked,
         eventReminders: document.getElementById('eventReminders').checked,
-        dailyReminders: document.getElementById('dailyReminders').checked
+        dailyReminders: document.getElementById('dailyReminders').checked,
+        rememberMe: document.getElementById('rememberMe').checked
     };
     
     const result = await apiCall('/api/settings', 'POST', newSettings);
@@ -1011,12 +1115,8 @@ function showMonthlyReport() {
 
 // ============= طلب الإشعارات =============
 function requestNotificationPermission() {
-    if ('Notification' in window) {
-        Notification.requestPermission().then(permission => {
-            if (permission === 'granted') {
-                addNotification('Уведомления включены', 'Вы будете получать напоминания', 'success');
-            }
-        });
+    if ('Notification' in window && Notification.permission !== 'granted' && Notification.permission !== 'denied') {
+        Notification.requestPermission();
     }
 }
 
@@ -1118,8 +1218,16 @@ document.getElementById('showInviteCodeBtn').addEventListener('click', showInvit
 document.getElementById('copyInviteCodeBtn').addEventListener('click', copyInviteCode);
 document.getElementById('shareInviteCodeBtn').addEventListener('click', shareInviteCode);
 
+// أزرار إدارة الصلاحيات
+document.getElementById('managePermissionsBtn').addEventListener('click', () => {
+    if (isFamilyHead()) {
+        openPermissionsModal(currentUser.uniqueId, currentUser.fullName);
+    }
+});
+document.getElementById('savePermissionsBtn').addEventListener('click', saveUserPermissions);
+
 // أزرار المودالات
-document.querySelectorAll('.close-modal, .closeJoinGroup, .closeInviteCode, .closeEvent, .closeEditProfile, .closeNotifications, .closeSettings, .closeSchedule, .closeTask, .closeShopping, .closeExpense, .closeApproval, .closeReport, .closeUnique').forEach(el => {
+document.querySelectorAll('.close-modal, .closeJoinGroup, .closeInviteCode, .closePermissions, .closeEvent, .closeEditProfile, .closeNotifications, .closeSettings, .closeSchedule, .closeTask, .closeShopping, .closeExpense, .closeApproval, .closeReport, .closeUnique').forEach(el => {
     el.addEventListener('click', () => { document.querySelectorAll('.modal').forEach(m => m.style.display = 'none'); });
 });
 
@@ -1127,6 +1235,9 @@ document.querySelectorAll('.close-modal, .closeJoinGroup, .closeInviteCode, .clo
 document.getElementById('notificationsBtn').addEventListener('click', () => {
     renderNotifications();
     document.getElementById('notificationsModal').style.display = 'flex';
+});
+document.getElementById('markAllReadBtn').addEventListener('click', () => {
+    markAllNotificationsAsRead();
 });
 
 // زر الإعدادات
@@ -1159,8 +1270,9 @@ document.getElementById('copyIdBtn').addEventListener('click', () => {
     alert('ID скопирован');
 });
 
-// أزرار الإضافة
+// ============= أزرار الإضافة =============
 document.getElementById('addTaskBtn').addEventListener('click', () => {
+    if (!hasPermission('can_add_tasks')) { alert('У вас нет прав на добавление задач'); return; }
     const family = getCurrentFamily();
     const members = users.filter(u => family?.members?.includes(u.uniqueId));
     const select = document.getElementById('taskAssignee');
@@ -1184,7 +1296,11 @@ document.getElementById('confirmAddTask').addEventListener('click', async () => 
     }
 });
 
-document.getElementById('addShoppingBtn').addEventListener('click', () => { document.getElementById('addShoppingModal').style.display = 'flex'; });
+document.getElementById('addShoppingBtn').addEventListener('click', () => {
+    if (!hasPermission('can_add_shopping')) { alert('У вас нет прав на добавление покупок'); return; }
+    document.getElementById('addShoppingModal').style.display = 'flex';
+});
+
 document.getElementById('confirmAddShopping').addEventListener('click', async () => {
     const name = document.getElementById('shoppingItem').value.trim();
     const price = parseFloat(document.getElementById('shoppingPrice').value);
@@ -1202,7 +1318,11 @@ document.getElementById('confirmAddShopping').addEventListener('click', async ()
     }
 });
 
-document.getElementById('addExpenseBtn').addEventListener('click', () => { document.getElementById('addExpenseModal').style.display = 'flex'; });
+document.getElementById('addExpenseBtn').addEventListener('click', () => {
+    if (!hasPermission('can_add_expenses')) { alert('У вас нет прав на добавление расходов'); return; }
+    document.getElementById('addExpenseModal').style.display = 'flex';
+});
+
 document.getElementById('confirmAddExpense').addEventListener('click', async () => {
     const description = document.getElementById('expenseDesc').value.trim();
     const amount = parseFloat(document.getElementById('expenseAmount').value);
@@ -1229,6 +1349,7 @@ document.getElementById('confirmAddExpense').addEventListener('click', async () 
 });
 
 document.getElementById('addEventBtn').addEventListener('click', () => {
+    if (!hasPermission('can_add_events')) { alert('У вас нет прав на добавление событий'); return; }
     const family = getCurrentFamily();
     const familyMembers = users.filter(u => family?.members?.includes(u.uniqueId));
     const select = document.getElementById('eventPerson');
@@ -1240,12 +1361,16 @@ document.getElementById('addEventBtn').addEventListener('click', () => {
 document.getElementById('confirmAddEvent').addEventListener('click', async () => {
     const title = document.getElementById('eventTitle').value.trim();
     const date = document.getElementById('eventDate').value;
+    const reminderDays = parseInt(document.getElementById('eventReminderDays').value);
     const personId = document.getElementById('eventPerson').value;
     const color = document.getElementById('eventColor').value;
     if (!title) { alert('Введите название события'); return; }
     if (!date) { alert('Выберите дату события'); return; }
     const family = getCurrentFamily();
-    const result = await apiCall('/api/events', 'POST', { title, date, personId: personId || null, color, familyId: family.id, createdBy: currentUser.uniqueId });
+    const result = await apiCall('/api/events', 'POST', { 
+        title, date, reminderDays, personId: personId || null, color, 
+        familyId: family.id, createdBy: currentUser.uniqueId 
+    });
     if (result.success) {
         await loadAllData();
         renderEvents();
@@ -1258,6 +1383,7 @@ document.getElementById('confirmAddEvent').addEventListener('click', async () =>
 });
 
 document.getElementById('addScheduleBtn').addEventListener('click', () => {
+    if (!hasPermission('can_add_schedule')) { alert('У вас нет прав на добавление расписания'); return; }
     const family = getCurrentFamily();
     const familyMembers = users.filter(u => family?.members?.includes(u.uniqueId));
     const select = document.getElementById('scheduleMember');
@@ -1356,7 +1482,7 @@ async function init() {
         showScreen('login');
     }
     setTimeout(() => initializeAllDatePickers(), 200);
-    setInterval(() => { checkEventReminders(); checkDailyReminders(); }, 3600000); // كل ساعة
+    setInterval(() => { checkEventReminders(); checkDailyReminders(); }, 3600000);
 }
 
 init();
