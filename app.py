@@ -1,16 +1,3 @@
-سأقوم بتطوير التطبيق بالكامل ليشمل:
-
-1. صلاحيات كاملة لرب الأسرة (التحكم الكامل)
-2. تحديد صلاحيات لكل فرد (مهام، مشتريات، مصاريف، أحداث)
-3. تذكير الأحداث داخل حقل إنشاء الحدث
-4. تذكر تسجيل الدخول (Session دائم)
-5. تسريع التطبيق (تحسين الأداء)
-
----
-
-الملف الأول: app.py (محدث بالكامل)
-
-```python
 from flask import Flask, send_from_directory, jsonify, request, session
 from flask_cors import CORS
 import json
@@ -685,4 +672,3 @@ if __name__ == '__main__':
     print(f"🚀 Сервер запущен на http://localhost:{port}")
     print(f"📁 Данные сохраняются в папке {DATA_DIR}")
     app.run(host='0.0.0.0', port=port, debug=False)
-```
