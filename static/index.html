@@ -142,6 +142,7 @@
                                 <div class="user-text">
                                     <h2 id="dashboardUserName">Здравствуйте, Пользователь</h2>
                                     <p id="dashboardUserRole">Роль: ---</p>
+                                    <p id="dashboardUserBadge" class="user-badge" style="display: none;"></p>
                                 </div>
                             </div>
                             <div class="header-actions">
@@ -208,6 +209,9 @@
                                     </button>
                                     <button class="small-btn" id="showInviteCodeBtn" style="margin-left: 8px;">
                                         <i class="fas fa-qrcode"></i> Код
+                                    </button>
+                                    <button class="small-btn" id="managePermissionsBtn" style="margin-left: 8px; display: none;">
+                                        <i class="fas fa-lock"></i> Права
                                     </button>
                                 </div>
                             </div>
@@ -363,6 +367,7 @@
                     <i class="fas fa-qrcode"></i>
                     <input type="text" id="inviteCode" placeholder="Введите код приглашения (например: FAMILY-ABC123)">
                 </div>
+                <small class="form-hint">Код семьи можно получить у главы семьи</small>
             </div>
             
             <div class="form-group">
@@ -425,7 +430,76 @@
         </div>
     </div>
     
-    <!-- Modal добавления события -->
+    <!-- Modal управления правами доступа -->
+    <div id="permissionsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-lock"></i> Права доступа</h3>
+                <span class="close-modal closePermissions">&times;</span>
+            </div>
+            <div id="permissionsUserInfo"></div>
+            <div class="permissions-list" id="permissionsList">
+                <div class="permission-item">
+                    <label>
+                        <input type="checkbox" id="perm_tasks_add"> Добавлять задачи
+                    </label>
+                </div>
+                <div class="permission-item">
+                    <label>
+                        <input type="checkbox" id="perm_tasks_complete"> Выполнять задачи
+                    </label>
+                </div>
+                <div class="permission-item">
+                    <label>
+                        <input type="checkbox" id="perm_shopping_add"> Добавлять покупки
+                    </label>
+                </div>
+                <div class="permission-item">
+                    <label>
+                        <input type="checkbox" id="perm_shopping_buy"> Покупать товары
+                    </label>
+                </div>
+                <div class="permission-item">
+                    <label>
+                        <input type="checkbox" id="perm_expenses_add"> Добавлять расходы
+                    </label>
+                </div>
+                <div class="permission-item">
+                    <label>
+                        <input type="checkbox" id="perm_expenses_view"> Просматривать расходы
+                    </label>
+                </div>
+                <div class="permission-item">
+                    <label>
+                        <input type="checkbox" id="perm_events_add"> Добавлять события
+                    </label>
+                </div>
+                <div class="permission-item">
+                    <label>
+                        <input type="checkbox" id="perm_events_edit"> Редактировать события
+                    </label>
+                </div>
+                <div class="permission-item">
+                    <label>
+                        <input type="checkbox" id="perm_schedule_add"> Добавлять расписание
+                    </label>
+                </div>
+                <div class="permission-item">
+                    <label>
+                        <input type="checkbox" id="perm_invite"> Приглашать участников
+                    </label>
+                </div>
+                <div class="permission-item">
+                    <label>
+                        <input type="checkbox" id="perm_approve"> Одобрять заявки
+                    </label>
+                </div>
+            </div>
+            <button class="primary-btn" id="savePermissionsBtn">Сохранить права</button>
+        </div>
+    </div>
+    
+    <!-- Modal добавления события (с выбором дней напоминания) -->
     <div id="addEventModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -444,6 +518,19 @@
                         <i class="fas fa-calendar-alt"></i>
                     </button>
                 </div>
+            </div>
+            <div class="input-field">
+                <i class="fas fa-bell"></i>
+                <select id="eventReminderDays">
+                    <option value="0">Без напоминания</option>
+                    <option value="1">За 1 день</option>
+                    <option value="2">За 2 дня</option>
+                    <option value="3">За 3 дня</option>
+                    <option value="5" selected>За 5 дней</option>
+                    <option value="7">За 7 дней</option>
+                    <option value="14">За 14 дней</option>
+                    <option value="30">За 30 дней</option>
+                </select>
             </div>
             <div class="input-field">
                 <i class="fas fa-users"></i>
@@ -506,6 +593,7 @@
                 <span class="close-modal closeNotifications">&times;</span>
             </div>
             <div id="notificationsList" class="notifications-list"></div>
+            <button class="secondary-btn" id="markAllReadBtn" style="margin-top: 16px;">Отметить все прочитанными</button>
         </div>
     </div>
     
@@ -566,6 +654,17 @@
                     <span>Ежедневные напоминания</span>
                     <label class="toggle-switch">
                         <input type="checkbox" id="dailyReminders">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+            
+            <div class="settings-section">
+                <h4>Сессия</h4>
+                <div class="toggle-setting">
+                    <span>Запомнить меня</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="rememberMe" checked>
                         <span class="toggle-slider"></span>
                     </label>
                 </div>
