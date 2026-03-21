@@ -1,14 +1,16 @@
-// Модели данных
+// API URLs
+const API_BASE = window.location.origin;
+
+// Глобальные переменные
 let currentUser = null;
 let users = [];
 let families = [];
-let pendingRequests = [];
 let tasks = [];
 let shopping = [];
 let expenses = [];
 let events = [];
 let schedules = [];
-let notifications = [];
+let pendingRequests = [];
 let settings = {
     currency: '₽',
     homeAddress: '',
@@ -17,48 +19,32 @@ let settings = {
     eventReminders: true
 };
 
-let pendingRoleSelection = null;
 let currentReportMonth = new Date();
 
-// Загрузка из localStorage
-function loadData() {
-    const storedUsers = localStorage.getItem('family_users');
-    const storedFamilies = localStorage.getItem('family_families');
-    const storedRequests = localStorage.getItem('family_requests');
-    const storedTasks = localStorage.getItem('family_tasks');
-    const storedShopping = localStorage.getItem('family_shopping');
-    const storedExpenses = localStorage.getItem('family_expenses');
-    const storedEvents = localStorage.getItem('family_events');
-    const storedSchedules = localStorage.getItem('family_schedules');
-    const storedNotifications = localStorage.getItem('family_notifications');
-    const storedSettings = localStorage.getItem('family_settings');
+// ============= ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ =============
+
+async function apiCall(endpoint, method = 'GET', data = null) {
+    const options = {
+        method,
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        credentials: 'include'
+    };
     
-    users = storedUsers ? JSON.parse(storedUsers) : [];
-    families = storedFamilies ? JSON.parse(storedFamilies) : [];
-    pendingRequests = storedRequests ? JSON.parse(storedRequests) : [];
-    tasks = storedTasks ? JSON.parse(storedTasks) : [];
-    shopping = storedShopping ? JSON.parse(storedShopping) : [];
-    expenses = storedExpenses ? JSON.parse(storedExpenses) : [];
-    events = storedEvents ? JSON.parse(storedEvents) : [];
-    schedules = storedSchedules ? JSON.parse(storedSchedules) : [];
-    notifications = storedNotifications ? JSON.parse(storedNotifications) : [];
-    if (storedSettings) settings = { ...settings, ...JSON.parse(storedSettings) };
+    if (data) {
+        options.body = JSON.stringify(data);
+    }
+    
+    try {
+        const response = await fetch(`${API_BASE}${endpoint}`, options);
+        return await response.json();
+    } catch (error) {
+        console.error('API Error:', error);
+        return { success: false, message: 'Ошибка соединения с сервером' };
+    }
 }
 
-function saveData() {
-    localStorage.setItem('family_users', JSON.stringify(users));
-    localStorage.setItem('family_families', JSON.stringify(families));
-    localStorage.setItem('family_requests', JSON.stringify(pendingRequests));
-    localStorage.setItem('family_tasks', JSON.stringify(tasks));
-    localStorage.setItem('family_shopping', JSON.stringify(shopping));
-    localStorage.setItem('family_expenses', JSON.stringify(expenses));
-    localStorage.setItem('family_events', JSON.stringify(events));
-    localStorage.setItem('family_schedules', JSON.stringify(schedules));
-    localStorage.setItem('family_notifications', JSON.stringify(notifications));
-    localStorage.setItem('family_settings', JSON.stringify(settings));
-}
-
-// Вспомогательные функции
 function calculateAge(birthDate) {
     if (!birthDate) return null;
     const today = new Date();
@@ -86,33 +72,26 @@ function formatDateForInput(dateString) {
     return date.toISOString().split('T')[0];
 }
 
-// Генерация уникального ID
 function generateUniqueID(name) {
     const random = Math.floor(Math.random() * 1000000).toString().padStart(6, '0');
     const prefix = name.substring(0, 2).toUpperCase();
     return `FAM-${prefix}${random}`;
 }
 
-function generateFamilyCode() {
-    return 'FAMILY-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
 }
 
-// Добавление уведомления
 function addNotification(title, message, type = 'info') {
-    const notification = {
-        id: Date.now(),
-        title,
-        message,
-        type,
-        date: new Date().toISOString(),
-        read: false
-    };
-    notifications.unshift(notification);
-    if (notifications.length > 50) notifications.pop();
-    saveData();
+    console.log(`[${type}] ${title}: ${message}`);
+    // Можно добавить визуальное уведомление
 }
 
-// Функции для работы с датами
+// ============= ДАТА ПИКЕР =============
+
 function triggerDatePicker(inputId) {
     const input = document.getElementById(inputId);
     if (input) {
@@ -150,7 +129,51 @@ function initializeAllDatePickers() {
     });
 }
 
-// Управление экранами
+// ============= ЗАГРУЗКА ДАННЫХ =============
+
+async function loadCurrentUser() {
+    const result = await apiCall('/api/current_user');
+    if (result.success && result.user) {
+        currentUser = result.user;
+        await loadAllData();
+        return true;
+    }
+    return false;
+}
+
+async function loadAllData() {
+    if (!currentUser) return;
+    
+    const usersResult = await apiCall('/api/users');
+    if (usersResult.success) users = usersResult.users;
+    
+    const familiesResult = await apiCall('/api/families');
+    if (familiesResult.success) families = familiesResult.families;
+    
+    const tasksResult = await apiCall(`/api/tasks?familyId=${currentUser.familyId || ''}`);
+    if (tasksResult.success) tasks = tasksResult.tasks;
+    
+    const shoppingResult = await apiCall(`/api/shopping?familyId=${currentUser.familyId || ''}`);
+    if (shoppingResult.success) shopping = shoppingResult.shopping;
+    
+    const expensesResult = await apiCall(`/api/expenses?familyId=${currentUser.familyId || ''}`);
+    if (expensesResult.success) expenses = expensesResult.expenses;
+    
+    const eventsResult = await apiCall(`/api/events?familyId=${currentUser.familyId || ''}`);
+    if (eventsResult.success) events = eventsResult.events;
+    
+    const schedulesResult = await apiCall(`/api/schedules?familyId=${currentUser.familyId || ''}`);
+    if (schedulesResult.success) schedules = schedulesResult.schedules;
+    
+    const requestsResult = await apiCall(`/api/requests?familyId=${currentUser.familyId || ''}`);
+    if (requestsResult.success) pendingRequests = requestsResult.requests;
+    
+    const settingsResult = await apiCall('/api/settings');
+    if (settingsResult.success) settings = { ...settings, ...settingsResult.settings };
+}
+
+// ============= УПРАВЛЕНИЕ ЭКРАНАМИ =============
+
 const screens = {
     login: document.getElementById('loginScreen'),
     register: document.getElementById('registerScreen'),
@@ -163,7 +186,8 @@ function showScreen(screenName) {
     setTimeout(() => initializeAllDatePickers(), 100);
 }
 
-// Управление вкладками
+// ============= УПРАВЛЕНИЕ ВКЛАДКАМИ =============
+
 function switchTab(tabId) {
     document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
     document.querySelectorAll('.tab-item').forEach(item => item.classList.remove('active'));
@@ -180,34 +204,15 @@ function switchTab(tabId) {
     if (tabId === 'profile') updateProfile();
 }
 
-// Получение текущей семьи
+// ============= ПОЛУЧЕНИЕ ТЕКУЩЕЙ СЕМЬИ =============
+
 function getCurrentFamily() {
     if (!currentUser) return null;
     return families.find(f => f.members && f.members.includes(currentUser.uniqueId));
 }
 
-// Создание семьи если её нет
-function ensureFamily() {
-    if (!currentUser) return null;
-    let family = families.find(f => f.members && f.members.includes(currentUser.uniqueId));
-    
-    if (!family) {
-        const newFamily = {
-            id: generateFamilyCode(),
-            name: `Семья ${currentUser.fullName}`,
-            members: [currentUser.uniqueId],
-            createdBy: currentUser.uniqueId,
-            createdAt: new Date().toISOString()
-        };
-        families.push(newFamily);
-        currentUser.familyId = newFamily.id;
-        saveData();
-        return newFamily;
-    }
-    return family;
-}
+// ============= РАСХОДЫ =============
 
-// Расходы текущего месяца
 function getCurrentMonthExpenses() {
     const now = new Date();
     const currentMonth = now.getMonth();
@@ -232,7 +237,8 @@ function getExpensesForMonth(year, month) {
     });
 }
 
-// Обновление статистики
+// ============= ОБНОВЛЕНИЕ СТАТИСТИКИ =============
+
 function updateStats() {
     const family = getCurrentFamily();
     const familyTasks = tasks.filter(t => t.familyId === (family?.id || currentUser?.familyId) && !t.completed);
@@ -247,7 +253,8 @@ function updateStats() {
     document.getElementById('monthlyExpenses').innerText = monthlyExpenses;
 }
 
-// Рендер событий
+// ============= РЕНДЕР СОБЫТИЙ =============
+
 function renderEvents() {
     const family = getCurrentFamily();
     const familyEvents = events.filter(e => e.familyId === (family?.id || currentUser?.familyId));
@@ -284,16 +291,19 @@ function renderEvents() {
     }).join('');
     
     document.querySelectorAll('.delete-event').forEach(btn => {
-        btn.addEventListener('click', (e) => {
+        btn.addEventListener('click', async (e) => {
             const eventId = parseInt(btn.dataset.id);
-            events = events.filter(e => e.id !== eventId);
-            saveData();
-            renderEvents();
+            const result = await apiCall(`/api/events/${eventId}`, 'DELETE');
+            if (result.success) {
+                await loadAllData();
+                renderEvents();
+            }
         });
     });
 }
 
-// Рендер членов семьи
+// ============= РЕНДЕР ЧЛЕНОВ СЕМЬИ =============
+
 function renderFamilyMembers() {
     if (!currentUser) return;
     const family = getCurrentFamily();
@@ -328,7 +338,8 @@ function renderFamilyMembers() {
     }).join('');
 }
 
-// Рендер задач
+// ============= РЕНДЕР ЗАДАЧ =============
+
 function renderTasks() {
     const family = getCurrentFamily();
     const familyTasks = tasks.filter(t => t.familyId === (family?.id || currentUser?.familyId));
@@ -350,21 +361,21 @@ function renderTasks() {
     `).join('');
     
     document.querySelectorAll('.complete-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
+        btn.addEventListener('click', async (e) => {
             const taskId = parseInt(btn.dataset.id);
-            const task = tasks.find(t => t.id === taskId);
-            if (task) {
-                task.completed = true;
-                saveData();
+            const result = await apiCall(`/api/tasks/${taskId}`, 'PUT', { completed: true });
+            if (result.success) {
+                await loadAllData();
                 renderTasks();
                 updateStats();
-                addNotification('Задача выполнена', `Задача "${task.title}" выполнена`, 'success');
+                addNotification('Задача выполнена', `Задача "${result.task.title}" выполнена`, 'success');
             }
         });
     });
 }
 
-// Рендер покупок
+// ============= РЕНДЕР ПОКУПОК =============
+
 function renderShopping() {
     const family = getCurrentFamily();
     const familyShopping = shopping.filter(s => s.familyId === (family?.id || currentUser?.familyId));
@@ -386,21 +397,21 @@ function renderShopping() {
     `).join('');
     
     document.querySelectorAll('.buy-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
+        btn.addEventListener('click', async (e) => {
             const itemId = parseInt(btn.dataset.id);
-            const item = shopping.find(s => s.id === itemId);
-            if (item) {
-                item.purchased = true;
-                saveData();
+            const result = await apiCall(`/api/shopping/${itemId}`, 'PUT', { purchased: true });
+            if (result.success) {
+                await loadAllData();
                 renderShopping();
                 updateStats();
-                addNotification('Товар куплен', `Товар "${item.name}" куплен`, 'success');
+                addNotification('Товар куплен', `Товар "${result.item.name}" куплен`, 'success');
             }
         });
     });
 }
 
-// Рендер расходов
+// ============= РЕНДЕР РАСХОДОВ =============
+
 function renderExpenses() {
     const family = getCurrentFamily();
     const familyExpenses = expenses.filter(e => e.familyId === (family?.id || currentUser?.familyId));
@@ -423,18 +434,21 @@ function renderExpenses() {
     `).join('');
     
     document.querySelectorAll('.delete-expense').forEach(btn => {
-        btn.addEventListener('click', (e) => {
+        btn.addEventListener('click', async (e) => {
             const expId = parseInt(btn.dataset.id);
-            expenses = expenses.filter(e => e.id !== expId);
-            saveData();
-            renderExpenses();
-            updateStats();
-            addNotification('Расход удален', 'Расход успешно удален', 'info');
+            const result = await apiCall(`/api/expenses/${expId}`, 'DELETE');
+            if (result.success) {
+                await loadAllData();
+                renderExpenses();
+                updateStats();
+                addNotification('Расход удален', 'Расход успешно удален', 'info');
+            }
         });
     });
 }
 
-// Рендер расписания
+// ============= РЕНДЕР РАСПИСАНИЯ =============
+
 function renderSchedules() {
     const family = getCurrentFamily();
     const memberFilter = document.getElementById('scheduleMemberFilter').value;
@@ -475,12 +489,14 @@ function renderSchedules() {
     }).join('');
     
     document.querySelectorAll('.delete-schedule').forEach(btn => {
-        btn.addEventListener('click', (e) => {
+        btn.addEventListener('click', async (e) => {
             const scheduleId = parseInt(btn.dataset.id);
-            schedules = schedules.filter(s => s.id !== scheduleId);
-            saveData();
-            renderSchedules();
-            addNotification('Расписание обновлено', 'Запись удалена из расписания', 'info');
+            const result = await apiCall(`/api/schedules/${scheduleId}`, 'DELETE');
+            if (result.success) {
+                await loadAllData();
+                renderSchedules();
+                addNotification('Расписание обновлено', 'Запись удалена из расписания', 'info');
+            }
         });
     });
 }
@@ -497,7 +513,8 @@ function updateScheduleMemberFilter() {
     select.addEventListener('change', () => renderSchedules());
 }
 
-// Рендер заявок
+// ============= РЕНДЕР ЗАЯВОК =============
+
 function renderPendingRequests() {
     const family = getCurrentFamily();
     if (!family) return;
@@ -539,26 +556,8 @@ function renderPendingRequests() {
     }
 }
 
-// Рендер уведомлений
-function renderNotifications() {
-    const container = document.getElementById('notificationsList');
-    const unreadNotifications = notifications.filter(n => !n.read);
-    
-    if (unreadNotifications.length === 0) {
-        container.innerHTML = '<div style="text-align:center; padding: 40px; color:#8e8e93;"><i class="fas fa-bell-slash" style="font-size: 32px; margin-bottom: 8px; display: block;"></i>Нет новых уведомлений</div>';
-        return;
-    }
-    
-    container.innerHTML = unreadNotifications.map(notif => `
-        <div class="notification-item">
-            <div class="notification-title">${escapeHtml(notif.title)}</div>
-            <div class="notification-message" style="font-size: 13px; color:#8e8e93; margin: 4px 0;">${escapeHtml(notif.message)}</div>
-            <div class="notification-date">${formatDate(notif.date)}</div>
-        </div>
-    `).join('');
-}
+// ============= ОБНОВЛЕНИЕ ПРОФИЛЯ =============
 
-// Обновление профиля
 function updateProfile() {
     if (!currentUser) return;
     document.getElementById('profileName').innerText = currentUser.fullName;
@@ -589,7 +588,8 @@ function updateProfile() {
     }
 }
 
-// Обновление главной панели
+// ============= ОБНОВЛЕНИЕ ГЛАВНОЙ ПАНЕЛИ =============
+
 function updateDashboard() {
     document.getElementById('dashboardUserName').innerHTML = currentUser.fullName.split(' ')[0];
     document.getElementById('dashboardUserRole').innerHTML = `Роль: ${currentUser.role}`;
@@ -599,7 +599,8 @@ function updateDashboard() {
     renderPendingRequests();
 }
 
-// Загрузка настроек в модальное окно
+// ============= НАСТРОЙКИ =============
+
 function loadSettingsToModal() {
     document.getElementById('currencySelect').value = settings.currency;
     document.getElementById('homeAddress').value = settings.homeAddress || '';
@@ -618,25 +619,31 @@ function loadSettingsToModal() {
     }
 }
 
-// Сохранение настроек
-function saveSettings() {
-    settings.currency = document.getElementById('currencySelect').value;
-    settings.homeAddress = document.getElementById('homeAddress').value;
-    settings.monthlyBudget = parseFloat(document.getElementById('monthlyBudget').value) || 0;
-    settings.taskReminders = document.getElementById('taskReminders').checked;
-    settings.eventReminders = document.getElementById('eventReminders').checked;
-    saveData();
-    updateStats();
-    addNotification('Настройки сохранены', 'Настройки приложения обновлены', 'success');
-    alert('Настройки сохранены');
-    document.getElementById('settingsModal').style.display = 'none';
+async function saveSettings() {
+    const newSettings = {
+        currency: document.getElementById('currencySelect').value,
+        homeAddress: document.getElementById('homeAddress').value,
+        monthlyBudget: parseFloat(document.getElementById('monthlyBudget').value) || 0,
+        taskReminders: document.getElementById('taskReminders').checked,
+        eventReminders: document.getElementById('eventReminders').checked
+    };
+    
+    const result = await apiCall('/api/settings', 'POST', newSettings);
+    if (result.success) {
+        settings = newSettings;
+        updateStats();
+        addNotification('Настройки сохранены', 'Настройки приложения обновлены', 'success');
+        alert('Настройки сохранены');
+        document.getElementById('settingsModal').style.display = 'none';
+    }
 }
 
-// Поделиться ссылкой-приглашением
+// ============= ПРИГЛАШЕНИЕ =============
+
 function shareInviteLink() {
-    const family = ensureFamily();
+    const family = getCurrentFamily();
     if (!family) {
-        alert('Ошибка. Пожалуйста, попробуйте снова.');
+        alert('Ошибка. Пожалуйста, создайте семью сначала.');
         return;
     }
     
@@ -659,7 +666,8 @@ function copyToClipboard(text) {
     alert('Код приглашения скопирован: ' + text);
 }
 
-// Ежемесячный отчет
+// ============= ОТЧЕТ =============
+
 function showMonthlyReport() {
     const year = currentReportMonth.getFullYear();
     const month = currentReportMonth.getMonth();
@@ -697,18 +705,10 @@ function showMonthlyReport() {
     document.getElementById('monthlyReportModal').style.display = 'flex';
 }
 
-// Экранирование HTML
-function escapeHtml(text) {
-    if (!text) return '';
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-}
-
 // ============= ОБРАБОТЧИКИ СОБЫТИЙ =============
 
 // Регистрация
-document.getElementById('submitRegisterBtn').addEventListener('click', () => {
+document.getElementById('submitRegisterBtn').addEventListener('click', async () => {
     const fullName = document.getElementById('regFullName').value.trim();
     const role = document.getElementById('regRole').value;
     const birthDate = document.getElementById('regBirthDate').value;
@@ -722,7 +722,8 @@ document.getElementById('submitRegisterBtn').addEventListener('click', () => {
     }
     
     const newId = generateUniqueID(fullName);
-    const newUser = {
+    
+    const result = await apiCall('/api/register', 'POST', {
         uniqueId: newId,
         fullName,
         role,
@@ -731,42 +732,13 @@ document.getElementById('submitRegisterBtn').addEventListener('click', () => {
         email,
         phone,
         familyId: null
-    };
+    });
     
-    users.push(newUser);
-    saveData();
-    currentUser = newUser;
-    
-    const newFamily = {
-        id: generateFamilyCode(),
-        name: `Семья ${fullName}`,
-        members: [newId],
-        createdBy: newId,
-        createdAt: new Date().toISOString()
-    };
-    families.push(newFamily);
-    currentUser.familyId = newFamily.id;
-    saveData();
-    
-    document.getElementById('generatedUniqueIdText').innerText = newId;
-    document.getElementById('uniqueIdModal').style.display = 'flex';
-    showScreen('main');
-    switchTab('home');
-    updateDashboard();
-    updateProfile();
-    renderTasks();
-    renderShopping();
-    renderExpenses();
-    renderSchedules();
-    addNotification('Добро пожаловать!', `Добро пожаловать в приложение Моя Семья, ${fullName}!`, 'success');
-});
-
-// Вход по ID
-document.getElementById('loginWithIdBtn').addEventListener('click', () => {
-    const enteredId = document.getElementById('loginUniqueId').value.trim();
-    const user = users.find(u => u.uniqueId === enteredId);
-    if (user) {
-        currentUser = user;
+    if (result.success) {
+        currentUser = result.user;
+        document.getElementById('generatedUniqueIdText').innerText = newId;
+        document.getElementById('uniqueIdModal').style.display = 'flex';
+        await loadAllData();
         showScreen('main');
         switchTab('home');
         updateDashboard();
@@ -775,7 +747,30 @@ document.getElementById('loginWithIdBtn').addEventListener('click', () => {
         renderShopping();
         renderExpenses();
         renderSchedules();
-        addNotification('Вход выполнен', `С возвращением, ${user.fullName}!`, 'info');
+        addNotification('Добро пожаловать!', `Добро пожаловать в приложение Моя Семья, ${fullName}!`, 'success');
+    } else {
+        alert(result.message || 'Ошибка регистрации');
+    }
+});
+
+// Вход по ID
+document.getElementById('loginWithIdBtn').addEventListener('click', async () => {
+    const enteredId = document.getElementById('loginUniqueId').value.trim();
+    
+    const result = await apiCall('/api/login', 'POST', { userId: enteredId });
+    
+    if (result.success) {
+        currentUser = result.user;
+        await loadAllData();
+        showScreen('main');
+        switchTab('home');
+        updateDashboard();
+        updateProfile();
+        renderTasks();
+        renderShopping();
+        renderExpenses();
+        renderSchedules();
+        addNotification('Вход выполнен', `С возвращением, ${currentUser.fullName}!`, 'info');
     } else {
         alert('Неверный ID');
     }
@@ -783,44 +778,20 @@ document.getElementById('loginWithIdBtn').addEventListener('click', () => {
 
 // Социальный вход
 function socialLoginMock(provider) {
-    pendingRoleSelection = { provider, fullName: `Пользователь ${provider}`, email: `${provider}@example.com`, phone: '000000000' };
-    document.getElementById('roleSelectionModal').style.display = 'flex';
-}
-
-document.getElementById('socialApple').addEventListener('click', () => socialLoginMock('Apple'));
-document.getElementById('socialGoogle').addEventListener('click', () => socialLoginMock('Google'));
-
-document.querySelectorAll('.role-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-        const role = btn.dataset.role;
-        if (pendingRoleSelection) {
-            const newId = generateUniqueID(pendingRoleSelection.fullName);
-            const newUser = {
-                uniqueId: newId,
-                fullName: pendingRoleSelection.fullName,
-                role: role,
-                email: pendingRoleSelection.email,
-                phone: pendingRoleSelection.phone,
-                familyId: null
-            };
-            users.push(newUser);
-            saveData();
-            currentUser = newUser;
-            
-            const newFamily = {
-                id: generateFamilyCode(),
-                name: `Семья ${newUser.fullName}`,
-                members: [newId],
-                createdBy: newId,
-                createdAt: new Date().toISOString()
-            };
-            families.push(newFamily);
-            currentUser.familyId = newFamily.id;
-            saveData();
-            
-            document.getElementById('generatedUniqueIdText').innerText = newId;
-            document.getElementById('uniqueIdModal').style.display = 'flex';
-            document.getElementById('roleSelectionModal').style.display = 'none';
+    const name = prompt('Введите ваше имя:', `Пользователь ${provider}`);
+    if (!name) return;
+    
+    const role = prompt('Введите вашу роль (Отец, Мать, Сын, Дочь и т.д.):', 'Пользователь');
+    
+    apiCall('/api/login/social', 'POST', {
+        provider: provider,
+        email: `${provider.toLowerCase()}@example.com`,
+        name: name,
+        role: role || 'Пользователь'
+    }).then(async (result) => {
+        if (result.success) {
+            currentUser = result.user;
+            await loadAllData();
             showScreen('main');
             switchTab('home');
             updateDashboard();
@@ -829,11 +800,13 @@ document.querySelectorAll('.role-btn').forEach(btn => {
             renderShopping();
             renderExpenses();
             renderSchedules();
-            pendingRoleSelection = null;
-            addNotification('Добро пожаловать!', `Добро пожаловать в приложение Моя Семья, ${newUser.fullName}!`, 'success');
+            addNotification('Добро пожаловать!', `Добро пожаловать в приложение Моя Семья, ${currentUser.fullName}!`, 'success');
         }
     });
-});
+}
+
+document.getElementById('socialApple').addEventListener('click', () => socialLoginMock('Apple'));
+document.getElementById('socialGoogle').addEventListener('click', () => socialLoginMock('Google'));
 
 // Присоединение к семье
 document.getElementById('joinFamilyBtn').addEventListener('click', () => {
@@ -844,73 +817,73 @@ document.getElementById('joinFamilyBtn').addEventListener('click', () => {
     document.getElementById('joinFamilyModal').style.display = 'flex';
 });
 
-document.getElementById('submitJoinRequest').addEventListener('click', () => {
+document.getElementById('submitJoinRequest').addEventListener('click', async () => {
     const familyCode = document.getElementById('familyCodeInput').value.trim();
     const family = families.find(f => f.id === familyCode);
+    
     if (family) {
         if (family.members && family.members.includes(currentUser.uniqueId)) {
             alert('Вы уже являетесь членом этой семьи');
             document.getElementById('joinFamilyModal').style.display = 'none';
             return;
         }
+        
         const existingRequest = pendingRequests.find(r => r.userId === currentUser.uniqueId && r.familyId === family.id);
         if (existingRequest) {
             alert('У вас уже есть ожидающая заявка');
             return;
         }
-        const newRequest = {
-            id: Date.now(),
+        
+        const result = await apiCall('/api/requests', 'POST', {
             familyId: family.id,
             userId: currentUser.uniqueId,
-            requestedRole: currentUser.role,
-            status: 'pending'
-        };
-        pendingRequests.push(newRequest);
-        saveData();
-        alert('Заявка отправлена успешно, ожидайте одобрения');
-        document.getElementById('joinFamilyModal').style.display = 'none';
-        document.getElementById('familyCodeInput').value = '';
-        addNotification('Заявка отправлена', `Заявка на вступление в семью ${family.name} отправлена`, 'info');
+            requestedRole: currentUser.role
+        });
+        
+        if (result.success) {
+            alert('Заявка отправлена успешно, ожидайте одобрения');
+            document.getElementById('joinFamilyModal').style.display = 'none';
+            document.getElementById('familyCodeInput').value = '';
+            addNotification('Заявка отправлена', `Заявка на вступление в семью ${family.name} отправлена`, 'info');
+            await loadAllData();
+            renderPendingRequests();
+        }
     } else {
         alert('Неверный код семьи');
     }
 });
 
-// Одобрение/отклонение заявок
-document.getElementById('approveRequest').addEventListener('click', () => {
+// Одобрение заявок
+document.getElementById('approveRequest').addEventListener('click', async () => {
     const request = pendingRequests.find(r => r.id === window.currentRequestId);
     if (request) {
-        const family = families.find(f => f.id === request.familyId);
-        if (family) {
-            if (!family.members) family.members = [];
-            family.members.push(request.userId);
-            const user = users.find(u => u.uniqueId === request.userId);
-            if (user) user.familyId = family.id;
-            pendingRequests = pendingRequests.filter(r => r.id !== window.currentRequestId);
-            saveData();
+        const result = await apiCall(`/api/requests/${request.id}`, 'PUT', { status: 'approved' });
+        if (result.success) {
             alert('Заявка одобрена');
             document.getElementById('approvalModal').style.display = 'none';
+            await loadAllData();
             if (currentUser.uniqueId === request.userId) {
-                currentUser.familyId = family.id;
+                currentUser.familyId = request.familyId;
                 updateDashboard();
             }
             renderFamilyMembers();
             renderPendingRequests();
             updateScheduleMemberFilter();
-            addNotification('Новый член семьи', `${user?.fullName} присоединился к семье`, 'success');
+            addNotification('Новый член семьи', `Пользователь присоединился к семье`, 'success');
         }
     }
 });
 
-document.getElementById('rejectRequest').addEventListener('click', () => {
+document.getElementById('rejectRequest').addEventListener('click', async () => {
     const request = pendingRequests.find(r => r.id === window.currentRequestId);
     if (request) {
-        const requester = users.find(u => u.uniqueId === request.userId);
-        pendingRequests = pendingRequests.filter(r => r.id !== window.currentRequestId);
-        saveData();
-        document.getElementById('approvalModal').style.display = 'none';
-        renderPendingRequests();
-        addNotification('Заявка отклонена', `Заявка ${requester?.fullName} отклонена`, 'warning');
+        const result = await apiCall(`/api/requests/${request.id}`, 'PUT', { status: 'rejected' });
+        if (result.success) {
+            document.getElementById('approvalModal').style.display = 'none';
+            await loadAllData();
+            renderPendingRequests();
+            addNotification('Заявка отклонена', 'Заявка отклонена', 'warning');
+        }
     }
 });
 
@@ -919,7 +892,6 @@ document.getElementById('inviteMemberBtn').addEventListener('click', shareInvite
 
 // Уведомления
 document.getElementById('notificationsBtn').addEventListener('click', () => {
-    renderNotifications();
     document.getElementById('notificationsModal').style.display = 'flex';
 });
 
@@ -933,19 +905,24 @@ document.getElementById('editProfileBtn').addEventListener('click', () => {
     setTimeout(() => initializeAllDatePickers(), 100);
 });
 
-document.getElementById('saveProfileBtn').addEventListener('click', () => {
-    currentUser.birthDate = document.getElementById('editBirthDate').value;
-    currentUser.bio = document.getElementById('editBio').value;
-    currentUser.email = document.getElementById('editEmail').value;
-    currentUser.phone = document.getElementById('editPhone').value;
+document.getElementById('saveProfileBtn').addEventListener('click', async () => {
+    const updatedUser = {
+        ...currentUser,
+        birthDate: document.getElementById('editBirthDate').value,
+        bio: document.getElementById('editBio').value,
+        email: document.getElementById('editEmail').value,
+        phone: document.getElementById('editPhone').value
+    };
     
-    const userIndex = users.findIndex(u => u.uniqueId === currentUser.uniqueId);
-    if (userIndex !== -1) users[userIndex] = currentUser;
-    saveData();
-    updateProfile();
-    document.getElementById('editProfileModal').style.display = 'none';
-    addNotification('Профиль обновлен', 'Ваша информация обновлена успешно', 'success');
-    alert('Изменения сохранены');
+    const result = await apiCall(`/api/users/${currentUser.uniqueId}`, 'PUT', updatedUser);
+    if (result.success) {
+        currentUser = result.user;
+        await loadAllData();
+        updateProfile();
+        document.getElementById('editProfileModal').style.display = 'none';
+        addNotification('Профиль обновлен', 'Ваша информация обновлена успешно', 'success');
+        alert('Изменения сохранены');
+    }
 });
 
 // Добавление события
@@ -967,7 +944,7 @@ document.getElementById('addEventBtn').addEventListener('click', () => {
     setTimeout(() => initializeAllDatePickers(), 100);
 });
 
-document.getElementById('confirmAddEvent').addEventListener('click', () => {
+document.getElementById('confirmAddEvent').addEventListener('click', async () => {
     const title = document.getElementById('eventTitle').value.trim();
     const date = document.getElementById('eventDate').value;
     const personId = document.getElementById('eventPerson').value;
@@ -983,35 +960,36 @@ document.getElementById('confirmAddEvent').addEventListener('click', () => {
         return;
     }
     
-    const family = ensureFamily();
-    events.push({
-        id: Date.now(),
+    const family = getCurrentFamily();
+    const result = await apiCall('/api/events', 'POST', {
         title,
         date,
         personId: personId || null,
         color,
         familyId: family.id,
-        createdBy: currentUser.uniqueId,
-        createdAt: new Date().toISOString()
+        createdBy: currentUser.uniqueId
     });
-    saveData();
-    renderEvents();
-    document.getElementById('addEventModal').style.display = 'none';
-    document.getElementById('eventTitle').value = '';
-    document.getElementById('eventDate').value = '';
-    addNotification('Новое событие', `Добавлено событие: ${title}`, 'info');
+    
+    if (result.success) {
+        await loadAllData();
+        renderEvents();
+        document.getElementById('addEventModal').style.display = 'none';
+        document.getElementById('eventTitle').value = '';
+        document.getElementById('eventDate').value = '';
+        addNotification('Новое событие', `Добавлено событие: ${title}`, 'info');
+    }
 });
 
 // Добавление расписания
 document.getElementById('addScheduleBtn').addEventListener('click', () => {
-    const family = ensureFamily();
+    const family = getCurrentFamily();
     const familyMembers = users.filter(u => family.members && family.members.includes(u.uniqueId));
     const select = document.getElementById('scheduleMember');
     select.innerHTML = familyMembers.map(m => `<option value="${m.uniqueId}">${escapeHtml(m.fullName)} (${m.role})</option>`).join('');
     document.getElementById('addScheduleModal').style.display = 'flex';
 });
 
-document.getElementById('confirmAddSchedule').addEventListener('click', () => {
+document.getElementById('confirmAddSchedule').addEventListener('click', async () => {
     const memberId = document.getElementById('scheduleMember').value;
     const title = document.getElementById('scheduleTitle').value.trim();
     const day = document.getElementById('scheduleDay').value;
@@ -1023,29 +1001,30 @@ document.getElementById('confirmAddSchedule').addEventListener('click', () => {
         return;
     }
     
-    const family = ensureFamily();
-    schedules.push({
-        id: Date.now(),
+    const family = getCurrentFamily();
+    const result = await apiCall('/api/schedules', 'POST', {
         memberId,
         title,
         day,
         time,
         location,
         familyId: family.id,
-        createdBy: currentUser.uniqueId,
-        createdAt: new Date().toISOString()
+        createdBy: currentUser.uniqueId
     });
-    saveData();
-    renderSchedules();
-    document.getElementById('addScheduleModal').style.display = 'none';
-    document.getElementById('scheduleTitle').value = '';
-    document.getElementById('scheduleLocation').value = '';
-    addNotification('Новая запись', `Добавлена запись в расписание: ${title}`, 'info');
+    
+    if (result.success) {
+        await loadAllData();
+        renderSchedules();
+        document.getElementById('addScheduleModal').style.display = 'none';
+        document.getElementById('scheduleTitle').value = '';
+        document.getElementById('scheduleLocation').value = '';
+        addNotification('Новая запись', `Добавлена запись в расписание: ${title}`, 'info');
+    }
 });
 
 // Добавление задачи
 document.getElementById('addTaskBtn').addEventListener('click', () => {
-    const family = ensureFamily();
+    const family = getCurrentFamily();
     const members = users.filter(u => family.members && family.members.includes(u.uniqueId));
     const select = document.getElementById('taskAssignee');
     select.innerHTML = '<option value="">Выберите ответственного</option>' + 
@@ -1053,28 +1032,30 @@ document.getElementById('addTaskBtn').addEventListener('click', () => {
     document.getElementById('addTaskModal').style.display = 'flex';
 });
 
-document.getElementById('confirmAddTask').addEventListener('click', () => {
+document.getElementById('confirmAddTask').addEventListener('click', async () => {
     const title = document.getElementById('taskTitle').value.trim();
     const assignee = document.getElementById('taskAssignee').value;
     if (!title) {
         alert('Введите название задачи');
         return;
     }
-    const family = ensureFamily();
-    tasks.push({
-        id: Date.now(),
+    
+    const family = getCurrentFamily();
+    const result = await apiCall('/api/tasks', 'POST', {
         title,
         assignee,
         familyId: family.id,
-        completed: false,
-        createdAt: new Date().toISOString()
+        createdBy: currentUser.uniqueId
     });
-    saveData();
-    renderTasks();
-    updateStats();
-    document.getElementById('addTaskModal').style.display = 'none';
-    document.getElementById('taskTitle').value = '';
-    addNotification('Новая задача', `Добавлена задача: ${title}`, 'info');
+    
+    if (result.success) {
+        await loadAllData();
+        renderTasks();
+        updateStats();
+        document.getElementById('addTaskModal').style.display = 'none';
+        document.getElementById('taskTitle').value = '';
+        addNotification('Новая задача', `Добавлена задача: ${title}`, 'info');
+    }
 });
 
 // Добавление покупки
@@ -1082,29 +1063,31 @@ document.getElementById('addShoppingBtn').addEventListener('click', () => {
     document.getElementById('addShoppingModal').style.display = 'flex';
 });
 
-document.getElementById('confirmAddShopping').addEventListener('click', () => {
+document.getElementById('confirmAddShopping').addEventListener('click', async () => {
     const name = document.getElementById('shoppingItem').value.trim();
     const price = parseFloat(document.getElementById('shoppingPrice').value);
     if (!name) {
         alert('Введите название товара');
         return;
     }
-    const family = ensureFamily();
-    shopping.push({
-        id: Date.now(),
+    
+    const family = getCurrentFamily();
+    const result = await apiCall('/api/shopping', 'POST', {
         name,
         price: price || 0,
         familyId: family.id,
-        purchased: false,
-        createdAt: new Date().toISOString()
+        createdBy: currentUser.uniqueId
     });
-    saveData();
-    renderShopping();
-    updateStats();
-    document.getElementById('addShoppingModal').style.display = 'none';
-    document.getElementById('shoppingItem').value = '';
-    document.getElementById('shoppingPrice').value = '';
-    addNotification('Новый товар', `Добавлен товар: ${name}`, 'info');
+    
+    if (result.success) {
+        await loadAllData();
+        renderShopping();
+        updateStats();
+        document.getElementById('addShoppingModal').style.display = 'none';
+        document.getElementById('shoppingItem').value = '';
+        document.getElementById('shoppingPrice').value = '';
+        addNotification('Новый товар', `Добавлен товар: ${name}`, 'info');
+    }
 });
 
 // Добавление расхода
@@ -1112,10 +1095,11 @@ document.getElementById('addExpenseBtn').addEventListener('click', () => {
     document.getElementById('addExpenseModal').style.display = 'flex';
 });
 
-document.getElementById('confirmAddExpense').addEventListener('click', () => {
+document.getElementById('confirmAddExpense').addEventListener('click', async () => {
     const description = document.getElementById('expenseDesc').value.trim();
     const amount = parseFloat(document.getElementById('expenseAmount').value);
     const category = document.getElementById('expenseCategory').value;
+    
     if (!description) {
         alert('Введите описание расхода');
         return;
@@ -1124,27 +1108,31 @@ document.getElementById('confirmAddExpense').addEventListener('click', () => {
         alert('Введите корректную сумму');
         return;
     }
-    const family = ensureFamily();
-    expenses.push({
-        id: Date.now(),
+    
+    const family = getCurrentFamily();
+    const result = await apiCall('/api/expenses', 'POST', {
         description,
         amount,
         category,
         familyId: family.id,
+        createdBy: currentUser.uniqueId,
         date: new Date().toISOString()
     });
-    saveData();
-    renderExpenses();
-    updateStats();
-    document.getElementById('addExpenseModal').style.display = 'none';
-    document.getElementById('expenseDesc').value = '';
-    document.getElementById('expenseAmount').value = '';
-    addNotification('Новый расход', `Добавлен расход: ${description} - ${amount} ${settings.currency}`, 'info');
     
-    if (settings.monthlyBudget > 0) {
-        const monthlyTotal = getCurrentMonthExpenses().reduce((sum, e) => sum + e.amount, 0);
-        if (monthlyTotal > settings.monthlyBudget) {
-            addNotification('Предупреждение о бюджете', `Превышение месячного бюджета на ${monthlyTotal - settings.monthlyBudget} ${settings.currency}`, 'warning');
+    if (result.success) {
+        await loadAllData();
+        renderExpenses();
+        updateStats();
+        document.getElementById('addExpenseModal').style.display = 'none';
+        document.getElementById('expenseDesc').value = '';
+        document.getElementById('expenseAmount').value = '';
+        addNotification('Новый расход', `Добавлен расход: ${description} - ${amount} ${settings.currency}`, 'info');
+        
+        if (settings.monthlyBudget > 0) {
+            const monthlyTotal = getCurrentMonthExpenses().reduce((sum, e) => sum + e.amount, 0);
+            if (monthlyTotal > settings.monthlyBudget) {
+                addNotification('Предупреждение о бюджете', `Превышение месячного бюджета на ${monthlyTotal - settings.monthlyBudget} ${settings.currency}`, 'warning');
+            }
         }
     }
 });
@@ -1177,7 +1165,8 @@ document.querySelectorAll('.tab-item').forEach(tab => {
 });
 
 // Выход
-document.getElementById('logoutBtnMain').addEventListener('click', () => {
+document.getElementById('logoutBtnMain').addEventListener('click', async () => {
+    await apiCall('/api/logout', 'POST');
     currentUser = null;
     showScreen('login');
 });
@@ -1201,6 +1190,21 @@ document.querySelectorAll('.close-modal, .closeTask, .closeShopping, .closeExpen
 });
 
 // Инициализация
-loadData();
-showScreen('login');
-setTimeout(() => initializeAllDatePickers(), 200);
+async function init() {
+    const loggedIn = await loadCurrentUser();
+    if (loggedIn) {
+        showScreen('main');
+        switchTab('home');
+        updateDashboard();
+        updateProfile();
+        renderTasks();
+        renderShopping();
+        renderExpenses();
+        renderSchedules();
+    } else {
+        showScreen('login');
+    }
+    setTimeout(() => initializeAllDatePickers(), 200);
+}
+
+init();
