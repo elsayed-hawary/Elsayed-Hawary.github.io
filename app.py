@@ -4,15 +4,19 @@ import json
 import os
 import uuid
 from datetime import datetime
-import hashlib
 
 app = Flask(__name__, static_folder='static')
 app.secret_key = 'family-app-secret-key-2024'
 CORS(app)
 
-# Директории
+# إعدادات المسارات
 STATIC_DIR = 'static'
 DATA_DIR = 'data'
+
+# إنشاء مجلد البيانات
+os.makedirs(DATA_DIR, exist_ok=True)
+
+# مسارات الملفات
 USERS_FILE = os.path.join(DATA_DIR, 'users.json')
 FAMILIES_FILE = os.path.join(DATA_DIR, 'families.json')
 TASKS_FILE = os.path.join(DATA_DIR, 'tasks.json')
@@ -23,27 +27,21 @@ SCHEDULES_FILE = os.path.join(DATA_DIR, 'schedules.json')
 REQUESTS_FILE = os.path.join(DATA_DIR, 'requests.json')
 SETTINGS_FILE = os.path.join(DATA_DIR, 'settings.json')
 
-# Создание папок
-os.makedirs(STATIC_DIR, exist_ok=True)
-os.makedirs(DATA_DIR, exist_ok=True)
-
-# ============= ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ =============
-
+# دوال مساعدة
 def load_json(file_path, default=None):
     if os.path.exists(file_path):
         try:
             with open(file_path, 'r', encoding='utf-8') as f:
                 return json.load(f)
         except:
-            return default if default else {}
-    return default if default else {}
+            return default if default else []
+    return default if default else []
 
 def save_json(file_path, data):
     with open(file_path, 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
 
 def init_data_files():
-    # Инициализация всех файлов данных
     if not os.path.exists(USERS_FILE):
         save_json(USERS_FILE, [])
     if not os.path.exists(FAMILIES_FILE):
@@ -71,29 +69,28 @@ def generate_unique_id(name):
 def generate_family_code():
     return f"FAMILY-{uuid.uuid4().hex[:6].upper()}"
 
-# ============= СТРАНИЦЫ =============
-
+# الصفحة الرئيسية
 @app.route('/')
 def index():
     return send_from_directory(STATIC_DIR, 'index.html')
 
+# الملفات الثابتة
 @app.route('/<path:filename>')
 def serve_static(filename):
+    if filename.startswith('static/'):
+        filename = filename[7:]
     return send_from_directory(STATIC_DIR, filename)
 
-# ============= API АВТОРИЗАЦИИ =============
-
+# API: تسجيل مستخدم جديد
 @app.route('/api/register', methods=['POST'])
 def register():
     data = request.json
     users = load_json(USERS_FILE, [])
     
-    # Проверка существующего пользователя
-    existing = next((u for u in users if u['uniqueId'] == data.get('uniqueId')), None)
+    existing = next((u for u in users if u.get('uniqueId') == data.get('uniqueId')), None)
     if existing:
         return jsonify({'success': False, 'message': 'ID уже существует'})
     
-    # Создание нового пользователя
     new_user = {
         'uniqueId': data.get('uniqueId'),
         'fullName': data.get('fullName'),
@@ -109,7 +106,7 @@ def register():
     users.append(new_user)
     save_json(USERS_FILE, users)
     
-    # Создание семьи для первого пользователя
+    # إنشاء عائلة للمستخدم الجديد
     families = load_json(FAMILIES_FILE, [])
     if len(users) == 1:
         new_family = {
@@ -122,7 +119,6 @@ def register():
         families.append(new_family)
         save_json(FAMILIES_FILE, families)
         new_user['familyId'] = new_family['id']
-        # Обновление пользователя
         for i, u in enumerate(users):
             if u['uniqueId'] == new_user['uniqueId']:
                 users[i]['familyId'] = new_family['id']
@@ -132,6 +128,7 @@ def register():
     session['user_id'] = new_user['uniqueId']
     return jsonify({'success': True, 'user': new_user})
 
+# API: تسجيل الدخول
 @app.route('/api/login', methods=['POST'])
 def login():
     data = request.json
@@ -145,60 +142,53 @@ def login():
     
     return jsonify({'success': False, 'message': 'Неверный ID'})
 
+# API: تسجيل الدخول الاجتماعي
 @app.route('/api/login/social', methods=['POST'])
 def social_login():
     data = request.json
-    provider = data.get('provider')
     email = data.get('email')
     name = data.get('name')
     role = data.get('role', 'Пользователь')
     
     users = load_json(USERS_FILE, [])
-    
-    # Проверка существующего пользователя
     user = next((u for u in users if u.get('email') == email), None)
     
     if not user:
-        # Создание нового пользователя
         new_id = generate_unique_id(name)
-        new_user = {
+        user = {
             'uniqueId': new_id,
             'fullName': name,
             'role': role,
-            'birthDate': '',
-            'bio': '',
             'email': email,
             'phone': '',
             'familyId': None,
-            'socialProvider': provider,
             'createdAt': datetime.now().isoformat()
         }
-        users.append(new_user)
+        users.append(user)
         save_json(USERS_FILE, users)
         
-        # Создание семьи
         families = load_json(FAMILIES_FILE, [])
-        new_family = {
-            'id': generate_family_code(),
-            'name': f"Семья {name}",
-            'members': [new_id],
-            'createdBy': new_id,
-            'createdAt': datetime.now().isoformat()
-        }
-        families.append(new_family)
-        save_json(FAMILIES_FILE, families)
-        new_user['familyId'] = new_family['id']
-        
-        for i, u in enumerate(users):
-            if u['uniqueId'] == new_id:
-                users[i]['familyId'] = new_family['id']
-                break
-        save_json(USERS_FILE, users)
-        user = new_user
+        if len(users) == 1:
+            new_family = {
+                'id': generate_family_code(),
+                'name': f"Семья {name}",
+                'members': [new_id],
+                'createdBy': new_id,
+                'createdAt': datetime.now().isoformat()
+            }
+            families.append(new_family)
+            save_json(FAMILIES_FILE, families)
+            user['familyId'] = new_family['id']
+            for i, u in enumerate(users):
+                if u['uniqueId'] == new_id:
+                    users[i]['familyId'] = new_family['id']
+                    break
+            save_json(USERS_FILE, users)
     
     session['user_id'] = user['uniqueId']
     return jsonify({'success': True, 'user': user})
 
+# API: المستخدم الحالي
 @app.route('/api/current_user', methods=['GET'])
 def get_current_user():
     if 'user_id' in session:
@@ -208,18 +198,19 @@ def get_current_user():
             return jsonify({'success': True, 'user': user})
     return jsonify({'success': False, 'message': 'Не авторизован'})
 
+# API: تسجيل الخروج
 @app.route('/api/logout', methods=['POST'])
 def logout():
     session.pop('user_id', None)
     return jsonify({'success': True})
 
-# ============= API ПОЛЬЗОВАТЕЛЕЙ =============
-
+# API: الحصول على المستخدمين
 @app.route('/api/users', methods=['GET'])
 def get_users():
     users = load_json(USERS_FILE, [])
     return jsonify({'success': True, 'users': users})
 
+# API: تحديث مستخدم
 @app.route('/api/users/<user_id>', methods=['PUT'])
 def update_user(user_id):
     data = request.json
@@ -233,71 +224,13 @@ def update_user(user_id):
     
     return jsonify({'success': False, 'message': 'Пользователь не найден'})
 
-# ============= API СЕМЕЙ =============
-
+# API: الحصول على العائلات
 @app.route('/api/families', methods=['GET'])
 def get_families():
     families = load_json(FAMILIES_FILE, [])
     return jsonify({'success': True, 'families': families})
 
-@app.route('/api/families/<family_id>', methods=['GET'])
-def get_family(family_id):
-    families = load_json(FAMILIES_FILE, [])
-    family = next((f for f in families if f['id'] == family_id), None)
-    return jsonify({'success': True, 'family': family})
-
-@app.route('/api/families', methods=['POST'])
-def create_family():
-    data = request.json
-    families = load_json(FAMILIES_FILE, [])
-    
-    new_family = {
-        'id': generate_family_code(),
-        'name': data.get('name'),
-        'members': data.get('members', []),
-        'createdBy': data.get('createdBy'),
-        'createdAt': datetime.now().isoformat()
-    }
-    
-    families.append(new_family)
-    save_json(FAMILIES_FILE, families)
-    
-    # Обновление пользователя
-    users = load_json(USERS_FILE, [])
-    for user in users:
-        if user['uniqueId'] in new_family['members']:
-            user['familyId'] = new_family['id']
-    save_json(USERS_FILE, users)
-    
-    return jsonify({'success': True, 'family': new_family})
-
-@app.route('/api/families/<family_id>/members', methods=['POST'])
-def add_member(family_id):
-    data = request.json
-    user_id = data.get('userId')
-    
-    families = load_json(FAMILIES_FILE, [])
-    for family in families:
-        if family['id'] == family_id:
-            if user_id not in family['members']:
-                family['members'].append(user_id)
-                save_json(FAMILIES_FILE, families)
-                
-                # Обновление пользователя
-                users = load_json(USERS_FILE, [])
-                for user in users:
-                    if user['uniqueId'] == user_id:
-                        user['familyId'] = family_id
-                save_json(USERS_FILE, users)
-                
-                return jsonify({'success': True, 'family': family})
-            else:
-                return jsonify({'success': False, 'message': 'Уже в семье'})
-    
-    return jsonify({'success': False, 'message': 'Семья не найдена'})
-
-# ============= API ЗАДАЧ =============
-
+# API: الحصول على المهام
 @app.route('/api/tasks', methods=['GET'])
 def get_tasks():
     tasks = load_json(TASKS_FILE, [])
@@ -308,8 +241,9 @@ def get_tasks():
     
     return jsonify({'success': True, 'tasks': tasks})
 
+# API: إضافة مهمة
 @app.route('/api/tasks', methods=['POST'])
-def create_task():
+def add_task():
     data = request.json
     tasks = load_json(TASKS_FILE, [])
     
@@ -325,9 +259,9 @@ def create_task():
     
     tasks.append(new_task)
     save_json(TASKS_FILE, tasks)
-    
     return jsonify({'success': True, 'task': new_task})
 
+# API: تحديث مهمة
 @app.route('/api/tasks/<int:task_id>', methods=['PUT'])
 def update_task(task_id):
     data = request.json
@@ -341,15 +275,7 @@ def update_task(task_id):
     
     return jsonify({'success': False, 'message': 'Задача не найдена'})
 
-@app.route('/api/tasks/<int:task_id>', methods=['DELETE'])
-def delete_task(task_id):
-    tasks = load_json(TASKS_FILE, [])
-    tasks = [t for t in tasks if t['id'] != task_id]
-    save_json(TASKS_FILE, tasks)
-    return jsonify({'success': True})
-
-# ============= API ПОКУПОК =============
-
+# API: الحصول على المشتريات
 @app.route('/api/shopping', methods=['GET'])
 def get_shopping():
     shopping = load_json(SHOPPING_FILE, [])
@@ -360,8 +286,9 @@ def get_shopping():
     
     return jsonify({'success': True, 'shopping': shopping})
 
+# API: إضافة منتج
 @app.route('/api/shopping', methods=['POST'])
-def create_shopping():
+def add_shopping():
     data = request.json
     shopping = load_json(SHOPPING_FILE, [])
     
@@ -377,9 +304,9 @@ def create_shopping():
     
     shopping.append(new_item)
     save_json(SHOPPING_FILE, shopping)
-    
     return jsonify({'success': True, 'item': new_item})
 
+# API: تحديث منتج
 @app.route('/api/shopping/<int:item_id>', methods=['PUT'])
 def update_shopping(item_id):
     data = request.json
@@ -393,8 +320,7 @@ def update_shopping(item_id):
     
     return jsonify({'success': False, 'message': 'Товар не найден'})
 
-# ============= API РАСХОДОВ =============
-
+# API: الحصول على المصاريف
 @app.route('/api/expenses', methods=['GET'])
 def get_expenses():
     expenses = load_json(EXPENSES_FILE, [])
@@ -405,8 +331,9 @@ def get_expenses():
     
     return jsonify({'success': True, 'expenses': expenses})
 
+# API: إضافة مصروف
 @app.route('/api/expenses', methods=['POST'])
-def create_expense():
+def add_expense():
     data = request.json
     expenses = load_json(EXPENSES_FILE, [])
     
@@ -422,9 +349,9 @@ def create_expense():
     
     expenses.append(new_expense)
     save_json(EXPENSES_FILE, expenses)
-    
     return jsonify({'success': True, 'expense': new_expense})
 
+# API: حذف مصروف
 @app.route('/api/expenses/<int:expense_id>', methods=['DELETE'])
 def delete_expense(expense_id):
     expenses = load_json(EXPENSES_FILE, [])
@@ -432,8 +359,7 @@ def delete_expense(expense_id):
     save_json(EXPENSES_FILE, expenses)
     return jsonify({'success': True})
 
-# ============= API СОБЫТИЙ =============
-
+# API: الحصول على الأحداث
 @app.route('/api/events', methods=['GET'])
 def get_events():
     events = load_json(EVENTS_FILE, [])
@@ -444,8 +370,9 @@ def get_events():
     
     return jsonify({'success': True, 'events': events})
 
+# API: إضافة حدث
 @app.route('/api/events', methods=['POST'])
-def create_event():
+def add_event():
     data = request.json
     events = load_json(EVENTS_FILE, [])
     
@@ -462,9 +389,9 @@ def create_event():
     
     events.append(new_event)
     save_json(EVENTS_FILE, events)
-    
     return jsonify({'success': True, 'event': new_event})
 
+# API: حذف حدث
 @app.route('/api/events/<int:event_id>', methods=['DELETE'])
 def delete_event(event_id):
     events = load_json(EVENTS_FILE, [])
@@ -472,8 +399,7 @@ def delete_event(event_id):
     save_json(EVENTS_FILE, events)
     return jsonify({'success': True})
 
-# ============= API РАСПИСАНИЯ =============
-
+# API: الحصول على الجداول
 @app.route('/api/schedules', methods=['GET'])
 def get_schedules():
     schedules = load_json(SCHEDULES_FILE, [])
@@ -484,8 +410,9 @@ def get_schedules():
     
     return jsonify({'success': True, 'schedules': schedules})
 
+# API: إضافة جدول
 @app.route('/api/schedules', methods=['POST'])
-def create_schedule():
+def add_schedule():
     data = request.json
     schedules = load_json(SCHEDULES_FILE, [])
     
@@ -503,9 +430,9 @@ def create_schedule():
     
     schedules.append(new_schedule)
     save_json(SCHEDULES_FILE, schedules)
-    
     return jsonify({'success': True, 'schedule': new_schedule})
 
+# API: حذف جدول
 @app.route('/api/schedules/<int:schedule_id>', methods=['DELETE'])
 def delete_schedule(schedule_id):
     schedules = load_json(SCHEDULES_FILE, [])
@@ -513,8 +440,7 @@ def delete_schedule(schedule_id):
     save_json(SCHEDULES_FILE, schedules)
     return jsonify({'success': True})
 
-# ============= API ЗАЯВОК =============
-
+# API: الحصول على الطلبات
 @app.route('/api/requests', methods=['GET'])
 def get_requests():
     requests = load_json(REQUESTS_FILE, [])
@@ -525,8 +451,9 @@ def get_requests():
     
     return jsonify({'success': True, 'requests': requests})
 
+# API: إضافة طلب
 @app.route('/api/requests', methods=['POST'])
-def create_request():
+def add_request():
     data = request.json
     requests = load_json(REQUESTS_FILE, [])
     
@@ -541,9 +468,9 @@ def create_request():
     
     requests.append(new_request)
     save_json(REQUESTS_FILE, requests)
-    
     return jsonify({'success': True, 'request': new_request})
 
+# API: تحديث طلب
 @app.route('/api/requests/<int:request_id>', methods=['PUT'])
 def update_request(request_id):
     data = request.json
@@ -554,7 +481,7 @@ def update_request(request_id):
             req.update(data)
             save_json(REQUESTS_FILE, requests)
             
-            # Если заявка одобрена, добавляем пользователя в семью
+            # إذا تمت الموافقة، أضف المستخدم للعائلة
             if data.get('status') == 'approved':
                 families = load_json(FAMILIES_FILE, [])
                 for family in families:
@@ -573,22 +500,21 @@ def update_request(request_id):
     
     return jsonify({'success': False, 'message': 'Заявка не найдена'})
 
-# ============= API НАСТРОЕК =============
-
+# API: الحصول على الإعدادات
 @app.route('/api/settings', methods=['GET'])
 def get_settings():
     settings = load_json(SETTINGS_FILE, {})
     return jsonify({'success': True, 'settings': settings})
 
+# API: حفظ الإعدادات
 @app.route('/api/settings', methods=['POST'])
-def update_settings():
+def save_settings():
     data = request.json
     save_json(SETTINGS_FILE, data)
     return jsonify({'success': True, 'settings': data})
 
-# ============= ЗАПУСК =============
-
+# تشغيل الخادم
 if __name__ == '__main__':
-    import os
+    init_data_files()
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
