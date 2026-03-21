@@ -569,6 +569,7 @@ function renderFamilyMembers() {
         return;
     }
     
+    // جلب جميع أفراد العائلة
     const familyMembers = users.filter(u => family.members && family.members.includes(u.uniqueId));
     
     if (familyMembers.length === 0) {
@@ -576,20 +577,25 @@ function renderFamilyMembers() {
         return;
     }
     
+    // التحقق من أن المستخدم الحالي هو رب الأسرة
+    const isHead = currentUser && currentUser.isFamilyHead === true;
+    
     container.innerHTML = familyMembers.map(member => {
         const age = calculateAge(member.birthDate);
-        const isHead = member.isFamilyHead;
+        const isCurrentUser = member.uniqueId === currentUser.uniqueId;
+        const isMemberHead = member.isFamilyHead === true;
+        
         return `
             <div class="member-item">
                 <div class="member-avatar-small">
                     <i class="fas fa-user"></i>
                 </div>
                 <div class="member-details">
-                    <h4>${escapeHtml(member.fullName)} ${member.uniqueId === currentUser.uniqueId ? '(Вы)' : ''} ${isHead ? '👑' : ''}</h4>
+                    <h4>${escapeHtml(member.fullName)} ${isCurrentUser ? '(Вы)' : ''} ${isMemberHead ? '👑' : ''}</h4>
                     <p>${member.email || 'Нет email'} ${age ? ` • ${age} лет` : ''}</p>
                 </div>
                 <div class="member-badge">${member.role}</div>
-                ${isFamilyHead() && member.uniqueId !== currentUser.uniqueId ? 
+                ${isHead && !isCurrentUser ? 
                     `<button class="small-btn permissions-btn" data-id="${member.uniqueId}" data-name="${escapeHtml(member.fullName)}" style="margin-left: 8px;">
                         <i class="fas fa-lock"></i>
                     </button>` : ''}
@@ -597,8 +603,10 @@ function renderFamilyMembers() {
         `;
     }).join('');
     
+    // إضافة مستمعي الأحداث لأزرار الصلاحيات
     document.querySelectorAll('.permissions-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
+            e.stopPropagation();
             const userId = btn.dataset.id;
             const userName = btn.dataset.name;
             openPermissionsModal(userId, userName);
