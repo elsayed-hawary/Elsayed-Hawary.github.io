@@ -299,6 +299,14 @@ body {
     margin-top: 16px;
 }
 
+.form-hint {
+    display: block;
+    font-size: 11px;
+    color: #8e8e93;
+    margin-top: -8px;
+    margin-bottom: 12px;
+}
+
 /* Главное приложение */
 .main-container {
     width: 100%;
@@ -334,6 +342,7 @@ body {
     display: flex;
     align-items: center;
     gap: 12px;
+    flex: 1;
 }
 
 .avatar {
@@ -351,6 +360,10 @@ body {
     color: white;
 }
 
+.user-text {
+    flex: 1;
+}
+
 .user-text h2 {
     font-size: 20px;
     font-weight: 600;
@@ -360,6 +373,17 @@ body {
 .user-text p {
     font-size: 13px;
     color: #8e8e93;
+}
+
+.user-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, #ffd700, #ffb347);
+    color: #1c1c1e;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 20px;
+    margin-left: 8px;
 }
 
 .header-actions {
@@ -420,6 +444,12 @@ body {
     text-align: center;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     border: 1px solid #f0f0f0;
+    transition: all 0.2s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
 }
 
 .stat-icon {
@@ -498,6 +528,10 @@ body {
     border-color: #667eea;
 }
 
+.small-btn:active {
+    transform: scale(0.96);
+}
+
 /* Список событий */
 .events-list {
     display: flex;
@@ -514,18 +548,32 @@ body {
     border-radius: 16px;
     border-right: 4px solid;
     position: relative;
+    transition: all 0.2s ease;
+}
+
+.event-item:hover {
+    transform: translateX(-4px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .event-reminder-badge {
     position: absolute;
-    top: -8px;
-    right: -8px;
+    top: -10px;
+    right: -10px;
     background: #ff9500;
     color: white;
     font-size: 10px;
-    padding: 2px 6px;
+    font-weight: 600;
+    padding: 2px 8px;
     border-radius: 20px;
-    font-weight: 500;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
 }
 
 .event-date {
@@ -589,6 +637,14 @@ body {
     align-items: center;
     gap: 12px;
     padding: 8px 0;
+    transition: all 0.2s ease;
+}
+
+.member-item:hover {
+    background: #f8f9fc;
+    border-radius: 16px;
+    padding: 8px 12px;
+    margin: 0 -4px;
 }
 
 .member-avatar-small {
@@ -628,6 +684,22 @@ body {
     font-size: 11px;
     color: #667eea;
     font-weight: 500;
+}
+
+.permissions-btn {
+    background: none;
+    border: none;
+    color: #667eea;
+    cursor: pointer;
+    font-size: 16px;
+    padding: 6px 10px;
+    border-radius: 20px;
+    transition: all 0.2s;
+}
+
+.permissions-btn:hover {
+    background: rgba(102, 126, 234, 0.1);
+    transform: scale(1.05);
 }
 
 /* Расписание */
@@ -744,6 +816,10 @@ body {
     transform: scale(0.95);
 }
 
+.add-btn:active {
+    transform: scale(0.92);
+}
+
 /* Кнопка отчета */
 .report-bar {
     margin-bottom: 16px;
@@ -783,6 +859,12 @@ body {
     justify-content: space-between;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     border: 1px solid #f0f0f0;
+    transition: all 0.2s ease;
+}
+
+.task-item:hover, .shopping-item:hover, .expense-item:hover {
+    transform: translateX(-4px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .task-info, .shopping-info, .expense-info {
@@ -1004,6 +1086,10 @@ body {
 .tab-item.active {
     color: #667eea;
     background: rgba(102, 126, 234, 0.1);
+}
+
+.tab-item:active {
+    transform: scale(0.95);
 }
 
 /* Модальные окна */
@@ -1268,7 +1354,12 @@ input:checked + .toggle-slider:before {
     background: #f8f9fc;
     border-radius: 14px;
     border-right: 3px solid #667eea;
-    transition: all 0.2s;
+    transition: all 0.2s ease;
+}
+
+.notification-item:hover {
+    transform: translateX(-4px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .notification-item.unread {
@@ -1328,11 +1419,50 @@ input:checked + .toggle-slider:before {
     background: rgba(102, 126, 234, 0.1);
 }
 
+/* Список прав доступа */
+.permissions-list {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.permission-item {
+    padding: 12px 0;
+    border-bottom: 1px solid #e5e5ea;
+}
+
+.permission-item label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    color: #1c1c1e;
+    font-size: 14px;
+}
+
+.permission-item input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    accent-color: #667eea;
+}
+
 /* Кнопки подтверждения */
 .approval-buttons {
     display: flex;
     gap: 12px;
     margin-top: 20px;
+}
+
+/* Выбор дней напоминания */
+select#eventReminderDays {
+    background: #f8f9fc;
+    border: 1px solid #e5e5ea;
+    border-radius: 14px;
+    padding: 12px 16px;
+    font-size: 16px;
+    color: #1c1c1e;
+    width: 100%;
+    font-family: inherit;
 }
 
 /* Скроллбар */
@@ -1366,5 +1496,17 @@ input:checked + .toggle-slider:before {
     
     .stat-value {
         font-size: 22px;
+    }
+    
+    .member-item {
+        flex-wrap: wrap;
+    }
+    
+    .member-badge {
+        margin-top: 4px;
+    }
+    
+    .schedule-day {
+        min-width: 60px;
     }
 }
