@@ -1,3 +1,6 @@
+الملف: static/script.js (كامل ومعدل)
+
+```javascript
 // ============= إعدادات API =============
 const API_BASE = window.location.origin;
 
@@ -12,6 +15,7 @@ let events = [];
 let schedules = [];
 let pendingRequests = [];
 let notifications = [];
+let selectedUserForPermissions = null;
 let settings = {
     currency: '₽',
     homeAddress: '',
@@ -23,7 +27,6 @@ let settings = {
 };
 
 let currentReportMonth = new Date();
-let selectedUserForPermissions = null;
 
 // ============= دوال مساعدة =============
 function escapeHtml(text) {
@@ -486,7 +489,7 @@ function updateStats() {
     document.getElementById('monthlyExpenses').innerText = monthlyExpenses;
 }
 
-// ============= عرض الأحداث مع أيام متبقية =============
+// ============= عرض الأحداث =============
 function getDaysRemaining(dateString) {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -558,7 +561,7 @@ function renderEvents() {
     });
 }
 
-// ============= عرض أعضاء العائلة مع إدارة الصلاحيات =============
+// ============= عرض أعضاء العائلة =============
 function renderFamilyMembers() {
     if (!currentUser) return;
     const family = getCurrentFamily();
@@ -578,7 +581,7 @@ function renderFamilyMembers() {
     }
     
     // التحقق من أن المستخدم الحالي هو رب الأسرة
-    const isHead = currentUser && currentUser.isFamilyHead === true;
+    const isHead = isFamilyHead();
     
     container.innerHTML = familyMembers.map(member => {
         const age = calculateAge(member.birthDate);
@@ -612,71 +615,6 @@ function renderFamilyMembers() {
             openPermissionsModal(userId, userName);
         });
     });
-}
-
-function openPermissionsModal(userId, userName) {
-    const user = users.find(u => u.uniqueId === userId);
-    if (!user) return;
-    
-    selectedUserForPermissions = userId;
-    document.getElementById('permissionsUserInfo').innerHTML = `
-        <div style="text-align:center; margin-bottom: 16px;">
-            <strong>${escapeHtml(userName)}</strong>
-            <p style="font-size: 12px; color:#8e8e93;">${user.role}</p>
-        </div>
-    `;
-    
-    const perms = user.permissions || {
-        can_add_tasks: true, can_complete_tasks: true,
-        can_add_shopping: true, can_buy_shopping: true,
-        can_add_expenses: true, can_view_expenses: true,
-        can_add_events: true, can_edit_events: false,
-        can_add_schedule: true, can_invite_members: false,
-        can_approve_requests: false, can_manage_permissions: false
-    };
-    
-    document.getElementById('perm_tasks_add').checked = perms.can_add_tasks;
-    document.getElementById('perm_tasks_complete').checked = perms.can_complete_tasks;
-    document.getElementById('perm_shopping_add').checked = perms.can_add_shopping;
-    document.getElementById('perm_shopping_buy').checked = perms.can_buy_shopping;
-    document.getElementById('perm_expenses_add').checked = perms.can_add_expenses;
-    document.getElementById('perm_expenses_view').checked = perms.can_view_expenses;
-    document.getElementById('perm_events_add').checked = perms.can_add_events;
-    document.getElementById('perm_events_edit').checked = perms.can_edit_events;
-    document.getElementById('perm_schedule_add').checked = perms.can_add_schedule;
-    document.getElementById('perm_invite').checked = perms.can_invite_members;
-    document.getElementById('perm_approve').checked = perms.can_approve_requests;
-    
-    document.getElementById('permissionsModal').style.display = 'flex';
-}
-
-async function saveUserPermissions() {
-    if (!selectedUserForPermissions) return;
-    
-    const permissions = {
-        can_add_tasks: document.getElementById('perm_tasks_add').checked,
-        can_complete_tasks: document.getElementById('perm_tasks_complete').checked,
-        can_add_shopping: document.getElementById('perm_shopping_add').checked,
-        can_buy_shopping: document.getElementById('perm_shopping_buy').checked,
-        can_add_expenses: document.getElementById('perm_expenses_add').checked,
-        can_view_expenses: document.getElementById('perm_expenses_view').checked,
-        can_add_events: document.getElementById('perm_events_add').checked,
-        can_edit_events: document.getElementById('perm_events_edit').checked,
-        can_add_schedule: document.getElementById('perm_schedule_add').checked,
-        can_invite_members: document.getElementById('perm_invite').checked,
-        can_approve_requests: document.getElementById('perm_approve').checked,
-        can_manage_permissions: false
-    };
-    
-    const result = await apiCall(`/api/users/${selectedUserForPermissions}/permissions`, 'PUT', permissions);
-    if (result.success) {
-        addNotification('Права обновлены', 'Права доступа пользователя обновлены', 'success');
-        await loadAllData();
-        renderFamilyMembers();
-        document.getElementById('permissionsModal').style.display = 'none';
-    } else {
-        alert(result.message || 'Ошибка при сохранении прав');
-    }
 }
 
 // ============= عرض المهام =============
@@ -944,6 +882,97 @@ function updateDashboard() {
     updateStats();
     renderEvents();
     renderPendingRequests();
+}
+
+// ============= دوال إدارة الصلاحيات =============
+async function openPermissionsModal(userId, userName) {
+    const user = users.find(u => u.uniqueId === userId);
+    if (!user) return;
+    
+    selectedUserForPermissions = userId;
+    document.getElementById('permissionsUserInfo').innerHTML = `
+        <div style="text-align:center; margin-bottom: 16px;">
+            <strong>${escapeHtml(userName)}</strong>
+            <p style="font-size: 12px; color:#8e8e93;">${user.role}</p>
+        </div>
+    `;
+    
+    const perms = user.permissions || {
+        can_add_tasks: true, can_complete_tasks: true,
+        can_add_shopping: true, can_buy_shopping: true,
+        can_add_expenses: true, can_view_expenses: true,
+        can_add_events: true, can_edit_events: false,
+        can_add_schedule: true, can_invite_members: false,
+        can_approve_requests: false, can_manage_permissions: false
+    };
+    
+    document.getElementById('perm_tasks_add').checked = perms.can_add_tasks;
+    document.getElementById('perm_tasks_complete').checked = perms.can_complete_tasks;
+    document.getElementById('perm_shopping_add').checked = perms.can_add_shopping;
+    document.getElementById('perm_shopping_buy').checked = perms.can_buy_shopping;
+    document.getElementById('perm_expenses_add').checked = perms.can_add_expenses;
+    document.getElementById('perm_expenses_view').checked = perms.can_view_expenses;
+    document.getElementById('perm_events_add').checked = perms.can_add_events;
+    document.getElementById('perm_events_edit').checked = perms.can_edit_events;
+    document.getElementById('perm_schedule_add').checked = perms.can_add_schedule;
+    document.getElementById('perm_invite').checked = perms.can_invite_members;
+    document.getElementById('perm_approve').checked = perms.can_approve_requests;
+    
+    document.getElementById('permissionsModal').style.display = 'flex';
+}
+
+async function saveUserPermissions() {
+    if (!selectedUserForPermissions) return;
+    
+    const permissions = {
+        can_add_tasks: document.getElementById('perm_tasks_add').checked,
+        can_complete_tasks: document.getElementById('perm_tasks_complete').checked,
+        can_add_shopping: document.getElementById('perm_shopping_add').checked,
+        can_buy_shopping: document.getElementById('perm_shopping_buy').checked,
+        can_add_expenses: document.getElementById('perm_expenses_add').checked,
+        can_view_expenses: document.getElementById('perm_expenses_view').checked,
+        can_add_events: document.getElementById('perm_events_add').checked,
+        can_edit_events: document.getElementById('perm_events_edit').checked,
+        can_add_schedule: document.getElementById('perm_schedule_add').checked,
+        can_invite_members: document.getElementById('perm_invite').checked,
+        can_approve_requests: document.getElementById('perm_approve').checked,
+        can_manage_permissions: false
+    };
+    
+    const result = await apiCall(`/api/users/${selectedUserForPermissions}/permissions`, 'PUT', permissions);
+    if (result.success) {
+        addNotification('Права обновлены', 'Права доступа пользователя обновлены', 'success');
+        await loadAllData();
+        renderFamilyMembers();
+        document.getElementById('permissionsModal').style.display = 'none';
+    } else {
+        alert(result.message || 'Ошибка при сохранении прав');
+    }
+}
+
+// ============= دوال إصلاح العائلة =============
+async function fixFamilyAndShowMembers() {
+    console.log("🔄 جاري إصلاح العائلة...");
+    
+    const fixResult = await apiCall('/api/fix_family', 'POST');
+    if (fixResult.success) {
+        console.log("✅ تم إصلاح العائلة:", fixResult.families);
+    }
+    
+    await loadAllData();
+    updateDashboard();
+    renderFamilyMembers();
+    renderPendingRequests();
+    
+    console.log("✅ تم تحديث قائمة أفراد العائلة");
+}
+
+let fixed = false;
+async function autoFixFamily() {
+    if (!fixed && currentUser) {
+        fixed = true;
+        await fixFamilyAndShowMembers();
+    }
 }
 
 // ============= دوال الانضمام إلى مجموعة =============
@@ -1227,12 +1256,12 @@ document.getElementById('copyInviteCodeBtn').addEventListener('click', copyInvit
 document.getElementById('shareInviteCodeBtn').addEventListener('click', shareInviteCode);
 
 // أزرار إدارة الصلاحيات
-document.getElementById('managePermissionsBtn').addEventListener('click', () => {
+document.getElementById('managePermissionsBtn')?.addEventListener('click', () => {
     if (isFamilyHead()) {
         openPermissionsModal(currentUser.uniqueId, currentUser.fullName);
     }
 });
-document.getElementById('savePermissionsBtn').addEventListener('click', saveUserPermissions);
+document.getElementById('savePermissionsBtn')?.addEventListener('click', saveUserPermissions);
 
 // أزرار المودالات
 document.querySelectorAll('.close-modal, .closeJoinGroup, .closeInviteCode, .closePermissions, .closeEvent, .closeEditProfile, .closeNotifications, .closeSettings, .closeSchedule, .closeTask, .closeShopping, .closeExpense, .closeApproval, .closeReport, .closeUnique').forEach(el => {
@@ -1244,7 +1273,7 @@ document.getElementById('notificationsBtn').addEventListener('click', () => {
     renderNotifications();
     document.getElementById('notificationsModal').style.display = 'flex';
 });
-document.getElementById('markAllReadBtn').addEventListener('click', () => {
+document.getElementById('markAllReadBtn')?.addEventListener('click', () => {
     markAllNotificationsAsRead();
 });
 
@@ -1475,7 +1504,6 @@ document.querySelectorAll('.tab-item').forEach(tab => {
 });
 
 // التهيئة
-// التهيئة
 async function init() {
     const loggedIn = await loadCurrentUser();
     if (loggedIn) {
@@ -1487,7 +1515,6 @@ async function init() {
         renderShopping();
         renderExpenses();
         renderSchedules();
-        // تشغيل إصلاح العائلة بعد 1 ثانية
         setTimeout(autoFixFamily, 1000);
     } else {
         showScreen('login');
@@ -1495,34 +1522,6 @@ async function init() {
     setTimeout(() => initializeAllDatePickers(), 200);
     setInterval(() => { checkEventReminders(); checkDailyReminders(); }, 3600000);
 }
-// ============= دالة إصلاح العائلة =============
-async function fixFamilyAndShowMembers() {
-    console.log("🔄 جاري إصلاح العائلة...");
-    
-    // استدعاء API الإصلاح
-    const fixResult = await apiCall('/api/fix_family', 'POST');
-    if (fixResult.success) {
-        console.log("✅ تم إصلاح العائلة:", fixResult.families);
-    }
-    
-    // إعادة تحميل البيانات
-    await loadAllData();
-    
-    // تحديث الواجهة
-    updateDashboard();
-    renderFamilyMembers();
-    renderPendingRequests();
-    
-    console.log("✅ تم تحديث قائمة أفراد العائلة");
-}
-
-// تشغيل الإصلاح عند تحميل الصفحة (مرة واحدة فقط)
-let fixed = false;
-async function autoFixFamily() {
-    if (!fixed && currentUser) {
-        fixed = true;
-        await fixFamilyAndShowMembers();
-    }
-}
 
 init();
+```
