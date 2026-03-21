@@ -1,2992 +1,672 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>منظومتي المتكاملة</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Inter', 'Cairo', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-        }
-
-        body {
-            background: #f2f5fa;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 0;
-        }
-
-        .app-screen {
-            width: 100%;
-            max-width: 450px;
-            background: #ffffff;
-            box-shadow: 0 0 40px rgba(0,0,0,0.03);
-            min-height: 100vh;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-        }
-
-        /* ========== شاشة البداية المتحركة ========== */
-        .onboarding-screen {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, #ff4fa3, #ff8ac6, #ffb3d9);
-            background-size: 300% 300%;
-            animation: gradientMove 10s ease infinite;
-            z-index: 2000;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 30px 20px;
-            transition: transform 0.5s ease-in-out;
-            overflow: hidden;
-        }
-        
-        @keyframes gradientMove {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-        
-        /* الأشكال المتحركة في الخلفية */
-        .shape {
-            position: absolute;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
-            pointer-events: none;
-            animation: float 6s infinite;
-        }
-        
-        .shape1 {
-            width: 200px;
-            height: 200px;
-            top: -50px;
-            right: -50px;
-            animation-delay: 0s;
-        }
-        
-        .shape2 {
-            width: 150px;
-            height: 150px;
-            bottom: -30px;
-            left: -30px;
-            animation-delay: 2s;
-        }
-        
-        .shape3 {
-            width: 100px;
-            height: 100px;
-            top: 30%;
-            left: 10%;
-            animation-delay: 4s;
-        }
-        
-        .shape4 {
-            width: 80px;
-            height: 80px;
-            bottom: 20%;
-            right: 15%;
-            animation-delay: 1s;
-        }
-        
-        .shape5 {
-            width: 120px;
-            height: 120px;
-            top: 60%;
-            right: 20%;
-            animation-delay: 3s;
-        }
-        
-        @keyframes float {
-            0%, 100% { transform: translateY(0) rotate(0deg); }
-            50% { transform: translateY(-30px) rotate(10deg); }
-        }
-        
-        .onboarding-screen.hide {
-            transform: translateY(100%);
-        }
-        
-        .step {
-            position: absolute;
-            width: 100%;
-            padding: 30px 20px;
-            opacity: 0;
-            transform: translateX(50px);
-            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-            pointer-events: none;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            z-index: 10;
-        }
-        .step.active {
-            opacity: 1;
-            transform: translateX(0);
-            pointer-events: all;
-        }
-        
-        .step-1 {
-            transform: translateX(-50px);
-        }
-        .step-1.active {
-            transform: translateX(0);
-        }
-        
-        .onboarding-logo {
-            width: 120px;
-            height: 120px;
-            background: rgba(255,255,255,0.2);
-            backdrop-filter: blur(10px);
-            border-radius: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 4rem;
-            margin-bottom: 30px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
-            border: 2px solid rgba(255,255,255,0.3);
-            animation: pulse 2s infinite;
-        }
-        
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-        }
-        
-        .onboarding-title {
-            color: white;
-            font-size: 2rem;
-            font-weight: 700;
-            margin-bottom: 20px;
-            text-align: center;
-            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
-            animation: slideUp 0.5s ease;
-        }
-        
-        .onboarding-desc {
-            color: rgba(255,255,255,0.9);
-            font-size: 1.1rem;
-            text-align: center;
-            margin-bottom: 40px;
-            line-height: 1.6;
-            animation: slideUp 0.5s ease 0.1s both;
-        }
-        
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .onboarding-input {
-            width: 100%;
-            background: rgba(255,255,255,0.2);
-            backdrop-filter: blur(10px);
-            border: 2px solid rgba(255,255,255,0.3);
-            border-radius: 60px;
-            padding: 18px 22px;
-            font-size: 1.1rem;
-            color: white;
-            margin-bottom: 20px;
-            outline: none;
-            transition: 0.3s;
-        }
-        .onboarding-input::placeholder {
-            color: rgba(255,255,255,0.7);
-        }
-        .onboarding-input:focus {
-            border-color: white;
-            background: rgba(255,255,255,0.3);
-            transform: scale(1.02);
-        }
-        .language-selector {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 30px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-        .lang-btn {
-            background: rgba(255,255,255,0.2);
-            backdrop-filter: blur(10px);
-            border: 2px solid rgba(255,255,255,0.3);
-            border-radius: 50px;
-            padding: 12px 25px;
-            color: white;
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .lang-btn.active {
-            background: white;
-            color: #ff4fa3;
-            border-color: white;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-            transform: scale(1.05);
-        }
-        .step-btn {
-            background: white;
-            border: none;
-            border-radius: 60px;
-            padding: 20px;
-            font-size: 1.2rem;
-            font-weight: 700;
-            color: #ff4fa3;
-            width: 100%;
-            cursor: pointer;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            margin-top: 20px;
-            transition: 0.2s;
-        }
-        .step-btn:active {
-            transform: scale(0.95);
-        }
-
-        .app-header {
-            padding: 20px 22px 12px 22px;
-            background: #ffffff;
-            border-bottom: 1px solid #edf2f9;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .app-header h1 {
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: #0b2b40;
-        }
-        .menu-btn {
-            background: #f0f4fc;
-            border: 1px solid #d9e4f0;
-            border-radius: 50px;
-            width: 52px;
-            height: 52px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2rem;
-            color: #1f344b;
-            cursor: pointer;
-        }
-
-        .drawer-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.4);
-            backdrop-filter: blur(4px);
-            z-index: 1000;
-            visibility: hidden;
-            opacity: 0;
-            transition: 0.2s;
-        }
-        .drawer {
-            position: fixed;
-            top: 0;
-            left: -320px;
-            width: 280px;
-            height: 100%;
-            background: white;
-            box-shadow: 4px 0 30px #00000030;
-            z-index: 1001;
-            transition: left 0.25s ease-out;
-            border-radius: 0 30px 30px 0;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-        .drawer.open { left: 0; }
-        .drawer-overlay.show { visibility: visible; opacity: 1; }
-        
-        .drawer-content {
-            flex: 1;
-            overflow-y: auto;
-            padding: 25px 20px;
-            scrollbar-width: thin;
-        }
-
-        .avatar-section {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin-bottom: 25px;
-        }
-        .avatar {
-            width: 90px;
-            height: 90px;
-            background: linear-gradient(135deg, #1f344b, #2a405a);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2.8rem;
-            color: white;
-            margin-bottom: 12px;
-            border: 3px solid #e2eaf5;
-        }
-        .user-name {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #1f344b;
-        }
-
-        .balance-card {
-            background: linear-gradient(135deg, #1f344b, #2a405a);
-            color: white;
-            border-radius: 30px;
-            padding: 22px 18px;
-            margin-bottom: 25px;
-        }
-        .balance-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-            font-size: 1rem;
-        }
-        .balance-row:last-child {
-            margin-bottom: 0;
-        }
-        .balance-value {
-            font-weight: 800;
-            font-size: 1.3rem;
-        }
-
-        .drawer-item {
-            padding: 16px 20px;
-            border-radius: 30px;
-            font-weight: 600;
-            font-size: 1.1rem;
-            color: #1f344b;
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            cursor: pointer;
-            transition: 0.15s;
-            margin-bottom: 4px;
-        }
-        .drawer-item.active {
-            background: #1f344b;
-            color: white;
-        }
-
-        .inner-tabs {
-            display: flex;
-            overflow-x: auto;
-            gap: 10px;
-            padding: 10px 20px 18px 20px;
-            background: white;
-            scrollbar-width: none;
-        }
-        .inner-tab {
-            background: #f0f4fc;
-            padding: 10px 20px;
-            border-radius: 40px;
-            font-weight: 600;
-            font-size: 0.95rem;
-            color: #334e6e;
-            border: 1px solid #d9e4f0;
-            cursor: pointer;
-            white-space: nowrap;
-            flex-shrink: 0;
-        }
-        .inner-tab.active {
-            background: #1f344b;
-            color: white;
-            border-color: #1f344b;
-        }
-
-        .filter-scroll {
-            display: flex;
-            overflow-x: auto;
-            gap: 10px;
-            padding: 10px 0 20px 0;
-        }
-        .filter-chip {
-            background: #f0f4fc;
-            padding: 8px 16px;
-            border-radius: 40px;
-            font-weight: 600;
-            font-size: 0.9rem;
-            color: #334e6e;
-            border: 1px solid #d9e4f0;
-            cursor: pointer;
-            white-space: nowrap;
-        }
-        .filter-chip.active {
-            background: #1f344b;
-            color: white;
-        }
-
-        .page-content {
-            flex: 1;
-            padding: 10px 20px 30px 20px;
-            background: #ffffff;
-        }
-        .page { display: none; }
-        .page.active-page { display: block; }
-        .subpage { display: none; }
-        .subpage.active-sub { display: block; }
-
-        .card {
-            background: #ffffff;
-            border-radius: 32px;
-            padding: 18px 16px;
-            margin-bottom: 16px;
-            box-shadow: 0 6px 24px rgba(0, 30, 60, 0.05);
-            border: 1px solid #eef3fb;
-        }
-        .card-title {
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: #132a41;
-            margin-bottom: 14px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .input-field-modern {
-            background: #f8fbfe;
-            border: 1.8px solid #e2ecf9;
-            border-radius: 28px;
-            padding: 16px 18px;
-            font-size: 1rem;
-            width: 100%;
-            outline: none;
-            transition: 0.2s;
-            color: #122b44;
-            font-weight: 500;
-        }
-        .input-field-modern:focus {
-            border-color: #2a5f9e;
-            background: white;
-            box-shadow: 0 0 0 5px #d2e3ff;
-        }
-        .input-row {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 16px;
-            flex-wrap: wrap;
-        }
-        .input-row > * { flex: 1 1 130px; }
-        .btn-primary {
-            background: #1d364b;
-            color: white;
-            border: none;
-            border-radius: 60px;
-            padding: 18px 16px;
-            font-weight: 700;
-            font-size: 1.1rem;
-            width: 100%;
-            margin: 12px 0 8px 0;
-            box-shadow: 0 16px 24px -6px #1d364b80;
-            cursor: pointer;
-        }
-        .btn-primary:active { transform: scale(0.97); background: #102433; }
-        .btn-small {
-            background: #e7eef9;
-            border: none;
-            border-radius: 40px;
-            padding: 10px 16px;
-            font-weight: 600;
-            color: #1d364b;
-            cursor: pointer;
-            font-size: 0.9rem;
-        }
-
-        .month-card {
-            background: #ffffff;
-            border-radius: 38px;
-            margin-bottom: 20px;
-            border: 1px solid #e3ecf7;
-            overflow: hidden;
-            box-shadow: 0 8px 22px -8px #afc6e0;
-        }
-        .month-header {
-            background: #f2f9ff;
-            padding: 16px 18px;
-            border-bottom: 1px solid #d6e2f0;
-        }
-        .month-title {
-            font-weight: 800;
-            font-size: 1.4rem;
-            color: #112b44;
-        }
-        .month-summary {
-            display: flex;
-            gap: 8px;
-            padding: 12px 16px;
-            background: #f8fcff;
-        }
-        .summary-item {
-            flex: 1;
-            text-align: center;
-        }
-        .summary-label {
-            font-size: 0.75rem;
-            color: #4f658d;
-        }
-        .summary-value {
-            font-weight: 800;
-            font-size: 1.2rem;
-            color: #102b42;
-        }
-
-        .day-card {
-            background: #f5faff;
-            border-radius: 30px;
-            padding: 14px 16px;
-            margin: 8px 12px;
-            border: 1px solid #dae6f5;
-            position: relative;
-        }
-        .day-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 6px;
-        }
-        .day-date {
-            font-weight: 700;
-            font-size: 1rem;
-            color: #143157;
-        }
-        .day-hours {
-            color: #42688b;
-            font-size: 0.9rem;
-        }
-        .day-amount {
-            font-weight: 800;
-            color: #1d364b;
-            font-size: 1.1rem;
-        }
-        .item-actions {
-            display: flex;
-            gap: 8px;
-            margin-top: 8px;
-            justify-content: flex-end;
-        }
-        .edit-btn, .delete-btn {
-            background: none;
-            border: none;
-            font-size: 1.2rem;
-            cursor: pointer;
-            padding: 4px 8px;
-            border-radius: 20px;
-            transition: 0.2s;
-        }
-        .edit-btn { color: #3b82f6; }
-        .edit-btn:hover { background: #dbeafe; }
-        .delete-btn { color: #ef4444; }
-        .delete-btn:hover { background: #fee2e2; }
-
-        .expense-item, .debt-item, .future-item, .task-item, .withdraw-item, .balance-item {
-            background: #f8fafd;
-            border-radius: 26px;
-            padding: 16px;
-            margin-bottom: 10px;
-            border: 1px solid #e0ecf9;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .badge {
-            background: #1f344b;
-            color: white;
-            padding: 4px 10px;
-            border-radius: 30px;
-            font-size: 0.75rem;
-        }
-        .importance-high { border-right: 6px solid #dc2626; }
-        .importance-medium { border-right: 6px solid #f59e0b; }
-        .importance-low { border-right: 6px solid #10b981; }
-
-        .timeline-card {
-            background: #ffffff;
-            border-radius: 28px;
-            padding: 14px;
-            margin-bottom: 10px;
-            border: 1px solid #e2ecf9;
-            box-shadow: 0 4px 10px #00000008;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-        .timeline-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .timeline-date {
-            background: #edf2f9;
-            padding: 4px 12px;
-            border-radius: 30px;
-            font-size: 0.85rem;
-            font-weight: 600;
-        }
-        .status-badge {
-            padding: 4px 12px;
-            border-radius: 30px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            cursor: pointer;
-        }
-        .status-completed { background: #d1fae5; color: #065f46; }
-        .status-pending { background: #fed7aa; color: #92400e; }
-        .status-waiting { background: #e0e7ff; color: #3730a3; }
-
-        .summary-banner {
-            background: #1f344b;
-            color: white;
-            border-radius: 30px;
-            padding: 16px;
-            margin-bottom: 18px;
-            display: flex;
-            justify-content: space-around;
-        }
-        .current-balance-large {
-            font-size: 1.8rem;
-            font-weight: 800;
-            color: #1f344b;
-            text-align: center;
-            margin: 10px 0;
-        }
-        .expected-card {
-            background: linear-gradient(145deg, #1f344b, #2a405a);
-            color: white;
-            border-radius: 30px;
-            padding: 16px;
-            margin-bottom: 16px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .expected-label {
-            font-size: 1rem;
-            opacity: 0.9;
-        }
-        .expected-value {
-            font-size: 1.8rem;
-            font-weight: 800;
-        }
-        .chart-container {
-            width: 100%;
-            height: 200px;
-            margin: 20px 0;
-        }
-        .toast-message {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #1f344b;
-            color: white;
-            padding: 12px 24px;
-            border-radius: 60px;
-            font-size: 1rem;
-            font-weight: 600;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            z-index: 2000;
-            opacity: 0;
-            transition: opacity 0.3s;
-            pointer-events: none;
-        }
-        .toast-message.show {
-            opacity: 1;
-        }
-        
-        .summary-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-            margin-bottom: 20px;
-        }
-        .summary-box {
-            background: #f8fafd;
-            border-radius: 24px;
-            padding: 16px;
-            text-align: center;
-            border: 1px solid #e0ecf9;
-        }
-        .summary-box .label {
-            color: #4f658d;
-            font-size: 0.85rem;
-            margin-bottom: 8px;
-        }
-        .summary-box .value {
-            font-size: 1.6rem;
-            font-weight: 800;
-            color: #1f344b;
-        }
-        .summary-box .sub-value {
-            color: #64748b;
-            font-size: 0.9rem;
-        }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+    <title>Моя Семья - Семейный менеджер</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div class="app-screen">
-    <!-- ========== شاشة البداية المتحركة ========== -->
-    <div class="onboarding-screen" id="onboardingScreen">
-        <!-- أشكال متحركة في الخلفية -->
-        <div class="shape shape1"></div>
-        <div class="shape shape2"></div>
-        <div class="shape shape3"></div>
-        <div class="shape shape4"></div>
-        <div class="shape shape5"></div>
-        
-        <!-- الخطوة 1: اختيار اللغة -->
-        <div class="step step-1 active" id="step1">
-            <div class="onboarding-logo">🌐</div>
-            <div class="onboarding-title" id="onboardingTitle1">اختر لغتك</div>
-            <div class="onboarding-desc" id="onboardingDesc1">Choose your language</div>
-            <div class="language-selector">
-                <span class="lang-btn active" data-lang="ar" id="onboardingLangAr">العربية</span>
-                <span class="lang-btn" data-lang="en" id="onboardingLangEn">English</span>
-                <span class="lang-btn" data-lang="ru" id="onboardingLangRu">Русский</span>
-            </div>
-            <button class="step-btn" id="nextToStep2">التالي</button>
-        </div>
-        
-        <!-- الخطوة 2: إدخال الاسم -->
-        <div class="step" id="step2">
-            <div class="onboarding-logo">👤</div>
-            <div class="onboarding-title" id="onboardingTitle2">ما اسمك؟</div>
-            <input type="text" class="onboarding-input" id="userNameInput" placeholder="ادخل اسمك">
-            <button class="step-btn" id="nextToStep3">التالي</button>
-        </div>
-        
-        <!-- الخطوة 3: إدخال سعر الساعة والبدء -->
-        <div class="step" id="step3">
-            <div class="onboarding-logo">💰</div>
-            <div class="onboarding-title" id="onboardingTitle3">سعر الساعة</div>
-            <input type="number" class="onboarding-input" id="hourRateInput" placeholder="سعر الساعة" value="50" step="0.1">
-            <button class="step-btn" id="startAppBtn">ابدأ الآن</button>
-        </div>
-    </div>
+    <div class="background-gradient"></div>
 
-    <!-- ========== المحتوى الرئيسي ========== -->
-    <div class="app-header">
-        <h1 id="mainTitle">⏳ منظومتي</h1>
-        <div class="menu-btn" id="menuBtn">☰</div>
-    </div>
-
-    <div class="drawer-overlay" id="drawerOverlay"></div>
-    <div class="drawer" id="drawer">
-        <div class="drawer-content">
-            <div class="avatar-section">
-                <div class="avatar">👤</div>
-                <div class="user-name" id="userName">Елсаед</div>
-            </div>
-            <div class="balance-card">
-                <div class="balance-row"><span id="currentBalanceLabel">💰 الرصيد الحالي:</span> <span class="balance-value" id="currentBalance">0</span></div>
-                <div class="balance-row"><span id="expectedBalanceLabel">⏳ الرصيد المتوقع:</span> <span class="balance-value" id="expectedBalance">0</span></div>
-            </div>
-            <div class="drawer-item" data-section="summary" id="drawerSummary">📊 الملخص</div>
-            <div class="drawer-item" data-section="balance" id="drawerBalance">💰 الرصيد</div>
-            <div class="drawer-item active" data-section="work" id="drawerWork">⏳ العمل</div>
-            <div class="drawer-item" data-section="expenses" id="drawerExpenses">💰 المصاريف</div>
-            <div class="drawer-item" data-section="plan" id="drawerPlan">📅 الخطة</div>
-            <div class="drawer-item" data-section="timeline" id="drawerTimeline">📊 المخطط الزمني</div>
-            <div class="drawer-item" data-section="settings" id="drawerSettings">⚙️ الإعدادات</div>
-            <div class="drawer-item" data-section="about" id="drawerAbout">ℹ️ حول</div>
-        </div>
-    </div>
-
-    <!-- التبويبات الداخلية للعمل -->
-    <div id="workInnerTabs" class="inner-tabs" style="display: none;">
-        <div class="inner-tab active" data-workpage="daily" id="workDailyTab">➕ تسجيل</div>
-        <div class="inner-tab" data-workpage="months" id="workMonthsTab">📊 الشهور</div>
-        <div class="inner-tab" data-workpage="withdraws" id="workWithdrawsTab">💰 السحوبات</div>
-    </div>
-
-    <!-- التبويبات الداخلية للمصاريف -->
-    <div id="expensesInnerTabs" class="inner-tabs" style="display: none;">
-        <div class="inner-tab active" data-expensespage="all" id="expensesAllTab">📋 سجل المصاريف</div>
-        <div class="inner-tab" data-expensespage="future" id="expensesFutureTab">📅 المستقبلية</div>
-        <div class="inner-tab" data-expensespage="debts" id="expensesDebtsTab">💳 الديون</div>
-    </div>
-
-    <!-- التبويبات الداخلية للخطة -->
-    <div id="planInnerTabs" class="inner-tabs" style="display: none;">
-        <div class="inner-tab active" data-planpage="purchases" id="planPurchasesTab">🛒 المشتريات</div>
-        <div class="inner-tab" data-planpage="tasks" id="planTasksTab">✅ التجهيز</div>
-    </div>
-
-    <!-- التبويبات الداخلية للمخطط الزمني -->
-    <div id="timelineInnerTabs" class="inner-tabs" style="display: none;">
-        <div class="inner-tab active" data-timelinepage="all" id="timelineAllTab">📋 كل الأحداث</div>
-        <div class="inner-tab" data-timelinepage="stats" id="timelineStatsTab">📊 إحصائية المبالغ</div>
-        <div class="inner-tab" data-timelinepage="plan" id="timelinePlanTab">📅 خطة زمنية</div>
-        <div class="inner-tab" data-timelinepage="chart" id="timelineChartTab">📈 رسم بياني</div>
-    </div>
-
-    <div class="page-content">
-        <!-- قسم الملخص -->
-        <div id="summarySection" class="page">
-            <h2 style="font-size:1.8rem; margin-bottom:20px;" id="summaryTitle">📊 الملخص</h2>
-            
-            <div class="balance-card" style="margin-bottom: 20px;">
-                <div class="balance-row"><span>💰 الرصيد الحالي:</span> <span class="balance-value" id="summaryCurrentBalance">0</span></div>
-                <div class="balance-row"><span>⏳ الرصيد المتوقع:</span> <span class="balance-value" id="summaryExpectedBalance">0</span></div>
-            </div>
-            
-            <div class="summary-grid">
-                <div class="summary-box">
-                    <div class="label" id="summaryWorkHours">ساعات العمل</div>
-                    <div class="value" id="summaryTotalHours">0</div>
-                    <div class="sub-value" id="summaryTotalDue">0 ₽ مستحق</div>
+    <div class="app-container" id="appContainer">
+        <!-- Экран входа -->
+        <div id="loginScreen" class="screen active">
+            <div class="iphone-card login-card">
+                <div class="logo-area">
+                    <div class="logo-icon">
+                        <i class="fas fa-house-chimney-user"></i>
+                    </div>
+                    <h1>Моя Семья</h1>
+                    <p>Управляйте семьей с умом</p>
                 </div>
-                <div class="summary-box">
-                    <div class="label" id="summaryWithdraws">السحوبات</div>
-                    <div class="value" id="summaryTotalWithdraws">0 ₽</div>
-                    <div class="sub-value" id="summaryWithdrawsCount">0 عملية</div>
-                </div>
-                <div class="summary-box">
-                    <div class="label" id="summaryExpenses">المصاريف</div>
-                    <div class="value" id="summaryTotalExpenses">0 ₽</div>
-                    <div class="sub-value" id="summaryExpensesCount">0 مصروف</div>
-                </div>
-                <div class="summary-box">
-                    <div class="label" id="summaryFuture">مشتريات مستقبلية</div>
-                    <div class="value" id="summaryTotalFuture">0 ₽</div>
-                    <div class="sub-value" id="summaryFutureCount">0 عنصر</div>
-                </div>
-                <div class="summary-box">
-                    <div class="label" id="summaryDebts">الديون</div>
-                    <div class="value" id="summaryTotalDebts">0 ₽</div>
-                    <div class="sub-value" id="summaryDebtsCount">0 دين</div>
-                </div>
-                <div class="summary-box">
-                    <div class="label" id="summaryTasks">المهام</div>
-                    <div class="value" id="summaryTotalTasks">0</div>
-                    <div class="sub-value" id="summaryTasksCount">0 مهمة</div>
-                </div>
-            </div>
-            
-            <div class="card">
-                <div class="card-title" id="summaryChartTitle">توزيع المصاريف</div>
-                <div style="height: 200px;">
-                    <canvas id="summaryChart"></canvas>
-                </div>
-            </div>
-        </div>
-
-        <!-- قسم الرصيد -->
-        <div id="balanceSection" class="page">
-            <h2 style="font-size:1.8rem; margin-bottom:20px;" id="balanceTitle">💰 إدارة الرصيد</h2>
-            
-            <div class="card">
-                <div class="card-title" id="currentBalanceDetail">الرصيد الحالي</div>
-                <div style="font-size: 2.5rem; font-weight: 800; color: #1f344b; text-align: center; margin: 20px 0;" id="balanceAmount">0 ₽</div>
                 
-                <div class="balance-row" style="justify-content: space-around; margin-top: 20px;">
-                    <div style="text-align: center;">
-                        <div class="label" id="balanceDue">المستحق</div>
-                        <div style="font-weight: 700; color: #1f344b;" id="balanceDueAmount">0 ₽</div>
-                    </div>
-                    <div style="text-align: center;">
-                        <div class="label" id="balanceWithdraws">السحوبات</div>
-                        <div style="font-weight: 700; color: #1f344b;" id="balanceWithdrawsAmount">0 ₽</div>
-                    </div>
-                    <div style="text-align: center;">
-                        <div class="label" id="balanceExpenses">المصاريف</div>
-                        <div style="font-weight: 700; color: #1f344b;" id="balanceExpensesAmount">0 ₽</div>
+                <div class="social-login">
+                    <button class="social-btn apple" id="socialApple">
+                        <i class="fab fa-apple"></i>
+                        <span>Apple</span>
+                    </button>
+                    <button class="social-btn google" id="socialGoogle">
+                        <i class="fab fa-google"></i>
+                        <span>Google</span>
+                    </button>
+                </div>
+                
+                <div class="divider">
+                    <span>или</span>
+                </div>
+                
+                <div class="input-field">
+                    <i class="fas fa-qrcode"></i>
+                    <input type="text" id="loginUniqueId" placeholder="Уникальный ID">
+                </div>
+                
+                <button class="primary-btn" id="loginWithIdBtn">Войти</button>
+                
+                <div class="auth-footer">
+                    <button class="text-btn" id="goToRegisterBtn">Создать аккаунт</button>
+                    <button class="text-btn" id="joinFamilyBtn">Присоединиться к семье</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Выбор роли -->
+        <div id="roleSelectionModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Выберите вашу роль в семье</h3>
+                </div>
+                <div class="role-buttons">
+                    <button class="role-btn" data-role="Отец">👨 Отец</button>
+                    <button class="role-btn" data-role="Мать">👩 Мать</button>
+                    <button class="role-btn" data-role="Муж">👨‍💼 Муж</button>
+                    <button class="role-btn" data-role="Жена">👩‍💼 Жена</button>
+                    <button class="role-btn" data-role="Сын">👦 Сын</button>
+                    <button class="role-btn" data-role="Дочь">👧 Дочь</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Регистрация -->
+        <div id="registerScreen" class="screen">
+            <div class="iphone-card register-card">
+                <div class="screen-header">
+                    <button class="back-btn" id="backFromRegister">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <h2>Новый аккаунт</h2>
+                    <div style="width: 32px;"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Полное имя</label>
+                    <div class="input-field">
+                        <i class="fas fa-user"></i>
+                        <input type="text" id="regFullName" placeholder="Введите ваше полное имя">
                     </div>
                 </div>
                 
-                <div class="balance-row" style="justify-content: space-around; margin-top: 10px;">
-                    <div style="text-align: center;">
-                        <div class="label" id="balanceFuture">المستقبليات</div>
-                        <div style="font-weight: 700; color: #1f344b;" id="balanceFutureAmount">0 ₽</div>
+                <div class="form-group">
+                    <label>Ваша роль в семье</label>
+                    <div class="input-field">
+                        <i class="fas fa-users"></i>
+                        <select id="regRole">
+                            <option value="Отец">Отец</option>
+                            <option value="Мать">Мать</option>
+                            <option value="Муж">Муж</option>
+                            <option value="Жена">Жена</option>
+                            <option value="Сын">Сын</option>
+                            <option value="Дочь">Дочь</option>
+                        </select>
                     </div>
-                    <div style="text-align: center;">
-                        <div class="label" id="balanceDebts">الديون</div>
-                        <div style="font-weight: 700; color: #1f344b;" id="balanceDebtsAmount">0 ₽</div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Дата рождения</label>
+                    <div class="date-wrapper">
+                        <div class="input-field date-field">
+                            <i class="fas fa-cake-candles"></i>
+                            <input type="date" id="regBirthDate" class="date-input" placeholder="Выберите дату">
+                            <button type="button" class="date-picker-trigger" onclick="triggerDatePicker('regBirthDate')">
+                                <i class="fas fa-calendar-alt"></i>
+                            </button>
+                        </div>
                     </div>
-                    <div style="text-align: center;">
-                        <div class="label" id="balanceTasks">المهام</div>
-                        <div style="font-weight: 700; color: #1f344b;" id="balanceTasksAmount">0 ₽</div>
+                </div>
+                
+                <div class="form-group">
+                    <label>О себе</label>
+                    <div class="input-field">
+                        <i class="fas fa-pen"></i>
+                        <textarea id="regBio" rows="2" placeholder="Напишите немного о себе..."></textarea>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Email</label>
+                    <div class="input-field">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" id="regEmail" placeholder="example@email.com">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Телефон</label>
+                    <div class="input-field">
+                        <i class="fas fa-phone"></i>
+                        <input type="tel" id="regPhone" placeholder="+7 999 123-45-67">
+                    </div>
+                </div>
+                
+                <button class="primary-btn" id="submitRegisterBtn">Создать аккаунт</button>
+                <p class="note-text">Вы получите уникальный ID для входа</p>
+            </div>
+        </div>
+
+        <!-- Главное приложение -->
+        <div id="mainAppScreen" class="screen">
+            <div class="main-container">
+                <div class="content-area" id="tabContent">
+                    <!-- Главная вкладка -->
+                    <div class="tab-pane active" id="homeTab">
+                        <div class="welcome-header">
+                            <div class="user-info">
+                                <div class="avatar">
+                                    <i class="fas fa-user-circle"></i>
+                                </div>
+                                <div class="user-text">
+                                    <h2 id="dashboardUserName">Здравствуйте, Пользователь</h2>
+                                    <p id="dashboardUserRole">Роль: ---</p>
+                                </div>
+                            </div>
+                            <div class="header-actions">
+                                <button class="icon-btn" id="notificationsBtn">
+                                    <i class="fas fa-bell"></i>
+                                </button>
+                                <button class="icon-btn" id="settingsBtn">
+                                    <i class="fas fa-gear"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Статистика -->
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-icon">
+                                    <i class="fas fa-tasks"></i>
+                                </div>
+                                <div class="stat-value" id="pendingTasksCount">0</div>
+                                <div class="stat-label">Ожидающих задач</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon">
+                                    <i class="fas fa-cart-shopping"></i>
+                                </div>
+                                <div class="stat-value" id="pendingShoppingCount">0</div>
+                                <div class="stat-label">Покупок</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon">
+                                    <i class="fas fa-wallet"></i>
+                                </div>
+                                <div class="stat-value" id="totalExpenses">0</div>
+                                <div class="stat-label">Всего расходов</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon">
+                                    <i class="fas fa-calendar-week"></i>
+                                </div>
+                                <div class="stat-value" id="monthlyExpenses">0</div>
+                                <div class="stat-label">В этом месяце</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Важные события -->
+                        <div class="section-card">
+                            <div class="section-header">
+                                <h3><i class="fas fa-calendar-star"></i> Важные события</h3>
+                                <button class="small-btn" id="addEventBtn">
+                                    <i class="fas fa-plus"></i> Добавить
+                                </button>
+                            </div>
+                            <div class="events-list" id="eventsList"></div>
+                        </div>
+                        
+                        <!-- Члены семьи -->
+                        <div class="section-card">
+                            <div class="section-header">
+                                <h3><i class="fas fa-people-group"></i> Члены семьи</h3>
+                                <button class="small-btn" id="inviteMemberBtn">
+                                    <i class="fas fa-share-nodes"></i> Пригласить
+                                </button>
+                            </div>
+                            <div class="family-list" id="familyMembersList"></div>
+                        </div>
+                        
+                        <!-- Заявки на вступление -->
+                        <div class="section-card" id="pendingApprovalsSection" style="display: none;">
+                            <div class="section-header">
+                                <h3><i class="fas fa-bell"></i> Заявки на вступление</h3>
+                            </div>
+                            <div id="pendingRequestsList"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Задачи -->
+                    <div class="tab-pane" id="tasksTab">
+                        <div class="page-header">
+                            <h2>Задачи</h2>
+                            <button class="add-btn" id="addTaskBtn">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                        <div class="tasks-list" id="tasksList"></div>
+                    </div>
+                    
+                    <!-- Покупки -->
+                    <div class="tab-pane" id="shoppingTab">
+                        <div class="page-header">
+                            <h2>Покупки</h2>
+                            <button class="add-btn" id="addShoppingBtn">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                        <div class="shopping-list" id="shoppingList"></div>
+                    </div>
+                    
+                    <!-- Расписание -->
+                    <div class="tab-pane" id="scheduleTab">
+                        <div class="page-header">
+                            <h2><i class="fas fa-calendar-week"></i> Расписание</h2>
+                            <button class="add-btn" id="addScheduleBtn">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                        <div class="schedule-filters">
+                            <select id="scheduleMemberFilter" class="filter-select">
+                                <option value="all">Все члены семьи</option>
+                            </select>
+                        </div>
+                        <div class="schedule-list" id="scheduleList"></div>
+                    </div>
+                    
+                    <!-- Расходы -->
+                    <div class="tab-pane" id="expensesTab">
+                        <div class="page-header">
+                            <h2>Расходы</h2>
+                            <button class="add-btn" id="addExpenseBtn">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                        <div class="report-bar">
+                            <button class="report-btn" id="monthlyReportBtn">
+                                <i class="fas fa-calendar-alt"></i> Отчет за текущий месяц
+                            </button>
+                        </div>
+                        <div class="expenses-list" id="expensesList"></div>
+                    </div>
+                    
+                    <!-- Профиль -->
+                    <div class="tab-pane" id="profileTab">
+                        <div class="profile-card">
+                            <div class="profile-avatar">
+                                <i class="fas fa-user-circle"></i>
+                            </div>
+                            <h3 id="profileName">Имя</h3>
+                            <p class="profile-role" id="profileRole">Роль</p>
+                            <p class="profile-id" id="profileId">ID: ---</p>
+                            <p class="profile-age" id="profileAge"></p>
+                            
+                            <div class="profile-bio" id="profileBio">
+                                <i class="fas fa-quote-right"></i>
+                                <span>О себе</span>
+                            </div>
+                            
+                            <div class="profile-details">
+                                <div class="detail-row">
+                                    <i class="fas fa-cake-candles"></i>
+                                    <span id="profileBirthDate">Дата рождения: ---</span>
+                                </div>
+                                <div class="detail-row">
+                                    <i class="fas fa-envelope"></i>
+                                    <span id="profileEmail">Email</span>
+                                </div>
+                                <div class="detail-row">
+                                    <i class="fas fa-phone"></i>
+                                    <span id="profilePhone">Телефон</span>
+                                </div>
+                            </div>
+                            
+                            <button class="edit-profile-btn" id="editProfileBtn">
+                                <i class="fas fa-pen"></i> Редактировать профиль
+                            </button>
+                            <button class="logout-btn" id="logoutBtnMain">
+                                <i class="fas fa-sign-out-alt"></i> Выйти
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Нижняя панель -->
+                <div class="tab-bar">
+                    <div class="tab-item active" data-tab="home">
+                        <i class="fas fa-house"></i>
+                        <span>Главная</span>
+                    </div>
+                    <div class="tab-item" data-tab="tasks">
+                        <i class="fas fa-list-check"></i>
+                        <span>Задачи</span>
+                    </div>
+                    <div class="tab-item" data-tab="shopping">
+                        <i class="fas fa-cart-shopping"></i>
+                        <span>Покупки</span>
+                    </div>
+                    <div class="tab-item" data-tab="schedule">
+                        <i class="fas fa-calendar-week"></i>
+                        <span>Расписание</span>
+                    </div>
+                    <div class="tab-item" data-tab="expenses">
+                        <i class="fas fa-wallet"></i>
+                        <span>Расходы</span>
+                    </div>
+                    <div class="tab-item" data-tab="profile">
+                        <i class="fas fa-person"></i>
+                        <span>Профиль</span>
                     </div>
                 </div>
             </div>
-            
-            <div class="card">
-                <div class="card-title" id="addBalanceTitle">➕ إضافة رصيد</div>
-                <div class="input-row">
-                    <input type="number" id="balanceAmountInput" class="input-field-modern" placeholder="المبلغ">
-                    <select id="balanceType" class="input-field-modern">
-                        <option value="add" id="balanceAdd">➕ إضافة</option>
-                        <option value="subtract" id="balanceSubtract">➖ خصم</option>
+        </div>
+    </div>
+    
+    <!-- Модальные окна -->
+    <div id="addEventModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Добавить событие</h3>
+                <span class="close-modal closeEvent">&times;</span>
+            </div>
+            <div class="input-field">
+                <i class="fas fa-calendar-day"></i>
+                <input type="text" id="eventTitle" placeholder="Название события">
+            </div>
+            <div class="date-wrapper">
+                <div class="input-field date-field">
+                    <i class="fas fa-calendar-alt"></i>
+                    <input type="date" id="eventDate" class="date-input" placeholder="Выберите дату">
+                    <button type="button" class="date-picker-trigger" onclick="triggerDatePicker('eventDate')">
+                        <i class="fas fa-calendar-alt"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="input-field">
+                <i class="fas fa-users"></i>
+                <select id="eventPerson">
+                    <option value="">Выберите человека</option>
+                </select>
+            </div>
+            <div class="input-field">
+                <i class="fas fa-palette"></i>
+                <select id="eventColor">
+                    <option value="#667eea">Фиолетовый</option>
+                    <option value="#34c759">Зеленый</option>
+                    <option value="#ff9500">Оранжевый</option>
+                    <option value="#ff3b30">Красный</option>
+                    <option value="#af52de">Пурпурный</option>
+                    <option value="#007aff">Синий</option>
+                </select>
+            </div>
+            <button class="primary-btn" id="confirmAddEvent">Добавить</button>
+        </div>
+    </div>
+    
+    <div id="editProfileModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Редактировать профиль</h3>
+                <span class="close-modal closeEditProfile">&times;</span>
+            </div>
+            <div class="date-wrapper">
+                <div class="input-field date-field">
+                    <i class="fas fa-cake-candles"></i>
+                    <input type="date" id="editBirthDate" class="date-input" placeholder="Дата рождения">
+                    <button type="button" class="date-picker-trigger" onclick="triggerDatePicker('editBirthDate')">
+                        <i class="fas fa-calendar-alt"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="input-field">
+                <i class="fas fa-pen"></i>
+                <textarea id="editBio" rows="3" placeholder="О себе..."></textarea>
+            </div>
+            <div class="input-field">
+                <i class="fas fa-envelope"></i>
+                <input type="email" id="editEmail" placeholder="Email">
+            </div>
+            <div class="input-field">
+                <i class="fas fa-phone"></i>
+                <input type="tel" id="editPhone" placeholder="Телефон">
+            </div>
+            <button class="primary-btn" id="saveProfileBtn">Сохранить</button>
+        </div>
+    </div>
+    
+    <div id="notificationsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-bell"></i> Уведомления</h3>
+                <span class="close-modal closeNotifications">&times;</span>
+            </div>
+            <div id="notificationsList" class="notifications-list"></div>
+        </div>
+    </div>
+    
+    <div id="settingsModal" class="modal">
+        <div class="modal-content settings-modal">
+            <div class="modal-header">
+                <h3><i class="fas fa-sliders-h"></i> Настройки</h3>
+                <span class="close-modal closeSettings">&times;</span>
+            </div>
+            <div class="settings-section">
+                <h4>Валюта</h4>
+                <div class="input-field">
+                    <i class="fas fa-coins"></i>
+                    <select id="currencySelect">
+                        <option value="₽">Российский рубль (₽)</option>
+                        <option value="$">Доллар США ($)</option>
+                        <option value="€">Евро (€)</option>
+                        <option value="ر.س">Саудовский риал (ر.س)</option>
                     </select>
                 </div>
-                <div class="input-row">
-                    <input type="text" id="balanceReason" class="input-field-modern" placeholder="السبب">
-                </div>
-                <button class="btn-primary" id="addBalanceBtn">💾 حفظ</button>
             </div>
             
-            <div class="card">
-                <div class="card-title" id="balanceHistoryTitle">📋 سجل تعديلات الرصيد</div>
-                <div id="balanceHistoryList"></div>
+            <div class="settings-section">
+                <h4>Домашний адрес</h4>
+                <div class="input-field">
+                    <i class="fas fa-location-dot"></i>
+                    <input type="text" id="homeAddress" placeholder="Введите домашний адрес">
+                </div>
             </div>
+            
+            <div class="settings-section">
+                <h4>Месячный бюджет</h4>
+                <div class="input-field">
+                    <i class="fas fa-chart-line"></i>
+                    <input type="number" id="monthlyBudget" placeholder="Месячный бюджет">
+                </div>
+                <p class="budget-info" id="budgetStatus"></p>
+            </div>
+            
+            <div class="settings-section">
+                <h4>Уведомления</h4>
+                <div class="toggle-setting">
+                    <span>Напоминания о задачах</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="taskReminders">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                <div class="toggle-setting">
+                    <span>Напоминания о событиях</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="eventReminders">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+            
+            <button class="primary-btn" id="saveSettingsBtn">Сохранить</button>
         </div>
-
-        <!-- قسم العمل -->
-        <div id="workSection" class="page">
-            <div id="workDaily" class="subpage active-sub">
-                <div class="card">
-                    <div class="card-title" id="addDailyTitle">➕ إضافة يوم</div>
-                    <div class="input-row">
-                        <input type="date" id="workDate" class="input-field-modern">
-                        <input type="time" id="startTime" class="input-field-modern" value="09:00">
-                        <input type="time" id="endTime" class="input-field-modern" value="17:00">
-                    </div>
-                    <div style="margin-bottom:16px;"><input type="text" id="workDay" class="input-field-modern" readonly placeholder="اليوم"></div>
-                    <div class="input-row">
-                        <input type="text" id="totalHours" class="input-field-modern" readonly placeholder="الساعات">
-                        <input type="text" id="amountEarned" class="input-field-modern" readonly placeholder="المبلغ">
-                    </div>
-                    <button class="btn-primary" id="saveWorkBtn">💾 حفظ اليوم</button>
-                </div>
+    </div>
+    
+    <div id="addScheduleModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Добавить в расписание</h3>
+                <span class="close-modal closeSchedule">&times;</span>
             </div>
-
-            <div id="workMonths" class="subpage">
-                <h2 id="monthsTitle" style="font-size:1.6rem; margin-bottom:15px;">📆 الشهور</h2>
-                <div class="filter-scroll" id="monthFilter"></div>
-                <div id="monthsCardsContainer"></div>
+            <div class="input-field">
+                <i class="fas fa-user"></i>
+                <select id="scheduleMember">
+                    <option value="">Выберите человека</option>
+                </select>
             </div>
-
-            <div id="workWithdraws" class="subpage">
-                <h2 id="withdrawsTitle" style="font-size:1.6rem; margin-bottom:15px;">💰 السحوبات</h2>
-                <div class="expected-card">
-                    <span class="expected-label" id="expectedWithdrawLabel">الرصيد المتوقع</span>
-                    <span class="expected-value" id="expectedWithdrawAmount">0 ₽</span>
-                </div>
-                <div class="current-balance-large" id="currentBalanceDisplay"></div>
-                <div class="card">
-                    <div class="card-title" id="addWithdrawTitle">➕ إضافة سحب (استلام مبلغ)</div>
-                    <div class="input-row">
-                        <input type="number" id="newWithdrawAmount" class="input-field-modern" placeholder="المبلغ">
-                        <input type="date" id="newWithdrawDate" class="input-field-modern">
-                    </div>
-                    <button class="btn-primary" id="addWithdrawBtn">💰 استلام</button>
-                </div>
-                <div id="allWithdrawsContainer"></div>
+            <div class="input-field">
+                <i class="fas fa-tag"></i>
+                <input type="text" id="scheduleTitle" placeholder="Название (работа, учеба)">
             </div>
+            <div class="input-field">
+                <i class="fas fa-calendar-week"></i>
+                <select id="scheduleDay">
+                    <option value="Понедельник">Понедельник</option>
+                    <option value="Вторник">Вторник</option>
+                    <option value="Среда">Среда</option>
+                    <option value="Четверг">Четверг</option>
+                    <option value="Пятница">Пятница</option>
+                    <option value="Суббота">Суббота</option>
+                    <option value="Воскресенье">Воскресенье</option>
+                </select>
+            </div>
+            <div class="input-field">
+                <i class="fas fa-clock"></i>
+                <input type="time" id="scheduleTime" value="09:00">
+            </div>
+            <div class="input-field">
+                <i class="fas fa-location-dot"></i>
+                <input type="text" id="scheduleLocation" placeholder="Место">
+            </div>
+            <button class="primary-btn" id="confirmAddSchedule">Добавить</button>
         </div>
-
-        <!-- قسم المصاريف -->
-        <div id="expensesSection" class="page">
-            <div id="expensesAll" class="subpage active-sub">
-                <div class="card">
-                    <div class="card-title" id="addExpenseTitle">➕ إضافة مصروف</div>
-                    <div class="input-row">
-                        <input type="text" id="expenseDesc" class="input-field-modern" placeholder="الوصف">
-                        <input type="number" id="expenseAmount" class="input-field-modern" placeholder="المبلغ">
-                    </div>
-                    <div class="input-row">
-                        <input type="date" id="expenseDate" class="input-field-modern">
-                        <select id="expenseCategory" class="input-field-modern">
-                            <option value="طعام">🍔 طعام</option>
-                            <option value="مواصلات">🚗 مواصلات</option>
-                            <option value="فواتير">💡 فواتير</option>
-                            <option value="أخرى">📦 أخرى</option>
-                        </select>
-                    </div>
-                    <div class="input-row">
-                        <select id="expenseIsFuture" class="input-field-modern">
-                            <option value="no">🚫 ليست مشتريات مستقبلية</option>
-                            <option value="yes">🛒 مشتريات مستقبلية</option>
-                        </select>
-                    </div>
-                    <button class="btn-primary" id="saveExpenseBtn">➕ إضافة</button>
-                </div>
-                <div class="filter-scroll" id="expenseFilter">
-                    <span class="filter-chip active" data-cat="all" id="filterAll">الكل</span>
-                    <span class="filter-chip" data-cat="طعام" id="filterFood">🍔 طعام</span>
-                    <span class="filter-chip" data-cat="مواصلات" id="filterTransport">🚗 مواصلات</span>
-                    <span class="filter-chip" data-cat="فواتير" id="filterBills">💡 فواتير</span>
-                    <span class="filter-chip" data-cat="أخرى" id="filterOther">📦 أخرى</span>
-                </div>
-                <div id="expensesList"></div>
+    </div>
+    
+    <div id="addTaskModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Новая задача</h3>
+                <span class="close-modal closeTask">&times;</span>
             </div>
-
-            <div id="expensesFuture" class="subpage">
-                <div class="card">
-                    <div class="card-title" id="addFutureTitle">🛒 إضافة مشتريات مستقبلية</div>
-                    <div class="input-row">
-                        <input type="text" id="futureName" class="input-field-modern" placeholder="الاسم">
-                        <input type="number" id="futureAmount" class="input-field-modern" placeholder="المبلغ">
-                    </div>
-                    <div class="input-row">
-                        <select id="futureCategory" class="input-field-modern">
-                            <option value="الكترونيات">📱 الكترونيات</option>
-                            <option value="منزل">🏠 منزل</option>
-                            <option value="سيارة">🚗 سيارة</option>
-                            <option value="سفر">✈️ سفر</option>
-                            <option value="أخرى">📦 أخرى</option>
-                        </select>
-                        <select id="futureImportance" class="input-field-modern">
-                            <option value="عالية">🔴 عالية</option>
-                            <option value="متوسطة">🟠 متوسطة</option>
-                            <option value="منخفضة">🟢 منخفضة</option>
-                        </select>
-                    </div>
-                    <div class="input-row">
-                        <input type="date" id="futureExecutionDate" class="input-field-modern" placeholder="تاريخ التنفيذ">
-                        <input type="text" id="futureTimeNeeded" class="input-field-modern" placeholder="الوقت اللازم (مثال: يومين)">
-                    </div>
-                    <button class="btn-primary" id="saveFutureBtn">➕ إضافة</button>
-                </div>
-                <div class="summary-banner" id="futureSummary"></div>
-                <div id="futureList"></div>
+            <div class="input-field">
+                <i class="fas fa-pencil"></i>
+                <input type="text" id="taskTitle" placeholder="Название задачи">
             </div>
-
-            <div id="expensesDebts" class="subpage">
-                <div class="card">
-                    <div class="card-title" id="addDebtTitle">➕ إضافة دين</div>
-                    <div class="input-row">
-                        <input type="text" id="debtName" class="input-field-modern" placeholder="الاسم">
-                        <input type="number" id="debtAmount" class="input-field-modern" placeholder="المبلغ">
-                    </div>
-                    <div class="input-row">
-                        <input type="date" id="debtDueDate" class="input-field-modern">
-                        <select id="debtType" class="input-field-modern">
-                            <option value="لي" id="debtOnMe">💳 عليك</option>
-                            <option value="عليه" id="debtForMe">💵 لك</option>
-                        </select>
-                    </div>
-                    <button class="btn-primary" id="saveDebtBtn">➕ إضافة</button>
-                </div>
-                <div id="debtsList"></div>
-            </div>
+            <select id="taskAssignee" class="modal-select">
+                <option value="">Выберите ответственного</option>
+            </select>
+            <button class="primary-btn" id="confirmAddTask">Добавить</button>
         </div>
-
-        <!-- قسم الخطة -->
-        <div id="planSection" class="page">
-            <div id="planPurchases" class="subpage active-sub">
-                <div id="planFutureList"></div>
+    </div>
+    
+    <div id="addShoppingModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Новый товар</h3>
+                <span class="close-modal closeShopping">&times;</span>
             </div>
-            <div id="planTasks" class="subpage">
-                <div class="card">
-                    <div class="card-title" id="addTaskTitle">➕ إضافة مهمة</div>
-                    <div class="input-row">
-                        <input type="text" id="taskName" class="input-field-modern" placeholder="اسم المهمة">
-                    </div>
-                    <div class="input-row">
-                        <select id="taskPriceType" class="input-field-modern">
-                            <option value="paid" id="taskPaid">💰 مدفوع</option>
-                            <option value="free" id="taskFree">🆓 مجاني</option>
-                        </select>
-                        <input type="number" id="taskPrice" class="input-field-modern" placeholder="السعر">
-                    </div>
-                    <div class="input-row">
-                        <input type="date" id="taskExecutionDate" class="input-field-modern" placeholder="تاريخ التنفيذ">
-                        <input type="text" id="taskTimeNeeded" class="input-field-modern" placeholder="المدة اللازمة">
-                    </div>
-                    <button class="btn-primary" id="saveTaskBtn">➕ إضافة</button>
-                </div>
-                <!-- فلتر المهام حسب الحالة -->
-                <div class="filter-scroll" id="taskFilter">
-                    <span class="filter-chip active" data-task-status="all">كل المهام</span>
-                    <span class="filter-chip" data-task-status="waiting">⏰ انتظار</span>
-                    <span class="filter-chip" data-task-status="pending">⏳ قيد التنفيذ</span>
-                    <span class="filter-chip" data-task-status="completed">✅ مكتمل</span>
-                </div>
-                <div id="tasksList"></div>
+            <div class="input-field">
+                <i class="fas fa-tag"></i>
+                <input type="text" id="shoppingItem" placeholder="Название товара">
             </div>
+            <div class="input-field">
+                <i class="fas fa-money-bill"></i>
+                <input type="number" id="shoppingPrice" placeholder="Цена">
+            </div>
+            <button class="primary-btn" id="confirmAddShopping">Добавить</button>
         </div>
-
-        <!-- قسم المخطط الزمني -->
-        <div id="timelineSection" class="page">
-            <div id="timelineAll" class="subpage active-sub">
-                <h2 id="timelineTitle" style="font-size:1.6rem; margin-bottom:15px;">📋 كل الأحداث</h2>
-                <div id="timelineList"></div>
+    </div>
+    
+    <div id="addExpenseModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Новый расход</h3>
+                <span class="close-modal closeExpense">&times;</span>
             </div>
-            <div id="timelineStats" class="subpage">
-                <h2 style="font-size:1.6rem; margin-bottom:15px;">📊 إحصائية المبالغ</h2>
-                <div class="card" id="statsContainer"></div>
+            <div class="input-field">
+                <i class="fas fa-receipt"></i>
+                <input type="text" id="expenseDesc" placeholder="Описание">
             </div>
-            <div id="timelinePlan" class="subpage">
-                <h2 style="font-size:1.6rem; margin-bottom:15px;">📅 خطة زمنية</h2>
-                <div id="planTimelineList"></div>
+            <div class="input-field">
+                <i class="fas fa-money-bill-wave"></i>
+                <input type="number" id="expenseAmount" placeholder="Сумма">
             </div>
-            <div id="timelineChart" class="subpage">
-                <h2 style="font-size:1.6rem; margin-bottom:15px;">📈 رسم بياني زمني</h2>
-                <div class="chart-container">
-                    <canvas id="timelineChartCanvas"></canvas>
-                </div>
-            </div>
+            <select id="expenseCategory" class="modal-select">
+                <option value="Еда">🍕 Еда</option>
+                <option value="Транспорт">🚗 Транспорт</option>
+                <option value="Коммунальные">💡 Коммунальные</option>
+                <option value="Развлечения">🎬 Развлечения</option>
+                <option value="Другое">📦 Другое</option>
+            </select>
+            <button class="primary-btn" id="confirmAddExpense">Добавить</button>
         </div>
-
-        <!-- قسم الإعدادات -->
-        <div id="settingsSection" class="page">
-            <h2 id="settingsTitle" style="font-size:1.6rem; margin-bottom:15px;">⚙️ الإعدادات</h2>
-            <div class="card">
-                <div class="input-row">
-                    <span class="inner-tab" data-lang="ar" id="langAr">العربية</span>
-                    <span class="inner-tab" data-lang="en" id="langEn">English</span>
-                    <span class="inner-tab" data-lang="ru" id="langRu">Русский</span>
-                </div>
-                <div style="margin-bottom:16px;">
-                    <label id="currencyLabel">💰 العملة</label>
-                    <select id="currencySelect" class="input-field-modern">
-                        <option value="RUB">₽ الروبل</option>
-                    </select>
-                </div>
-                <div style="margin-bottom:16px;">
-                    <label id="hourRateLabel">💵 سعر الساعة</label>
-                    <input type="number" id="hourRate" class="input-field-modern" value="50" step="0.1">
-                </div>
-                <div style="margin-bottom:16px;">
-                    <label id="dateFormatLabel">📅 تنسيق التاريخ</label>
-                    <select id="dateFormat" class="input-field-modern"><option value="YYYY-MM-DD">YYYY-MM-DD</option><option value="DD/MM/YYYY">DD/MM/YYYY</option></select>
-                </div>
-                <button class="btn-primary" id="saveSettingsBtn">💾 حفظ التغييرات</button>
-                <button class="btn-primary" id="resetAppBtn" style="background: #b91c1c; margin-top: 10px;">🔄 إعادة ضبط التطبيق</button>
+    </div>
+    
+    <div id="joinFamilyModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Присоединиться к семье</h3>
+                <span class="close-modal closeJoin">&times;</span>
             </div>
+            <p>Введите код семьи, который вы получили:</p>
+            <div class="input-field">
+                <i class="fas fa-qrcode"></i>
+                <input type="text" id="familyCodeInput" placeholder="Пример: FAMILY-ABC123">
+            </div>
+            <button class="primary-btn" id="submitJoinRequest">Отправить заявку</button>
         </div>
-
-        <!-- قسم حول -->
-        <div id="aboutSection" class="page">
-            <h2 id="aboutTitle" style="font-size:1.6rem; margin-bottom:15px;">ℹ️ حول</h2>
-            <div class="card">
-                <div style="text-align: center; margin-bottom: 20px;">
-                    <div class="avatar" style="margin: 0 auto 15px; width: 100px; height: 100px; font-size: 3rem;">📱</div>
-                    <h3 id="appName" style="font-size: 1.5rem; color: #1f344b;">منظومتي المتكاملة</h3>
-                    <p id="appVersion" style="color: #4f658d; margin: 10px 0;">الإصدار 2.0.0</p>
-                </div>
-                <div style="border-top: 2px solid #eef3fb; padding-top: 15px;">
-                    <p id="aboutDesc" style="margin-bottom: 10px;">تطبيق متكامل لإدارة ساعات العمل والمصاريف والخطط</p>
-                    <p id="aboutDev" style="color: #4f658d;">تم التطوير بواسطة Елсаед</p>
-                </div>
+    </div>
+    
+    <div id="approvalModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Подтверждение вступления</h3>
+                <span class="close-modal closeApproval">&times;</span>
+            </div>
+            <div id="approvalDetails"></div>
+            <div class="approval-buttons">
+                <button class="primary-btn" id="approveRequest">Одобрить</button>
+                <button class="secondary-btn" id="rejectRequest">Отклонить</button>
             </div>
         </div>
     </div>
-</div>
-
-<!-- رسالة toast -->
-<div id="toastMessage" class="toast-message"></div>
-
-<script>
-    (function() {
-        // ========== مفاتيح التخزين ==========
-        const STORAGE_KEY = 'work_months_data_v19';
-        const EXPENSES_KEY = 'expenses_data_v17';
-        const FUTURE_KEY = 'future_data_v16';
-        const DEBTS_KEY = 'debts_data_v16';
-        const TASKS_KEY = 'tasks_data_v16';
-        const SETTINGS_KEY = 'settings_app_v19';
-        const BALANCE_KEY = 'balance_adjustments';
-        const ONBOARDING_KEY = 'onboarding_complete';
-
-        // ========== البيانات ==========
-        let months = [];
-        let expenses = [];
-        let futureItems = [];
-        let debts = [];
-        let tasks = [];
-        let balanceAdjustments = [];
-
-        let settings = { language: 'ar', currency: 'RUB', hourRate: 50, dateFormat: 'YYYY-MM-DD' };
-        let timelineStatus = {};
-
-        // ========== دالة عرض الرسائل ==========
-        function showToast(message) {
-            let toast = document.getElementById('toastMessage');
-            if (toast) {
-                toast.innerText = message;
-                toast.classList.add('show');
-                setTimeout(() => {
-                    toast.classList.remove('show');
-                }, 2000);
-            } else {
-                alert(message);
-            }
-        }
-
-        // ========== الترجمات ==========
-        const translations = {
-            ar: {
-                mainTitle: '⏳ منظومتي',
-                userName: 'Елсаед',
-                currentBalanceLabel: '💰 الرصيد الحالي:',
-                expectedBalanceLabel: '⏳ الرصيد المتوقع:',
-                drawerSummary: '📊 الملخص',
-                drawerBalance: '💰 الرصيد',
-                drawerWork: '⏳ العمل',
-                drawerExpenses: '💰 المصاريف',
-                drawerPlan: '📅 الخطة',
-                drawerTimeline: '📊 المخطط الزمني',
-                drawerSettings: '⚙️ الإعدادات',
-                drawerAbout: 'ℹ️ حول',
-                workDailyTab: '➕ تسجيل',
-                workMonthsTab: '📊 الشهور',
-                workWithdrawsTab: '💰 السحوبات',
-                expensesAllTab: '📋 سجل المصاريف',
-                expensesFutureTab: '📅 المستقبلية',
-                expensesDebtsTab: '💳 الديون',
-                planPurchasesTab: '🛒 المشتريات',
-                planTasksTab: '✅ التجهيز',
-                timelineAllTab: '📋 كل الأحداث',
-                timelineStatsTab: '📊 إحصائية المبالغ',
-                timelinePlanTab: '📅 خطة زمنية',
-                timelineChartTab: '📈 رسم بياني',
-                addDailyTitle: '➕ إضافة يوم',
-                monthsTitle: '📆 الشهور',
-                withdrawsTitle: '💰 السحوبات',
-                expectedWithdrawLabel: 'الرصيد المتوقع',
-                addWithdrawTitle: '➕ إضافة سحب (استلام مبلغ)',
-                currentBalanceDisplay: 'الرصيد الحالي',
-                addExpenseTitle: '➕ إضافة مصروف',
-                filterAll: 'الكل',
-                filterFood: '🍔 طعام',
-                filterTransport: '🚗 مواصلات',
-                filterBills: '💡 فواتير',
-                filterOther: '📦 أخرى',
-                addFutureTitle: '🛒 إضافة مشتريات مستقبلية',
-                addDebtTitle: '➕ إضافة دين',
-                debtOnMe: '💳 عليك',
-                debtForMe: '💵 لك',
-                addTaskTitle: '➕ إضافة مهمة',
-                taskPaid: '💰 مدفوع',
-                taskFree: '🆓 مجاني',
-                timelineTitle: '📋 كل الأحداث',
-                settingsTitle: '⚙️ الإعدادات',
-                aboutTitle: 'ℹ️ حول',
-                appName: 'منظومتي المتكاملة',
-                appVersion: 'الإصدار 2.0.0',
-                aboutDesc: 'تطبيق متكامل لإدارة ساعات العمل والمصاريف والخطط',
-                aboutDev: 'تم التطوير بواسطة Елсаед',
-                langAr: 'العربية',
-                langEn: 'English',
-                langRu: 'Русский',
-                currencyLabel: '💰 العملة',
-                hourRateLabel: '💵 سعر الساعة',
-                dateFormatLabel: '📅 تنسيق التاريخ',
-                saveSettingsBtn: '💾 حفظ التغييرات',
-                saveWorkBtn: '💾 حفظ اليوم',
-                withdrawBtn: '💰 استلام',
-                addBtn: '➕ إضافة',
-                noData: 'لا توجد بيانات',
-                totalHours: 'الساعات',
-                totalDue: 'المستحق',
-                totalPaid: 'المدفوع',
-                remaining: 'المتبقي',
-                completed: '✅ مكتمل',
-                pending: '⏳ قيد التنفيذ',
-                waiting: '⏰ انتظار',
-                delete: '🗑️',
-                saved: '✅ تم الحفظ بنجاح',
-                added: '✅ تمت الإضافة بنجاح',
-                withdrawSuccess: '💰 تم الاستلام بنجاح',
-                amountPlaceholder: 'المبلغ',
-                datePlaceholder: 'التاريخ',
-                executionDatePlaceholder: 'تاريخ التنفيذ',
-                timeNeededPlaceholder: 'المدة اللازمة',
-                onboardingTitle1: 'اختر لغتك',
-                onboardingDesc1: 'Choose your language',
-                onboardingTitle2: 'ما اسمك؟',
-                onboardingTitle3: 'سعر الساعة',
-                startBtn: 'ابدأ الآن',
-                next: 'التالي',
-                resetConfirm: 'هل أنت متأكد من إعادة ضبط التطبيق؟ سيتم حذف جميع البيانات.',
-                resetSuccess: 'تم إعادة ضبط التطبيق بنجاح',
-                edit: 'تعديل',
-                confirmDelete: 'هل أنت متأكد من حذف هذا العنصر؟',
-                summaryTitle: '📊 الملخص',
-                summaryWorkHours: 'ساعات العمل',
-                summaryWithdraws: 'السحوبات',
-                summaryExpenses: 'المصاريف',
-                summaryFuture: 'مشتريات مستقبلية',
-                summaryDebts: 'الديون',
-                summaryTasks: 'المهام',
-                summaryChartTitle: 'توزيع المصاريف',
-                balanceTitle: '💰 إدارة الرصيد',
-                currentBalanceDetail: 'الرصيد الحالي',
-                balanceDue: 'المستحق',
-                balanceWithdraws: 'السحوبات',
-                balanceExpenses: 'المصاريف',
-                balanceFuture: 'المستقبليات',
-                balanceDebts: 'الديون',
-                balanceTasks: 'المهام',
-                addBalanceTitle: '➕ إضافة رصيد',
-                balanceAdd: '➕ إضافة',
-                balanceSubtract: '➖ خصم',
-                balanceHistoryTitle: '📋 سجل تعديلات الرصيد',
-                balanceReason: 'السبب'
-            },
-            en: {
-                mainTitle: '⏳ My System',
-                userName: 'Elsayed',
-                currentBalanceLabel: '💰 Current Balance:',
-                expectedBalanceLabel: '⏳ Expected Balance:',
-                drawerSummary: '📊 Summary',
-                drawerBalance: '💰 Balance',
-                drawerWork: '⏳ Work',
-                drawerExpenses: '💰 Expenses',
-                drawerPlan: '📅 Plan',
-                drawerTimeline: '📊 Timeline',
-                drawerSettings: '⚙️ Settings',
-                drawerAbout: 'ℹ️ About',
-                workDailyTab: '➕ Add',
-                workMonthsTab: '📊 Months',
-                workWithdrawsTab: '💰 Withdrawals',
-                expensesAllTab: '📋 Expenses Log',
-                expensesFutureTab: '📅 Future',
-                expensesDebtsTab: '💳 Debts',
-                planPurchasesTab: '🛒 Purchases',
-                planTasksTab: '✅ Tasks',
-                timelineAllTab: '📋 All Events',
-                timelineStatsTab: '📊 Amount Stats',
-                timelinePlanTab: '📅 Timeline Plan',
-                timelineChartTab: '📈 Chart',
-                addDailyTitle: '➕ Add Day',
-                monthsTitle: '📆 Months',
-                withdrawsTitle: '💰 Withdrawals',
-                expectedWithdrawLabel: 'Expected Balance',
-                addWithdrawTitle: '➕ Add Withdrawal',
-                currentBalanceDisplay: 'Current Balance',
-                addExpenseTitle: '➕ Add Expense',
-                filterAll: 'All',
-                filterFood: '🍔 Food',
-                filterTransport: '🚗 Transport',
-                filterBills: '💡 Bills',
-                filterOther: '📦 Other',
-                addFutureTitle: '🛒 Add Future Purchase',
-                addDebtTitle: '➕ Add Debt',
-                debtOnMe: '💳 On me',
-                debtForMe: '💵 For me',
-                addTaskTitle: '➕ Add Task',
-                taskPaid: '💰 Paid',
-                taskFree: '🆓 Free',
-                timelineTitle: '📋 All Events',
-                settingsTitle: '⚙️ Settings',
-                aboutTitle: 'ℹ️ About',
-                appName: 'My Integrated System',
-                appVersion: 'Version 2.0.0',
-                aboutDesc: 'Integrated app for managing work hours, expenses, and plans',
-                aboutDev: 'Developed by Elsayed',
-                langAr: 'Arabic',
-                langEn: 'English',
-                langRu: 'Russian',
-                currencyLabel: '💰 Currency',
-                hourRateLabel: '💵 Hourly Rate',
-                dateFormatLabel: '📅 Date Format',
-                saveSettingsBtn: '💾 Save Changes',
-                saveWorkBtn: '💾 Save Day',
-                withdrawBtn: '💰 Withdraw',
-                addBtn: '➕ Add',
-                noData: 'No data',
-                totalHours: 'Hours',
-                totalDue: 'Due',
-                totalPaid: 'Paid',
-                remaining: 'Left',
-                completed: '✅ Completed',
-                pending: '⏳ Pending',
-                waiting: '⏰ Waiting',
-                delete: '🗑️',
-                saved: '✅ Saved successfully',
-                added: '✅ Added successfully',
-                withdrawSuccess: '💰 Withdrawn successfully',
-                amountPlaceholder: 'Amount',
-                datePlaceholder: 'Date',
-                executionDatePlaceholder: 'Execution date',
-                timeNeededPlaceholder: 'Time needed',
-                onboardingTitle1: 'Choose your language',
-                onboardingDesc1: 'اختر لغتك',
-                onboardingTitle2: 'What is your name?',
-                onboardingTitle3: 'Hourly Rate',
-                startBtn: 'Start Now',
-                next: 'Next',
-                resetConfirm: 'Are you sure you want to reset the app? All data will be deleted.',
-                resetSuccess: 'App reset successfully',
-                edit: 'Edit',
-                confirmDelete: 'Are you sure you want to delete this item?',
-                summaryTitle: '📊 Summary',
-                summaryWorkHours: 'Work Hours',
-                summaryWithdraws: 'Withdrawals',
-                summaryExpenses: 'Expenses',
-                summaryFuture: 'Future Purchases',
-                summaryDebts: 'Debts',
-                summaryTasks: 'Tasks',
-                summaryChartTitle: 'Expenses Distribution',
-                balanceTitle: '💰 Balance Management',
-                currentBalanceDetail: 'Current Balance',
-                balanceDue: 'Due',
-                balanceWithdraws: 'Withdrawals',
-                balanceExpenses: 'Expenses',
-                balanceFuture: 'Future',
-                balanceDebts: 'Debts',
-                balanceTasks: 'Tasks',
-                addBalanceTitle: '➕ Add Balance',
-                balanceAdd: '➕ Add',
-                balanceSubtract: '➖ Subtract',
-                balanceHistoryTitle: '📋 Balance History',
-                balanceReason: 'Reason'
-            },
-            ru: {
-                mainTitle: '⏳ Моя система',
-                userName: 'Елсаед',
-                currentBalanceLabel: '💰 Текущий баланс:',
-                expectedBalanceLabel: '⏳ Ожидаемый баланс:',
-                drawerSummary: '📊 Сводка',
-                drawerBalance: '💰 Баланс',
-                drawerWork: '⏳ Работа',
-                drawerExpenses: '💰 Расходы',
-                drawerPlan: '📅 План',
-                drawerTimeline: '📊 Временная шкала',
-                drawerSettings: '⚙️ Настройки',
-                drawerAbout: 'ℹ️ О программе',
-                workDailyTab: '➕ Добавить',
-                workMonthsTab: '📊 Месяцы',
-                workWithdrawsTab: '💰 Снятия',
-                expensesAllTab: '📋 Журнал расходов',
-                expensesFutureTab: '📅 Будущие',
-                expensesDebtsTab: '💳 Долги',
-                planPurchasesTab: '🛒 Покупки',
-                planTasksTab: '✅ Задачи',
-                timelineAllTab: '📋 Все события',
-                timelineStatsTab: '📊 Статистика сумм',
-                timelinePlanTab: '📅 Временной план',
-                timelineChartTab: '📈 График',
-                addDailyTitle: '➕ Добавить день',
-                monthsTitle: '📆 Месяцы',
-                withdrawsTitle: '💰 Снятия',
-                expectedWithdrawLabel: 'Ожидаемый баланс',
-                addWithdrawTitle: '➕ Добавить снятие',
-                currentBalanceDisplay: 'Текущий баланс',
-                addExpenseTitle: '➕ Добавить расход',
-                filterAll: 'Все',
-                filterFood: '🍔 Еда',
-                filterTransport: '🚗 Транспорт',
-                filterBills: '💡 Счета',
-                filterOther: '📦 Другое',
-                addFutureTitle: '🛒 Будущие покупки',
-                addDebtTitle: '➕ Добавить долг',
-                debtOnMe: '💳 Мне должны',
-                debtForMe: '💵 Я должен',
-                addTaskTitle: '➕ Добавить задачу',
-                taskPaid: '💰 Платно',
-                taskFree: '🆓 Бесплатно',
-                timelineTitle: '📋 Все события',
-                settingsTitle: '⚙️ Настройки',
-                aboutTitle: 'ℹ️ О программе',
-                appName: 'Моя интегрированная система',
-                appVersion: 'Версия 2.0.0',
-                aboutDesc: 'Интегрированное приложение для учета рабочего времени, расходов и планов',
-                aboutDev: 'Разработано Елсаедом',
-                langAr: 'Арабский',
-                langEn: 'Английский',
-                langRu: 'Русский',
-                currencyLabel: '💰 Валюта',
-                hourRateLabel: '💵 Ставка в час',
-                dateFormatLabel: '📅 Формат даты',
-                saveSettingsBtn: '💾 Сохранить',
-                saveWorkBtn: '💾 Сохранить день',
-                withdrawBtn: '💰 Снять',
-                addBtn: '➕ Добавить',
-                noData: 'Нет данных',
-                totalHours: 'Часы',
-                totalDue: 'Начислено',
-                totalPaid: 'Выплачено',
-                remaining: 'Остаток',
-                completed: '✅ Завершено',
-                pending: '⏳ В процессе',
-                waiting: '⏰ Ожидание',
-                delete: '🗑️',
-                saved: '✅ Успешно сохранено',
-                added: '✅ Успешно добавлено',
-                withdrawSuccess: '💰 Успешно снято',
-                amountPlaceholder: 'Сумма',
-                datePlaceholder: 'Дата',
-                executionDatePlaceholder: 'Дата выполнения',
-                timeNeededPlaceholder: 'Необходимое время',
-                onboardingTitle1: 'Выберите язык',
-                onboardingDesc1: 'Choose your language',
-                onboardingTitle2: 'Как вас зовут?',
-                onboardingTitle3: 'Ставка в час',
-                startBtn: 'Начать',
-                next: 'Далее',
-                resetConfirm: 'Вы уверены, что хотите сбросить приложение? Все данные будут удалены.',
-                resetSuccess: 'Приложение сброшено успешно',
-                edit: 'Редактировать',
-                confirmDelete: 'Вы уверены, что хотите удалить этот элемент?',
-                summaryTitle: '📊 Сводка',
-                summaryWorkHours: 'Часы работы',
-                summaryWithdraws: 'Снятия',
-                summaryExpenses: 'Расходы',
-                summaryFuture: 'Будущие покупки',
-                summaryDebts: 'Долги',
-                summaryTasks: 'Задачи',
-                summaryChartTitle: 'Распределение расходов',
-                balanceTitle: '💰 Управление балансом',
-                currentBalanceDetail: 'Текущий баланс',
-                balanceDue: 'Начислено',
-                balanceWithdraws: 'Снятия',
-                balanceExpenses: 'Расходы',
-                balanceFuture: 'Будущие',
-                balanceDebts: 'Долги',
-                balanceTasks: 'Задачи',
-                addBalanceTitle: '➕ Добавить баланс',
-                balanceAdd: '➕ Добавить',
-                balanceSubtract: '➖ Вычесть',
-                balanceHistoryTitle: '📋 История баланса',
-                balanceReason: 'Причина'
-            }
-        };
-
-        // ========== شاشة البداية ==========
-        function initOnboarding() {
-            const onboardingScreen = document.getElementById('onboardingScreen');
-            const step1 = document.getElementById('step1');
-            const step2 = document.getElementById('step2');
-            const step3 = document.getElementById('step3');
-            const nextToStep2 = document.getElementById('nextToStep2');
-            const nextToStep3 = document.getElementById('nextToStep3');
-            const startBtn = document.getElementById('startAppBtn');
-            const userNameInput = document.getElementById('userNameInput');
-            const hourRateInput = document.getElementById('hourRateInput');
-            const langBtns = document.querySelectorAll('.lang-btn');
-            
-            // التحقق مما إذا كانت شاشة البداية قد ظهرت من قبل
-            const onboardingComplete = localStorage.getItem(ONBOARDING_KEY);
-            
-            if (onboardingComplete) {
-                onboardingScreen.style.display = 'none';
-                return;
-            }
-            
-            // إظهار شاشة البداية
-            onboardingScreen.style.display = 'flex';
-            
-            // تحديث نص شاشة البداية حسب اللغة المختارة
-            function updateOnboardingLanguage(lang) {
-                const t = translations[lang];
-                document.getElementById('onboardingTitle1').innerText = t.onboardingTitle1;
-                document.getElementById('onboardingDesc1').innerText = t.onboardingDesc1;
-                document.getElementById('onboardingTitle2').innerText = t.onboardingTitle2;
-                document.getElementById('onboardingTitle3').innerText = t.onboardingTitle3;
-                userNameInput.placeholder = t.userName;
-                hourRateInput.placeholder = t.hourRateLabel;
-                startBtn.innerText = t.startBtn;
-                nextToStep2.innerText = t.next;
-                nextToStep3.innerText = t.next;
-            }
-            
-            // أحداث أزرار اللغة
-            langBtns.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    langBtns.forEach(b => b.classList.remove('active'));
-                    this.classList.add('active');
-                    const lang = this.dataset.lang;
-                    settings.language = lang;
-                    updateOnboardingLanguage(lang);
-                });
-            });
-            
-            // التنقل بين الخطوات
-            nextToStep2.addEventListener('click', function() {
-                step1.classList.remove('active');
-                step2.classList.add('active');
-            });
-            
-            nextToStep3.addEventListener('click', function() {
-                step2.classList.remove('active');
-                step3.classList.add('active');
-            });
-            
-            // بدء التطبيق
-            startBtn.addEventListener('click', function() {
-                const userName = userNameInput.value.trim() || translations[settings.language].userName;
-                const hourRate = parseFloat(hourRateInput.value) || 50;
-                
-                settings.userName = userName;
-                settings.hourRate = hourRate;
-                
-                // حفظ الإعدادات
-                saveData();
-                
-                // تخزين أن شاشة البداية اكتملت
-                localStorage.setItem(ONBOARDING_KEY, 'true');
-                
-                // إخفاء شاشة البداية
-                onboardingScreen.classList.add('hide');
-                setTimeout(() => {
-                    onboardingScreen.style.display = 'none';
-                    // تطبيق اللغة بعد إخفاء الشاشة
-                    applyLanguage();
-                    renderSummary();
-                    renderBalance();
-                }, 500);
-            });
-        }
-
-        // ========== دوال التخزين ==========
-        function loadData() {
-            try {
-                let m = localStorage.getItem(STORAGE_KEY);
-                months = m ? JSON.parse(m) : [];
-                
-                let e = localStorage.getItem(EXPENSES_KEY);
-                expenses = e ? JSON.parse(e) : [];
-                
-                let f = localStorage.getItem(FUTURE_KEY);
-                futureItems = f ? JSON.parse(f) : [];
-                
-                let d = localStorage.getItem(DEBTS_KEY);
-                debts = d ? JSON.parse(d) : [];
-                
-                let t = localStorage.getItem(TASKS_KEY);
-                tasks = t ? JSON.parse(t) : [];
-                
-                let b = localStorage.getItem(BALANCE_KEY);
-                balanceAdjustments = b ? JSON.parse(b) : [];
-                
-                let s = localStorage.getItem(SETTINGS_KEY);
-                if (s) settings = {...settings, ...JSON.parse(s)};
-                
-                let status = localStorage.getItem('timelineStatus');
-                if (status) timelineStatus = JSON.parse(status);
-            } catch(e) {
-                console.error('Error loading data:', e);
-            }
-        }
-        
-        function saveData() {
-            try {
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(months));
-                localStorage.setItem(EXPENSES_KEY, JSON.stringify(expenses));
-                localStorage.setItem(FUTURE_KEY, JSON.stringify(futureItems));
-                localStorage.setItem(DEBTS_KEY, JSON.stringify(debts));
-                localStorage.setItem(TASKS_KEY, JSON.stringify(tasks));
-                localStorage.setItem(BALANCE_KEY, JSON.stringify(balanceAdjustments));
-                localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
-                localStorage.setItem('timelineStatus', JSON.stringify(timelineStatus));
-                return true;
-            } catch(e) {
-                console.error('Error saving data:', e);
-                return false;
-            }
-        }
-
-        // ========== تحديث الرصيد مع الديون ==========
-        function updateBalances() {
-            // المستحق من ساعات العمل
-            let totalDue = 0;
-            months.forEach(m => {
-                m.days.forEach(d => totalDue += d.amount);
-            });
-
-            // إجمالي السحوبات
-            let totalWithdraws = 0;
-            months.forEach(m => {
-                m.withdraws.forEach(w => totalWithdraws += w.amount);
-            });
-
-            // المصاريف
-            let totalExpenses = expenses.reduce((s, e) => s + e.amount, 0);
-            
-            // المستقبليات
-            let totalFuture = futureItems.reduce((s, f) => s + f.amount, 0);
-            
-            // المهام المدفوعة
-            let totalTasks = tasks.filter(t => t.priceType === 'paid').reduce((s, t) => s + t.price, 0);
-            
-            // الديون (عليك - لك)
-            let totalDebtsOnMe = debts.filter(d => d.type === 'لي').reduce((s, d) => s + d.amount, 0);
-            let totalDebtsForMe = debts.filter(d => d.type === 'عليه').reduce((s, d) => s + d.amount, 0);
-            let netDebts = totalDebtsOnMe - totalDebtsForMe;
-
-            // الرصيد المتوقع = المستحق - السحوبات
-            let expected = totalDue - totalWithdraws;
-            
-            // الرصيد الحالي = السحوبات - المصاريف - المستقبليات - المهام - صافي الديون
-            let current = totalWithdraws - (totalExpenses + totalFuture + totalTasks + netDebts);
-            
-            // إضافة تعديلات الرصيد اليدوية
-            let totalAdjustments = balanceAdjustments.reduce((sum, adj) => {
-                return adj.type === 'add' ? sum + adj.amount : sum - adj.amount;
-            }, 0);
-            current += totalAdjustments;
-
-            let currencySymbol = '₽';
-
-            document.getElementById('currentBalance').innerText = current.toFixed(0) + ' ' + currencySymbol;
-            document.getElementById('expectedBalance').innerText = expected.toFixed(0) + ' ' + currencySymbol;
-            document.getElementById('expectedWithdrawAmount').innerText = expected.toFixed(0) + ' ' + currencySymbol;
-            document.getElementById('currentBalanceDisplay').innerHTML = `${translations[settings.language].currentBalanceDisplay}: ${current.toFixed(0)} ${currencySymbol}`;
-            
-            // تحديث الملخص والرصيد إذا كانا ظاهرين
-            renderSummary();
-            renderBalance();
-        }
-
-        // ========== دوال العمل ==========
-        function getMonthKey(dateStr) { return dateStr.substring(0,7); }
-        
-        function updateDayField() {
-            let d = document.getElementById('workDate').value;
-            if (!d) return;
-            let dateObj = new Date(d + 'T12:00:00');
-            let dayName = dateObj.toLocaleDateString(settings.language === 'ar' ? 'ar-EG' : (settings.language === 'en' ? 'en-US' : 'ru-RU'), { weekday: 'long' });
-            document.getElementById('workDay').value = dayName;
-        }
-        
-        function computeHours() {
-            let start = document.getElementById('startTime').value;
-            let end = document.getElementById('endTime').value;
-            if (start && end) {
-                let [h1,m1] = start.split(':').map(Number);
-                let [h2,m2] = end.split(':').map(Number);
-                let mins = (h2*60+m2) - (h1*60+m1);
-                if (mins<0) mins += 24*60;
-                let hours = (mins/60).toFixed(2);
-                document.getElementById('totalHours').value = hours;
-                document.getElementById('amountEarned').value = (hours * settings.hourRate).toFixed(2);
-            }
-        }
-        
-        function saveDay() {
-            let date = document.getElementById('workDate').value;
-            let dayName = document.getElementById('workDay').value;
-            let start = document.getElementById('startTime').value;
-            let end = document.getElementById('endTime').value;
-            let hours = parseFloat(document.getElementById('totalHours').value) || 0;
-            let amount = parseFloat(document.getElementById('amountEarned').value) || 0;
-            if (!date || hours === 0) {
-                alert('أدخل بيانات صحيحة');
-                return;
-            }
-            let monthKey = getMonthKey(date);
-            let month = months.find(m => m.monthKey === monthKey);
-            if (!month) { 
-                month = { monthKey, days: [], withdraws: [] }; 
-                months.push(month); 
-            }
-            let dayIndex = month.days.findIndex(d => d.date === date);
-            let newDay = { id: Date.now(), date, dayName, start, end, hours, amount, paid: 0 };
-            if (dayIndex !== -1) { 
-                newDay.paid = month.days[dayIndex].paid || 0; 
-                month.days[dayIndex] = newDay; 
-            } else {
-                month.days.push(newDay);
-            }
-            month.days.sort((a,b)=>b.date.localeCompare(a.date));
-            if (saveData()) {
-                renderMonthCards(); 
-                renderWithdraws(); 
-                updateBalances();
-                // تفريغ الحقول
-                document.getElementById('workDate').value = new Date().toISOString().slice(0,10);
-                document.getElementById('startTime').value = '09:00';
-                document.getElementById('endTime').value = '17:00';
-                updateDayField();
-                computeHours();
-                showToast(translations[settings.language].added);
-            }
-        }
-
-        function deleteDay(monthKey, dayId) {
-            if (!confirm(translations[settings.language].confirmDelete)) return;
-            let month = months.find(m => m.monthKey === monthKey);
-            if (month) {
-                month.days = month.days.filter(d => d.id !== dayId);
-                if (saveData()) {
-                    renderMonthCards();
-                    updateBalances();
-                    showToast(translations[settings.language].saved);
-                }
-            }
-        }
-
-        function editDay(monthKey, dayId) {
-            let month = months.find(m => m.monthKey === monthKey);
-            if (!month) return;
-            let day = month.days.find(d => d.id == dayId);
-            if (!day) return;
-            
-            let newHours = prompt(translations[settings.language].edit, day.hours);
-            if (newHours) {
-                day.hours = parseFloat(newHours);
-                day.amount = day.hours * settings.hourRate;
-                if (saveData()) {
-                    renderMonthCards();
-                    updateBalances();
-                    showToast(translations[settings.language].saved);
-                }
-            }
-        }
-
-        // ========== عرض الشهور كبطاقات ==========
-        function renderMonthCards() {
-            let container = document.getElementById('monthsCardsContainer');
-            if (!container) return;
-            if (months.length === 0) { 
-                container.innerHTML = '<div class="note">' + translations[settings.language].noData + '</div>'; 
-                return; 
-            }
-            
-            let monthsList = months.map(m => m.monthKey).sort().reverse();
-            let filterHtml = '<span class="filter-chip active" data-month="all">' + translations[settings.language].filterAll + '</span>';
-            monthsList.forEach(m => filterHtml += `<span class="filter-chip" data-month="${m}">${m}</span>`);
-            document.getElementById('monthFilter').innerHTML = filterHtml;
-
-            let activeMonth = document.querySelector('#monthFilter .filter-chip.active')?.dataset.month || 'all';
-            let filtered = activeMonth === 'all' ? months : months.filter(m => m.monthKey === activeMonth);
-            
-            let t = translations[settings.language];
-            let html = '';
-            filtered.sort((a,b)=>b.monthKey.localeCompare(a.monthKey)).forEach(month => {
-                let totalHours = month.days.reduce((s,d)=>s+d.hours,0);
-                let totalAmount = month.days.reduce((s,d)=>s+d.amount,0);
-                let totalPaid = month.days.reduce((s,d)=>s+(d.paid||0),0);
-                
-                html += `<div class="month-card">`;
-                html += `<div class="month-header"><span class="month-title">${month.monthKey}</span></div>`;
-                html += `<div class="month-summary">
-                    <div class="summary-item"><div class="summary-label">${t.totalHours}</div><div class="summary-value">${totalHours.toFixed(1)}</div></div>
-                    <div class="summary-item"><div class="summary-label">${t.totalDue}</div><div class="summary-value">${totalAmount.toFixed(0)}</div></div>
-                    <div class="summary-item"><div class="summary-label">${t.totalPaid}</div><div class="summary-value">${totalPaid.toFixed(0)}</div></div>
-                    <div class="summary-item"><div class="summary-label">${t.remaining}</div><div class="summary-value">${(totalAmount - totalPaid).toFixed(0)}</div></div>
-                </div>`;
-                
-                month.days.sort((a,b)=>b.date.localeCompare(a.date)).forEach(day => {
-                    html += `<div class="day-card">
-                        <div class="day-header">
-                            <span class="day-date">${day.date}</span>
-                            <span class="day-hours">${day.hours} ${t.totalHours}</span>
-                        </div>
-                        <div class="day-amount">${day.amount.toFixed(0)} ₽ <span style="font-size:0.9rem;">(${t.totalPaid}: ${day.paid||0})</span></div>
-                        <div class="item-actions">
-                            <button class="edit-btn" onclick="editDay('${month.monthKey}', ${day.id})">✏️</button>
-                            <button class="delete-btn" onclick="deleteDay('${month.monthKey}', ${day.id})">🗑️</button>
-                        </div>
-                    </div>`;
-                });
-                html += `</div>`;
-            });
-            container.innerHTML = html;
-
-            document.querySelectorAll('#monthFilter .filter-chip').forEach(chip => {
-                chip.addEventListener('click', function() {
-                    document.querySelectorAll('#monthFilter .filter-chip').forEach(c => c.classList.remove('active'));
-                    this.classList.add('active');
-                    renderMonthCards();
-                });
-            });
-        }
-
-        // ========== عرض السحوبات ==========
-        function renderWithdraws() {
-            let container = document.getElementById('allWithdrawsContainer');
-            if (!container) return;
-            let allWithdraws = [];
-            months.forEach(m => m.withdraws.forEach(w => allWithdraws.push({ monthKey: m.monthKey, ...w })));
-            if (allWithdraws.length === 0) { 
-                container.innerHTML = '<div class="note">' + translations[settings.language].noData + '</div>'; 
-                return; 
-            }
-            allWithdraws.sort((a,b)=>b.date.localeCompare(a.date));
-            let html = '';
-            allWithdraws.forEach(w => {
-                html += `<div class="withdraw-item"><div><strong>${w.monthKey}</strong> | ${w.amount} ₽</div><div>${w.date}</div></div>`;
-            });
-            container.innerHTML = html;
-        }
-
-        // ========== إضافة سحب ==========
-        document.getElementById('addWithdrawBtn').onclick = () => {
-            let amount = parseFloat(document.getElementById('newWithdrawAmount').value);
-            let date = document.getElementById('newWithdrawDate').value;
-            if (!amount || amount <=0 || !date) {
-                alert('أدخل المبلغ والتاريخ');
-                return;
-            }
-            let monthKey = date.substring(0,7);
-            let month = months.find(m => m.monthKey === monthKey);
-            if (!month) {
-                month = { monthKey, days: [], withdraws: [] };
-                months.push(month);
-            }
-            month.withdraws.push({ id: Date.now(), date, amount });
-            if (saveData()) {
-                renderMonthCards(); 
-                renderWithdraws(); 
-                updateBalances();
-                document.getElementById('newWithdrawAmount').value = '';
-                showToast(translations[settings.language].withdrawSuccess);
-            }
-        };
-
-        // ========== دوال المصاريف ==========
-        function renderExpenses(filterCat = 'all') {
-            let container = document.getElementById('expensesList');
-            if (!container) return;
-            let filtered = filterCat === 'all' ? expenses : expenses.filter(e => e.category === filterCat);
-            if (filtered.length === 0) { 
-                container.innerHTML = '<div class="note">' + translations[settings.language].noData + '</div>'; 
-                return; 
-            }
-            let html = '';
-            filtered.sort((a,b)=>b.date.localeCompare(a.date)).forEach(e => {
-                html += `<div class="expense-item">
-                    <div><strong>${e.desc}</strong> (${e.category})<br>${e.date}</div>
-                    <div style="font-weight:700;">${e.amount} ₽</div>
-                    <div class="item-actions">
-                        <button class="delete-btn" onclick="deleteExpense(${e.id})">🗑️</button>
-                    </div>
-                </div>`;
-            });
-            container.innerHTML = html;
-        }
-
-        window.deleteExpense = (id) => {
-            if (!confirm(translations[settings.language].confirmDelete)) return;
-            expenses = expenses.filter(e => e.id !== id);
-            if (saveData()) {
-                renderExpenses();
-                updateBalances();
-                showToast(translations[settings.language].saved);
-            }
-        };
-
-        document.getElementById('saveExpenseBtn').onclick = () => {
-            let desc = document.getElementById('expenseDesc').value;
-            let amount = parseFloat(document.getElementById('expenseAmount').value);
-            let date = document.getElementById('expenseDate').value;
-            let cat = document.getElementById('expenseCategory').value;
-            let isFuture = document.getElementById('expenseIsFuture').value;
-            if (!desc || !amount || !date) {
-                alert('أكمل البيانات');
-                return;
-            }
-            
-            expenses.push({ id: Date.now(), desc, amount, date, category: cat });
-            
-            if (isFuture === 'yes') {
-                futureItems.push({
-                    id: Date.now() + 1,
-                    name: desc,
-                    amount: amount,
-                    category: cat,
-                    importance: 'متوسطة',
-                    deadlineDate: date,
-                    deadlineDisplay: date,
-                    executionDate: date,
-                    timeNeeded: 'غير محدد'
-                });
-            }
-            
-            if (saveData()) {
-                renderExpenses(); 
-                renderFuture(); 
-                updateBalances(); 
-                renderTimeline(); 
-                renderTimelineChart();
-                // تفريغ الحقول
-                document.getElementById('expenseDesc').value = '';
-                document.getElementById('expenseAmount').value = '';
-                showToast(translations[settings.language].added);
-            }
-        };
-
-        document.querySelectorAll('#expenseFilter .filter-chip').forEach(chip => {
-            chip.addEventListener('click', function() {
-                document.querySelectorAll('#expenseFilter .filter-chip').forEach(c => c.classList.remove('active'));
-                this.classList.add('active');
-                renderExpenses(this.dataset.cat);
-            });
-        });
-
-        // ========== دوال المشتريات المستقبلية ==========
-        function renderFuture() {
-            let container = document.getElementById('futureList');
-            let planContainer = document.getElementById('planFutureList');
-            if (!container || !planContainer) return;
-            
-            let total = futureItems.reduce((s,f) => s + f.amount, 0);
-            let count = futureItems.length;
-            let highCount = futureItems.filter(f => f.importance === 'عالية').length;
-            document.getElementById('futureSummary').innerHTML = `
-                <span>💰 ${total} ₽</span>
-                <span>📦 ${count}</span>
-                <span>🔴 ${highCount}</span>
-            `;
-
-            if (futureItems.length === 0) {
-                container.innerHTML = '<div class="note">' + translations[settings.language].noData + '</div>';
-                planContainer.innerHTML = '<div class="note">' + translations[settings.language].noData + '</div>';
-                return;
-            }
-            let html = '';
-            futureItems.sort((a,b)=> (a.deadlineDate || a.date || '').localeCompare(b.deadlineDate || b.date || '')).forEach(f => {
-                let impClass = f.importance === 'عالية' ? 'importance-high' : (f.importance === 'متوسطة' ? 'importance-medium' : 'importance-low');
-                html += `<div class="future-item ${impClass}">
-                    <div><strong>${f.name}</strong><br><span class="badge">${f.category}</span><br>⏰ ${f.executionDate || ''} (${f.timeNeeded || ''})</div>
-                    <div>${f.amount} ₽</div>
-                    <div class="item-actions">
-                        <button class="delete-btn" onclick="deleteFuture(${f.id})">🗑️</button>
-                    </div>
-                </div>`;
-            });
-            container.innerHTML = html;
-            planContainer.innerHTML = html;
-        }
-
-        window.deleteFuture = (id) => {
-            if (!confirm(translations[settings.language].confirmDelete)) return;
-            futureItems = futureItems.filter(f => f.id !== id);
-            if (saveData()) {
-                renderFuture();
-                updateBalances();
-                showToast(translations[settings.language].saved);
-            }
-        };
-
-        document.getElementById('saveFutureBtn').onclick = () => {
-            let name = document.getElementById('futureName').value;
-            let amount = parseFloat(document.getElementById('futureAmount').value);
-            let category = document.getElementById('futureCategory').value;
-            let importance = document.getElementById('futureImportance').value;
-            let executionDate = document.getElementById('futureExecutionDate').value;
-            let timeNeeded = document.getElementById('futureTimeNeeded').value;
-            if (!name || !amount || !executionDate) {
-                alert('أكمل البيانات');
-                return;
-            }
-            
-            futureItems.push({ 
-                id: Date.now(), 
-                name, amount, category, importance, 
-                executionDate, timeNeeded,
-                deadlineDate: executionDate,
-                deadlineDisplay: executionDate + ' (' + timeNeeded + ')'
-            });
-            if (saveData()) {
-                renderFuture(); 
-                updateBalances(); 
-                renderTimeline(); 
-                renderTimelineChart();
-                // تفريغ الحقول
-                document.getElementById('futureName').value = '';
-                document.getElementById('futureAmount').value = '';
-                document.getElementById('futureTimeNeeded').value = '';
-                showToast(translations[settings.language].added);
-            }
-        };
-
-        // ========== دوال الديون مع خصم من الرصيد ==========
-        function renderDebts() {
-            let container = document.getElementById('debtsList');
-            if (!container) return;
-            if (debts.length === 0) { 
-                container.innerHTML = '<div class="note">' + translations[settings.language].noData + '</div>'; 
-                return; 
-            }
-            let html = '';
-            debts.sort((a,b)=>b.dueDate.localeCompare(a.dueDate)).forEach(d => {
-                html += `<div class="debt-item">
-                    <div><strong>${d.name}</strong> (${d.type === 'لي' ? translations[settings.language].debtOnMe : translations[settings.language].debtForMe})<br>${d.dueDate}</div>
-                    <div>${d.amount} ₽</div>
-                    <div class="item-actions">
-                        <button class="delete-btn" onclick="deleteDebt(${d.id})">🗑️</button>
-                    </div>
-                </div>`;
-            });
-            container.innerHTML = html;
-        }
-
-        window.deleteDebt = (id) => {
-            if (!confirm(translations[settings.language].confirmDelete)) return;
-            debts = debts.filter(d => d.id !== id);
-            if (saveData()) {
-                renderDebts();
-                updateBalances();
-                showToast(translations[settings.language].saved);
-            }
-        };
-
-        document.getElementById('saveDebtBtn').onclick = () => {
-            let name = document.getElementById('debtName').value;
-            let amount = parseFloat(document.getElementById('debtAmount').value);
-            let dueDate = document.getElementById('debtDueDate').value;
-            let type = document.getElementById('debtType').value;
-            if (!name || !amount || !dueDate) {
-                alert('أكمل البيانات');
-                return;
-            }
-            debts.push({ id: Date.now(), name, amount, dueDate, type });
-            if (saveData()) {
-                renderDebts(); 
-                updateBalances(); 
-                renderTimeline(); 
-                renderTimelineChart();
-                // تفريغ الحقول
-                document.getElementById('debtName').value = '';
-                document.getElementById('debtAmount').value = '';
-                showToast(translations[settings.language].added);
-            }
-        };
-
-        // ========== دوال المهام مع الفلتر والحذف والتعديل ==========
-        function renderTasks(filterStatus = 'all') {
-            let container = document.getElementById('tasksList');
-            if (!container) return;
-            
-            let filteredTasks = tasks;
-            if (filterStatus !== 'all') {
-                filteredTasks = tasks.filter(t => t.status === filterStatus);
-            }
-            
-            if (filteredTasks.length === 0) { 
-                container.innerHTML = '<div class="note">' + translations[settings.language].noData + '</div>'; 
-                return; 
-            }
-            
-            let t = translations[settings.language];
-            let html = '';
-            filteredTasks.sort((a,b)=> (a.executionDate || '').localeCompare(b.executionDate || '')).forEach(task => {
-                let status = task.status || 'waiting';
-                let statusClass = status === 'completed' ? 'status-completed' : (status === 'pending' ? 'status-pending' : 'status-waiting');
-                let statusText = status === 'completed' ? t.completed : (status === 'pending' ? t.pending : t.waiting);
-                
-                html += `<div class="task-item">
-                    <div style="flex: 1;">
-                        <strong>${task.name}</strong><br>
-                        ${task.priceType === 'paid' ? task.price + ' ₽' : t.taskFree}<br>
-                        ⏰ ${task.executionDate || ''} (${task.timeNeeded || ''})
-                    </div>
-                    <div style="display: flex; flex-direction: column; gap: 5px;">
-                        <span class="status-badge ${statusClass}" onclick="toggleTaskStatus('${task.id}')">${statusText}</span>
-                        <div class="item-actions">
-                            <button class="edit-btn" onclick="editTask('${task.id}')">✏️</button>
-                            <button class="delete-btn" onclick="deleteTask('${task.id}')">🗑️</button>
-                        </div>
-                    </div>
-                </div>`;
-            });
-            container.innerHTML = html;
-        }
-
-        window.toggleTaskStatus = (taskId) => {
-            let task = tasks.find(t => t.id == taskId);
-            if (task) {
-                let statuses = ['waiting', 'pending', 'completed'];
-                let current = task.status || 'waiting';
-                let next = statuses[(statuses.indexOf(current) + 1) % 3];
-                task.status = next;
-                if (saveData()) {
-                    let activeFilter = document.querySelector('#taskFilter .filter-chip.active')?.dataset.taskStatus || 'all';
-                    renderTasks(activeFilter);
-                    showToast(translations[settings.language].saved);
-                }
-            }
-        };
-
-        window.editTask = (taskId) => {
-            let task = tasks.find(t => t.id == taskId);
-            if (task) {
-                let newName = prompt(translations[settings.language].edit, task.name);
-                if (newName) {
-                    task.name = newName;
-                    if (saveData()) {
-                        let activeFilter = document.querySelector('#taskFilter .filter-chip.active')?.dataset.taskStatus || 'all';
-                        renderTasks(activeFilter);
-                        showToast(translations[settings.language].saved);
-                    }
-                }
-            }
-        };
-
-        window.deleteTask = (taskId) => {
-            if (!confirm(translations[settings.language].confirmDelete)) return;
-            tasks = tasks.filter(t => t.id != taskId);
-            if (saveData()) {
-                let activeFilter = document.querySelector('#taskFilter .filter-chip.active')?.dataset.taskStatus || 'all';
-                renderTasks(activeFilter);
-                renderTimeline();
-                renderTimelineChart();
-                showToast(translations[settings.language].saved);
-            }
-        };
-
-        document.getElementById('saveTaskBtn').onclick = () => {
-            let name = document.getElementById('taskName').value;
-            let priceType = document.getElementById('taskPriceType').value;
-            let price = parseFloat(document.getElementById('taskPrice').value) || 0;
-            let executionDate = document.getElementById('taskExecutionDate').value;
-            let timeNeeded = document.getElementById('taskTimeNeeded').value;
-            if (!name || !executionDate) {
-                alert('أكمل البيانات');
-                return;
-            }
-            
-            tasks.push({ 
-                id: Date.now(), 
-                name, 
-                priceType, 
-                price, 
-                executionDate, 
-                timeNeeded,
-                deadlineDate: executionDate,
-                status: 'waiting'
-            });
-            if (saveData()) {
-                renderTasks(); 
-                renderTimeline(); 
-                renderTimelineChart();
-                // تفريغ الحقول
-                document.getElementById('taskName').value = '';
-                document.getElementById('taskPrice').value = '';
-                document.getElementById('taskTimeNeeded').value = '';
-                showToast(translations[settings.language].added);
-            }
-        };
-
-        document.querySelectorAll('#taskFilter .filter-chip').forEach(chip => {
-            chip.addEventListener('click', function() {
-                document.querySelectorAll('#taskFilter .filter-chip').forEach(c => c.classList.remove('active'));
-                this.classList.add('active');
-                renderTasks(this.dataset.taskStatus);
-            });
-        });
-
-        // ========== دوال المخطط الزمني ==========
-        function renderTimeline() {
-            let container = document.getElementById('timelineList');
-            if (!container) return;
-            let events = [];
-            let t = translations[settings.language];
-            
-            tasks.forEach(task => {
-                events.push({ 
-                    id: 'task_'+task.id, 
-                    date: task.executionDate || '', 
-                    text: `✅ ${task.name} (${task.timeNeeded || ''})`, 
-                    type: 'task',
-                    status: task.status || 'waiting'
-                });
-            });
-            futureItems.forEach(f => {
-                events.push({ 
-                    id: 'future_'+f.id, 
-                    date: f.executionDate || f.date || '', 
-                    text: `🛒 ${f.name} - ${f.amount} ₽ (${f.timeNeeded || ''})`, 
-                    type: 'future',
-                    status: timelineStatus['future_'+f.id] || 'waiting'
-                });
-            });
-            debts.forEach(d => {
-                events.push({ 
-                    id: 'debt_'+d.id, 
-                    date: d.dueDate, 
-                    text: `💳 ${d.name} - ${d.amount} ₽`, 
-                    type: 'debt',
-                    status: timelineStatus['debt_'+d.id] || 'waiting'
-                });
-            });
-            
-            events.sort((a,b) => a.date.localeCompare(b.date));
-            if (events.length === 0) { 
-                container.innerHTML = '<div class="note">' + t.noData + '</div>'; 
-                return; 
-            }
-            
-            let html = '';
-            events.forEach(e => {
-                let statusClass = e.status === 'completed' ? 'status-completed' : (e.status === 'pending' ? 'status-pending' : 'status-waiting');
-                let statusText = e.status === 'completed' ? t.completed : (e.status === 'pending' ? t.pending : t.waiting);
-                
-                html += `<div class="timeline-card">
-                    <div class="timeline-header">
-                        <span class="timeline-date">${e.date}</span>
-                        <span class="status-badge ${statusClass}" onclick="toggleStatus('${e.id}')">${statusText}</span>
-                    </div>
-                    <div>${e.text}</div>
-                </div>`;
-            });
-            container.innerHTML = html;
-        }
-
-        function renderTimelineStats() {
-            let container = document.getElementById('statsContainer');
-            if (!container) return;
-            
-            let totalFuture = futureItems.reduce((s, f) => s + f.amount, 0);
-            let totalDebts = debts.reduce((s, d) => s + d.amount, 0);
-            let totalTasks = tasks.filter(t => t.priceType === 'paid').reduce((s, t) => s + t.price, 0);
-            
-            let html = `
-                <div style="display:flex; flex-direction:column; gap:15px;">
-                    <div style="display:flex; justify-content:space-between;">
-                        <span>🛒 ${translations[settings.language].addFutureTitle}:</span>
-                        <strong>${totalFuture} ₽</strong>
-                    </div>
-                    <div style="display:flex; justify-content:space-between;">
-                        <span>💳 ${translations[settings.language].expensesDebtsTab}:</span>
-                        <strong>${totalDebts} ₽</strong>
-                    </div>
-                    <div style="display:flex; justify-content:space-between;">
-                        <span>✅ ${translations[settings.language].planTasksTab}:</span>
-                        <strong>${totalTasks} ₽</strong>
-                    </div>
-                    <div style="display:flex; justify-content:space-between; border-top:2px solid #eee; padding-top:10px;">
-                        <span>💰 ${translations[settings.language].expectedBalanceLabel}:</span>
-                        <strong>${totalFuture + totalDebts + totalTasks} ₽</strong>
-                    </div>
+    
+    <div id="monthlyReportModal" class="modal">
+        <div class="modal-content report-modal">
+            <div class="modal-header">
+                <h3><i class="fas fa-chart-pie"></i> Отчет о расходах</h3>
+                <span class="close-modal closeReport">&times;</span>
+            </div>
+            <div class="report-month">
+                <button class="month-nav" id="prevMonth"><i class="fas fa-chevron-right"></i></button>
+                <span id="reportMonthYear">Январь 2024</span>
+                <button class="month-nav" id="nextMonth"><i class="fas fa-chevron-left"></i></button>
+            </div>
+            <div class="report-summary">
+                <div class="report-item">
+                    <span>Всего расходов:</span>
+                    <strong id="reportTotal">0</strong>
                 </div>
-            `;
-            container.innerHTML = html;
-        }
-
-        function renderTimelinePlan() {
-            let container = document.getElementById('planTimelineList');
-            if (!container) return;
-            
-            let events = [];
-            
-            futureItems.forEach(f => {
-                events.push({
-                    date: f.executionDate || f.date,
-                    text: `🛒 ${f.name} - ${f.amount} ₽ (${f.timeNeeded || ''})`,
-                    type: 'future'
-                });
-            });
-            
-            tasks.forEach(t => {
-                events.push({
-                    date: t.executionDate,
-                    text: `✅ ${t.name} (${t.timeNeeded || ''})`,
-                    type: 'task'
-                });
-            });
-            
-            events.sort((a,b) => a.date.localeCompare(b.date));
-            
-            if (events.length === 0) {
-                container.innerHTML = '<div class="note">' + translations[settings.language].noData + '</div>';
-                return;
-            }
-            
-            let html = '';
-            events.forEach(e => {
-                html += `<div class="timeline-card">
-                    <div class="timeline-header">
-                        <span class="timeline-date">${e.date}</span>
-                    </div>
-                    <div>${e.text}</div>
-                </div>`;
-            });
-            container.innerHTML = html;
-        }
-
-        function renderTimelineChart() {
-            let canvas = document.getElementById('timelineChartCanvas');
-            if (!canvas) return;
-            
-            let ctx = canvas.getContext('2d');
-            
-            // تجميع البيانات حسب الشهر
-            let monthlyData = {};
-            
-            futureItems.forEach(f => {
-                let month = (f.executionDate || f.date || '').substring(0,7);
-                if (month) {
-                    monthlyData[month] = (monthlyData[month] || 0) + f.amount;
-                }
-            });
-            
-            tasks.filter(t => t.priceType === 'paid').forEach(t => {
-                let month = (t.executionDate || '').substring(0,7);
-                if (month) {
-                    monthlyData[month] = (monthlyData[month] || 0) + t.price;
-                }
-            });
-            
-            debts.forEach(d => {
-                let month = d.dueDate.substring(0,7);
-                if (month) {
-                    monthlyData[month] = (monthlyData[month] || 0) + d.amount;
-                }
-            });
-            
-            let sortedMonths = Object.keys(monthlyData).sort();
-            let amounts = sortedMonths.map(m => monthlyData[m]);
-            
-            // تدمير الرسم البياني السابق إذا كان موجوداً
-            if (window.timelineChart) {
-                window.timelineChart.destroy();
-            }
-            
-            // إنشاء رسم بياني جديد
-            window.timelineChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: sortedMonths,
-                    datasets: [{
-                        label: 'المبالغ المتوقعة',
-                        data: amounts,
-                        borderColor: '#1f344b',
-                        backgroundColor: 'rgba(31, 52, 75, 0.1)',
-                        tension: 0.4,
-                        fill: true
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: false
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    return context.raw + ' ₽';
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                callback: function(value) {
-                                    return value + ' ₽';
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        // ========== دوال الملخص ==========
-        function renderSummary() {
-            // المستحق من ساعات العمل
-            let totalDue = 0;
-            let totalHours = 0;
-            months.forEach(m => {
-                m.days.forEach(d => {
-                    totalDue += d.amount;
-                    totalHours += d.hours;
-                });
-            });
-
-            // إجمالي السحوبات
-            let totalWithdraws = 0;
-            let withdrawsCount = 0;
-            months.forEach(m => {
-                m.withdraws.forEach(w => {
-                    totalWithdraws += w.amount;
-                    withdrawsCount++;
-                });
-            });
-
-            // المصاريف
-            let totalExpenses = expenses.reduce((s, e) => s + e.amount, 0);
-            let expensesCount = expenses.length;
-            
-            // المستقبليات
-            let totalFuture = futureItems.reduce((s, f) => s + f.amount, 0);
-            let futureCount = futureItems.length;
-            
-            // المهام المدفوعة
-            let totalTasks = tasks.filter(t => t.priceType === 'paid').reduce((s, t) => s + t.price, 0);
-            let tasksCount = tasks.length;
-
-            // الديون
-            let totalDebts = debts.reduce((s, d) => s + d.amount, 0);
-            let debtsCount = debts.length;
-
-            let currencySymbol = '₽';
-
-            document.getElementById('summaryCurrentBalance').innerText = document.getElementById('currentBalance').innerText;
-            document.getElementById('summaryExpectedBalance').innerText = document.getElementById('expectedBalance').innerText;
-            
-            document.getElementById('summaryTotalHours').innerText = totalHours.toFixed(1);
-            document.getElementById('summaryTotalDue').innerText = totalDue.toFixed(0) + ' ₽ مستحق';
-            
-            document.getElementById('summaryTotalWithdraws').innerText = totalWithdraws.toFixed(0) + ' ₽';
-            document.getElementById('summaryWithdrawsCount').innerText = withdrawsCount + ' عملية';
-            
-            document.getElementById('summaryTotalExpenses').innerText = totalExpenses.toFixed(0) + ' ₽';
-            document.getElementById('summaryExpensesCount').innerText = expensesCount + ' مصروف';
-            
-            document.getElementById('summaryTotalFuture').innerText = totalFuture.toFixed(0) + ' ₽';
-            document.getElementById('summaryFutureCount').innerText = futureCount + ' عنصر';
-            
-            document.getElementById('summaryTotalDebts').innerText = totalDebts.toFixed(0) + ' ₽';
-            document.getElementById('summaryDebtsCount').innerText = debtsCount + ' دين';
-            
-            document.getElementById('summaryTotalTasks').innerText = tasksCount;
-            document.getElementById('summaryTasksCount').innerText = tasksCount + ' مهمة';
-            
-            // رسم بياني دائري للمصاريف
-            let ctx = document.getElementById('summaryChart').getContext('2d');
-            
-            // تجميع المصاريف حسب التصنيف
-            let categoryTotals = {};
-            expenses.forEach(e => {
-                categoryTotals[e.category] = (categoryTotals[e.category] || 0) + e.amount;
-            });
-            
-            let categories = Object.keys(categoryTotals);
-            let amounts = Object.values(categoryTotals);
-            
-            if (window.summaryChart) {
-                window.summaryChart.destroy();
-            }
-            
-            window.summaryChart = new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: categories,
-                    datasets: [{
-                        data: amounts,
-                        backgroundColor: [
-                            '#ff4fa3',
-                            '#ff8ac6',
-                            '#ffb3d9',
-                            '#ffd9e6',
-                            '#ffe6f0'
-                        ]
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom'
-                        }
-                    }
-                }
-            });
-        }
-
-        // ========== دوال الرصيد ==========
-        function renderBalance() {
-            // المستحق من ساعات العمل
-            let totalDue = 0;
-            months.forEach(m => {
-                m.days.forEach(d => totalDue += d.amount);
-            });
-
-            // إجمالي السحوبات
-            let totalWithdraws = 0;
-            months.forEach(m => {
-                m.withdraws.forEach(w => totalWithdraws += w.amount);
-            });
-
-            // المصاريف
-            let totalExpenses = expenses.reduce((s, e) => s + e.amount, 0);
-            
-            // المستقبليات
-            let totalFuture = futureItems.reduce((s, f) => s + f.amount, 0);
-            
-            // المهام المدفوعة
-            let totalTasks = tasks.filter(t => t.priceType === 'paid').reduce((s, t) => s + t.price, 0);
-            
-            // الديون
-            let totalDebts = debts.reduce((s, d) => s + d.amount, 0);
-
-            let currencySymbol = '₽';
-
-            document.getElementById('balanceAmount').innerText = document.getElementById('currentBalance').innerText;
-            document.getElementById('balanceDueAmount').innerText = totalDue.toFixed(0) + ' ₽';
-            document.getElementById('balanceWithdrawsAmount').innerText = totalWithdraws.toFixed(0) + ' ₽';
-            document.getElementById('balanceExpensesAmount').innerText = totalExpenses.toFixed(0) + ' ₽';
-            document.getElementById('balanceFutureAmount').innerText = totalFuture.toFixed(0) + ' ₽';
-            document.getElementById('balanceDebtsAmount').innerText = totalDebts.toFixed(0) + ' ₽';
-            document.getElementById('balanceTasksAmount').innerText = totalTasks.toFixed(0) + ' ₽';
-            
-            // عرض سجل تعديلات الرصيد
-            let historyContainer = document.getElementById('balanceHistoryList');
-            if (balanceAdjustments.length === 0) {
-                historyContainer.innerHTML = '<div class="note">' + translations[settings.language].noData + '</div>';
-            } else {
-                let html = '';
-                balanceAdjustments.sort((a,b) => b.date.localeCompare(a.date)).forEach(adj => {
-                    html += `<div class="balance-item">
-                        <div><strong>${adj.type === 'add' ? '➕' : '➖'} ${adj.amount} ₽</strong><br>${adj.reason || ''}</div>
-                        <div>${adj.date}</div>
-                    </div>`;
-                });
-                historyContainer.innerHTML = html;
-            }
-        }
-
-        document.getElementById('addBalanceBtn').onclick = () => {
-            let amount = parseFloat(document.getElementById('balanceAmountInput').value);
-            let type = document.getElementById('balanceType').value;
-            let reason = document.getElementById('balanceReason').value;
-            let date = new Date().toISOString().slice(0,10);
-            
-            if (!amount || amount <= 0) {
-                alert('أدخل مبلغ صحيح');
-                return;
-            }
-            
-            balanceAdjustments.push({
-                id: Date.now(),
-                amount,
-                type,
-                reason,
-                date
-            });
-            
-            if (saveData()) {
-                updateBalances();
-                renderBalance();
-                document.getElementById('balanceAmountInput').value = '';
-                document.getElementById('balanceReason').value = '';
-                showToast(translations[settings.language].added);
-            }
-        };
-
-        window.toggleStatus = (id) => {
-            let statuses = ['waiting', 'pending', 'completed'];
-            let current = timelineStatus[id] || 'waiting';
-            let next = statuses[(statuses.indexOf(current) + 1) % 3];
-            timelineStatus[id] = next;
-            saveData();
-            renderTimeline();
-        };
-
-        window.deleteDay = deleteDay;
-        window.editDay = editDay;
-
-        // ========== تطبيق اللغة ==========
-        function applyLanguage() {
-            let t = translations[settings.language] || translations.ar;
-            
-            document.getElementById('mainTitle').innerText = t.mainTitle;
-            document.getElementById('userName').innerText = settings.userName || t.userName;
-            document.getElementById('currentBalanceLabel').innerText = t.currentBalanceLabel;
-            document.getElementById('expectedBalanceLabel').innerText = t.expectedBalanceLabel;
-            document.getElementById('drawerSummary').innerHTML = `📊 ${t.drawerSummary.split(' ')[1] || t.drawerSummary}`;
-            document.getElementById('drawerBalance').innerHTML = `💰 ${t.drawerBalance.split(' ')[1] || t.drawerBalance}`;
-            document.getElementById('drawerWork').innerHTML = `⏳ ${t.drawerWork.split(' ')[1] || t.drawerWork}`;
-            document.getElementById('drawerExpenses').innerHTML = `💰 ${t.drawerExpenses.split(' ')[1] || t.drawerExpenses}`;
-            document.getElementById('drawerPlan').innerHTML = `📅 ${t.drawerPlan.split(' ')[1] || t.drawerPlan}`;
-            document.getElementById('drawerTimeline').innerHTML = `📊 ${t.drawerTimeline.split(' ')[1] || t.drawerTimeline}`;
-            document.getElementById('drawerSettings').innerHTML = `⚙️ ${t.drawerSettings.split(' ')[1] || t.drawerSettings}`;
-            document.getElementById('drawerAbout').innerHTML = `ℹ️ ${t.drawerAbout.split(' ')[1] || t.drawerAbout}`;
-            
-            document.getElementById('workDailyTab').innerText = t.workDailyTab;
-            document.getElementById('workMonthsTab').innerText = t.workMonthsTab;
-            document.getElementById('workWithdrawsTab').innerText = t.workWithdrawsTab;
-            
-            document.getElementById('expensesAllTab').innerText = t.expensesAllTab;
-            document.getElementById('expensesFutureTab').innerText = t.expensesFutureTab;
-            document.getElementById('expensesDebtsTab').innerText = t.expensesDebtsTab;
-            
-            document.getElementById('planPurchasesTab').innerText = t.planPurchasesTab;
-            document.getElementById('planTasksTab').innerText = t.planTasksTab;
-            
-            document.getElementById('timelineAllTab').innerText = t.timelineAllTab;
-            document.getElementById('timelineStatsTab').innerText = t.timelineStatsTab;
-            document.getElementById('timelinePlanTab').innerText = t.timelinePlanTab;
-            document.getElementById('timelineChartTab').innerText = t.timelineChartTab;
-            
-            document.getElementById('addDailyTitle').innerText = t.addDailyTitle;
-            document.getElementById('monthsTitle').innerText = t.monthsTitle;
-            document.getElementById('withdrawsTitle').innerText = t.withdrawsTitle;
-            document.getElementById('expectedWithdrawLabel').innerText = t.expectedWithdrawLabel;
-            document.getElementById('addWithdrawTitle').innerText = t.addWithdrawTitle;
-            document.getElementById('addExpenseTitle').innerText = t.addExpenseTitle;
-            document.getElementById('filterAll').innerText = t.filterAll;
-            document.getElementById('filterFood').innerText = t.filterFood;
-            document.getElementById('filterTransport').innerText = t.filterTransport;
-            document.getElementById('filterBills').innerText = t.filterBills;
-            document.getElementById('filterOther').innerText = t.filterOther;
-            document.getElementById('addFutureTitle').innerText = t.addFutureTitle;
-            document.getElementById('addDebtTitle').innerText = t.addDebtTitle;
-            document.getElementById('debtOnMe').innerText = t.debtOnMe;
-            document.getElementById('debtForMe').innerText = t.debtForMe;
-            document.getElementById('addTaskTitle').innerText = t.addTaskTitle;
-            document.getElementById('taskPaid').innerText = t.taskPaid;
-            document.getElementById('taskFree').innerText = t.taskFree;
-            document.getElementById('timelineTitle').innerText = t.timelineTitle;
-            document.getElementById('settingsTitle').innerText = t.settingsTitle;
-            document.getElementById('aboutTitle').innerText = t.aboutTitle;
-            document.getElementById('appName').innerText = t.appName;
-            document.getElementById('appVersion').innerText = t.appVersion;
-            document.getElementById('aboutDesc').innerText = t.aboutDesc;
-            document.getElementById('aboutDev').innerText = t.aboutDev;
-            
-            document.getElementById('langAr').innerText = t.langAr;
-            document.getElementById('langEn').innerText = t.langEn;
-            document.getElementById('langRu').innerText = t.langRu;
-            document.getElementById('currencyLabel').innerText = t.currencyLabel;
-            document.getElementById('hourRateLabel').innerText = t.hourRateLabel;
-            document.getElementById('dateFormatLabel').innerText = t.dateFormatLabel;
-            document.getElementById('saveSettingsBtn').innerText = t.saveSettingsBtn;
-            document.getElementById('saveWorkBtn').innerText = t.saveWorkBtn;
-            document.getElementById('addWithdrawBtn').innerText = t.withdrawBtn;
-            document.getElementById('saveExpenseBtn').innerText = t.addBtn;
-            document.getElementById('saveFutureBtn').innerText = t.addBtn;
-            document.getElementById('saveDebtBtn').innerText = t.addBtn;
-            document.getElementById('saveTaskBtn').innerText = t.addBtn;
-            
-            document.getElementById('summaryTitle').innerText = t.summaryTitle;
-            document.getElementById('summaryWorkHours').innerText = t.summaryWorkHours;
-            document.getElementById('summaryWithdraws').innerText = t.summaryWithdraws;
-            document.getElementById('summaryExpenses').innerText = t.summaryExpenses;
-            document.getElementById('summaryFuture').innerText = t.summaryFuture;
-            document.getElementById('summaryDebts').innerText = t.summaryDebts;
-            document.getElementById('summaryTasks').innerText = t.summaryTasks;
-            document.getElementById('summaryChartTitle').innerText = t.summaryChartTitle;
-            
-            document.getElementById('balanceTitle').innerText = t.balanceTitle;
-            document.getElementById('currentBalanceDetail').innerText = t.currentBalanceDetail;
-            document.getElementById('balanceDue').innerText = t.balanceDue;
-            document.getElementById('balanceWithdraws').innerText = t.balanceWithdraws;
-            document.getElementById('balanceExpenses').innerText = t.balanceExpenses;
-            document.getElementById('balanceFuture').innerText = t.balanceFuture;
-            document.getElementById('balanceDebts').innerText = t.balanceDebts;
-            document.getElementById('balanceTasks').innerText = t.balanceTasks;
-            document.getElementById('addBalanceTitle').innerText = t.addBalanceTitle;
-            document.getElementById('balanceAdd').innerText = t.balanceAdd;
-            document.getElementById('balanceSubtract').innerText = t.balanceSubtract;
-            document.getElementById('balanceHistoryTitle').innerText = t.balanceHistoryTitle;
-            document.getElementById('balanceReason').placeholder = t.balanceReason;
-
-            document.getElementById('newWithdrawAmount').placeholder = t.amountPlaceholder;
-            document.getElementById('expenseDesc').placeholder = t.addExpenseTitle;
-            document.getElementById('expenseAmount').placeholder = t.amountPlaceholder;
-            document.getElementById('futureName').placeholder = t.addFutureTitle;
-            document.getElementById('futureAmount').placeholder = t.amountPlaceholder;
-            document.getElementById('futureExecutionDate').placeholder = t.executionDatePlaceholder;
-            document.getElementById('futureTimeNeeded').placeholder = t.timeNeededPlaceholder;
-            document.getElementById('debtName').placeholder = t.addDebtTitle;
-            document.getElementById('debtAmount').placeholder = t.amountPlaceholder;
-            document.getElementById('taskName').placeholder = t.addTaskTitle;
-            document.getElementById('taskPrice').placeholder = t.amountPlaceholder;
-            document.getElementById('taskExecutionDate').placeholder = t.executionDatePlaceholder;
-            document.getElementById('taskTimeNeeded').placeholder = t.timeNeededPlaceholder;
-            document.getElementById('balanceAmountInput').placeholder = t.amountPlaceholder;
-
-            updateBalances();
-            renderMonthCards();
-            renderWithdraws();
-            renderExpenses();
-            renderFuture();
-            renderDebts();
-            renderTasks();
-            renderTimeline();
-            renderTimelineStats();
-            renderTimelinePlan();
-            renderTimelineChart();
-            renderSummary();
-            renderBalance();
-        }
-
-        // ========== إعادة ضبط التطبيق ==========
-        document.getElementById('resetAppBtn').onclick = () => {
-            if (confirm(translations[settings.language].resetConfirm)) {
-                localStorage.clear();
-                showToast(translations[settings.language].resetSuccess);
-                setTimeout(() => {
-                    location.reload();
-                }, 1500);
-            }
-        };
-
-        // ========== إعدادات ==========
-        document.getElementById('saveSettingsBtn').onclick = () => {
-            settings.hourRate = parseFloat(document.getElementById('hourRate').value) || 50;
-            settings.currency = document.getElementById('currencySelect').value;
-            settings.dateFormat = document.getElementById('dateFormat').value;
-            if (saveData()) {
-                applyLanguage();
-                computeHours();
-                updateBalances();
-                renderMonthCards();
-                showToast(translations[settings.language].saved);
-            }
-        };
-
-        document.querySelectorAll('[data-lang]').forEach(el => {
-            el.addEventListener('click', function() {
-                settings.language = this.dataset.lang;
-                applyLanguage();
-                saveData();
-                document.querySelectorAll('[data-lang]').forEach(e => e.classList.remove('active'));
-                this.classList.add('active');
-                showToast(translations[settings.language].saved);
-            });
-        });
-
-        // ========== القائمة الجانبية ==========
-        const menuBtn = document.getElementById('menuBtn');
-        const drawer = document.getElementById('drawer');
-        const overlay = document.getElementById('drawerOverlay');
-        function closeDrawer() { drawer.classList.remove('open'); overlay.classList.remove('show'); }
-        menuBtn.onclick = () => { drawer.classList.add('open'); overlay.classList.add('show'); };
-        overlay.onclick = closeDrawer;
-
-        document.querySelectorAll('.drawer-item').forEach(item => {
-            item.addEventListener('click', function(e) {
-                document.querySelectorAll('.drawer-item').forEach(i => i.classList.remove('active'));
-                this.classList.add('active');
-                let section = this.dataset.section;
-                
-                document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
-                document.querySelectorAll('.inner-tabs').forEach(t => t.style.display = 'none');
-                
-                if (section === 'summary') {
-                    document.getElementById('summarySection').style.display = 'block';
-                    renderSummary();
-                } else if (section === 'balance') {
-                    document.getElementById('balanceSection').style.display = 'block';
-                    renderBalance();
-                } else if (section === 'work') {
-                    document.getElementById('workSection').style.display = 'block';
-                    document.getElementById('workInnerTabs').style.display = 'flex';
-                    document.querySelector('.inner-tab[data-workpage="daily"]').click();
-                } else if (section === 'expenses') {
-                    document.getElementById('expensesSection').style.display = 'block';
-                    document.getElementById('expensesInnerTabs').style.display = 'flex';
-                    document.querySelector('.inner-tab[data-expensespage="all"]').click();
-                } else if (section === 'plan') {
-                    document.getElementById('planSection').style.display = 'block';
-                    document.getElementById('planInnerTabs').style.display = 'flex';
-                    document.querySelector('.inner-tab[data-planpage="purchases"]').click();
-                } else if (section === 'timeline') {
-                    document.getElementById('timelineSection').style.display = 'block';
-                    document.getElementById('timelineInnerTabs').style.display = 'flex';
-                    document.querySelector('.inner-tab[data-timelinepage="all"]').click();
-                } else if (section === 'settings') {
-                    document.getElementById('settingsSection').style.display = 'block';
-                } else if (section === 'about') {
-                    document.getElementById('aboutSection').style.display = 'block';
-                }
-                closeDrawer();
-            });
-        });
-
-        // ========== التبويبات الداخلية ==========
-        document.querySelectorAll('[data-workpage]').forEach(tab => {
-            tab.addEventListener('click', function() {
-                document.querySelectorAll('[data-workpage]').forEach(t => t.classList.remove('active'));
-                this.classList.add('active');
-                document.querySelectorAll('#workSection .subpage').forEach(sp => sp.classList.remove('active-sub'));
-                document.getElementById('work' + this.dataset.workpage.charAt(0).toUpperCase() + this.dataset.workpage.slice(1)).classList.add('active-sub');
-                if (this.dataset.workpage === 'months') renderMonthCards();
-                if (this.dataset.workpage === 'withdraws') renderWithdraws();
-            });
-        });
-
-        document.querySelectorAll('[data-expensespage]').forEach(tab => {
-            tab.addEventListener('click', function() {
-                document.querySelectorAll('[data-expensespage]').forEach(t => t.classList.remove('active'));
-                this.classList.add('active');
-                document.querySelectorAll('#expensesSection .subpage').forEach(sp => sp.classList.remove('active-sub'));
-                document.getElementById('expenses' + this.dataset.expensespage.charAt(0).toUpperCase() + this.dataset.expensespage.slice(1)).classList.add('active-sub');
-                if (this.dataset.expensespage === 'all') renderExpenses();
-                if (this.dataset.expensespage === 'future') renderFuture();
-                if (this.dataset.expensespage === 'debts') renderDebts();
-            });
-        });
-
-        document.querySelectorAll('[data-planpage]').forEach(tab => {
-            tab.addEventListener('click', function() {
-                document.querySelectorAll('[data-planpage]').forEach(t => t.classList.remove('active'));
-                this.classList.add('active');
-                document.querySelectorAll('#planSection .subpage').forEach(sp => sp.classList.remove('active-sub'));
-                document.getElementById('plan' + this.dataset.planpage.charAt(0).toUpperCase() + this.dataset.planpage.slice(1)).classList.add('active-sub');
-                if (this.dataset.planpage === 'purchases') renderFuture();
-                if (this.dataset.planpage === 'tasks') {
-                    renderTasks();
-                    // تفعيل فلتر الكل
-                    document.querySelector('#taskFilter .filter-chip.active')?.classList.remove('active');
-                    document.querySelector('#taskFilter .filter-chip[data-task-status="all"]')?.classList.add('active');
-                }
-            });
-        });
-
-        document.querySelectorAll('[data-timelinepage]').forEach(tab => {
-            tab.addEventListener('click', function() {
-                document.querySelectorAll('[data-timelinepage]').forEach(t => t.classList.remove('active'));
-                this.classList.add('active');
-                document.querySelectorAll('#timelineSection .subpage').forEach(sp => sp.classList.remove('active-sub'));
-                document.getElementById('timeline' + this.dataset.timelinepage.charAt(0).toUpperCase() + this.dataset.timelinepage.slice(1)).classList.add('active-sub');
-                if (this.dataset.timelinepage === 'all') renderTimeline();
-                if (this.dataset.timelinepage === 'stats') renderTimelineStats();
-                if (this.dataset.timelinepage === 'plan') renderTimelinePlan();
-                if (this.dataset.timelinepage === 'chart') {
-                    setTimeout(() => renderTimelineChart(), 100);
-                }
-            });
-        });
-
-        // ========== الربط ==========
-        document.getElementById('startTime').addEventListener('change', computeHours);
-        document.getElementById('endTime').addEventListener('change', computeHours);
-        document.getElementById('saveWorkBtn').addEventListener('click', saveDay);
-        document.getElementById('workDate').addEventListener('change', updateDayField);
-
-        // ========== التهيئة ==========
-        let d = new Date();
-        document.getElementById('workDate').value = d.toISOString().slice(0,10);
-        document.getElementById('expenseDate').value = d.toISOString().slice(0,10);
-        document.getElementById('debtDueDate').value = d.toISOString().slice(0,10);
-        document.getElementById('newWithdrawDate').value = d.toISOString().slice(0,10);
-        document.getElementById('futureExecutionDate').value = d.toISOString().slice(0,10);
-        document.getElementById('taskExecutionDate').value = d.toISOString().slice(0,10);
-        updateDayField();
-        computeHours();
-
-        loadData();
-        document.getElementById('hourRate').value = settings.hourRate;
-        document.getElementById('currencySelect').value = settings.currency;
-        document.getElementById('dateFormat').value = settings.dateFormat;
-        
-        // تشغيل شاشة البداية
-        initOnboarding();
-        
-        // تطبيق اللغة بعد التحميل
-        setTimeout(() => {
-            applyLanguage();
-            renderMonthCards();
-            renderWithdraws();
-            renderExpenses();
-            renderFuture();
-            renderDebts();
-            renderTasks();
-            renderTimeline();
-            renderTimelineStats();
-            renderTimelinePlan();
-            setTimeout(() => renderTimelineChart(), 100);
-            renderSummary();
-            renderBalance();
-            updateBalances();
-        }, 100);
-
-        document.querySelector('.drawer-item[data-section="work"]').click();
-    })();
-</script>
+                <div class="report-item">
+                    <span>Остаток бюджета:</span>
+                    <strong id="reportRemaining">0</strong>
+                </div>
+            </div>
+            <div class="report-categories" id="reportCategories"></div>
+            <div class="report-transactions" id="reportTransactions"></div>
+        </div>
+    </div>
+    
+    <div id="uniqueIdModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Ваш уникальный ID</h3>
+                <span class="close-modal closeUnique">&times;</span>
+            </div>
+            <div class="code-display highlight" id="generatedUniqueIdText">ID-XXXXXX</div>
+            <p>Сохраните этот ID для входа в приложение</p>
+            <button class="secondary-btn" id="copyIdBtn">Копировать ID</button>
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
 </body>
 </html>
