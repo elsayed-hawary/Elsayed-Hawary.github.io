@@ -1484,5 +1484,34 @@ async function init() {
     setTimeout(() => initializeAllDatePickers(), 200);
     setInterval(() => { checkEventReminders(); checkDailyReminders(); }, 3600000);
 }
+// ============= دالة إصلاح العائلة =============
+async function fixFamilyAndShowMembers() {
+    console.log("🔄 جاري إصلاح العائلة...");
+    
+    // استدعاء API الإصلاح
+    const fixResult = await apiCall('/api/fix_family', 'POST');
+    if (fixResult.success) {
+        console.log("✅ تم إصلاح العائلة:", fixResult.families);
+    }
+    
+    // إعادة تحميل البيانات
+    await loadAllData();
+    
+    // تحديث الواجهة
+    updateDashboard();
+    renderFamilyMembers();
+    renderPendingRequests();
+    
+    console.log("✅ تم تحديث قائمة أفراد العائلة");
+}
+
+// تشغيل الإصلاح عند تحميل الصفحة (مرة واحدة فقط)
+let fixed = false;
+async function autoFixFamily() {
+    if (!fixed && currentUser) {
+        fixed = true;
+        await fixFamilyAndShowMembers();
+    }
+}
 
 init();
