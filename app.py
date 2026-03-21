@@ -664,6 +664,49 @@ def check_session():
     if 'user_id' in session:
         return jsonify({'success': True, 'userId': session['user_id']})
     return jsonify({'success': False})
+# ============= API إصلاح العائلة =============
+@app.route('/api/fix_family', methods=['POST'])
+def fix_family():
+    """إصلاح العائلة وإظهار جميع الأعضاء لبعضهم البعض"""
+    users = load_json(USERS_FILE, [])
+    families = load_json(FAMILIES_FILE, [])
+    
+    # ابحث عن جميع المستخدمين الذين لديهم نفس familyId
+    family_groups = {}
+    for user in users:
+        if user.get('familyId'):
+            if user['familyId'] not in family_groups:
+                family_groups[user['familyId']] = []
+            family_groups[user['familyId']].append(user['uniqueId'])
+    
+    # تحديث كل عائلة
+    for family in families:
+        if family['id'] in family_groups:
+            # تأكد من أن جميع الأعضاء في قائمة العائلة
+            for member_id in family_groups[family['id']]:
+                if member_id not in family['members']:
+                    family['members'].append(member_id)
+            
+            # تأكد من وجود createdBy (رب الأسرة)
+            if not family.get('createdBy') and family['members']:
+                family['createdBy'] = family['members'][0]
+                # أعط صلاحيات كاملة لرب الأسرة
+                update_user_permissions(family['members'][0], {
+                    'can_add_tasks': True, 'can_complete_tasks': True,
+                    'can_add_shopping': True, 'can_buy_shopping': True,
+                    'can_add_expenses': True, 'can_view_expenses': True,
+                    'can_add_events': True, 'can_edit_events': True,
+                    'can_add_schedule': True, 'can_invite_members': True,
+                    'can_approve_requests': True, 'can_manage_permissions': True
+                })
+    
+    save_json(FAMILIES_FILE, families)
+    
+    return jsonify({
+        'success': True,
+        'message': 'Семьи исправлены',
+        'families': families
+    })
 
 # التشغيل
 if __name__ == '__main__':
