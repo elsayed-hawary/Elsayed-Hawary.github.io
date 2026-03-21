@@ -8,7 +8,7 @@ import hashlib
 
 app = Flask(__name__, static_folder='static')
 app.secret_key = 'family-app-secret-key-2024-change-this'
-app.permanent_session_lifetime = timedelta(days=30)  # جلسة لمدة 30 يوم
+app.permanent_session_lifetime = timedelta(days=30)
 CORS(app, supports_credentials=True)
 
 # إعدادات
@@ -29,7 +29,6 @@ REQUESTS_FILE = os.path.join(DATA_DIR, 'requests.json')
 SETTINGS_FILE = os.path.join(DATA_DIR, 'settings.json')
 PERMISSIONS_FILE = os.path.join(DATA_DIR, 'permissions.json')
 
-# دوال مساعدة
 def load_json(file_path, default=None):
     if os.path.exists(file_path):
         try:
@@ -74,8 +73,22 @@ def is_family_head(user_id):
     return family and family.get('createdBy') == user_id
 
 def get_user_permissions(user_id):
-    """الحصول على صلاحيات المستخدم"""
     permissions = load_json(PERMISSIONS_FILE, {})
+    if is_family_head(user_id):
+        return {
+            'can_add_tasks': True,
+            'can_complete_tasks': True,
+            'can_add_shopping': True,
+            'can_buy_shopping': True,
+            'can_add_expenses': True,
+            'can_view_expenses': True,
+            'can_add_events': True,
+            'can_edit_events': True,
+            'can_add_schedule': True,
+            'can_invite_members': True,
+            'can_approve_requests': True,
+            'can_manage_permissions': True
+        }
     return permissions.get(user_id, {
         'can_add_tasks': True,
         'can_complete_tasks': True,
@@ -84,7 +97,7 @@ def get_user_permissions(user_id):
         'can_add_expenses': True,
         'can_view_expenses': True,
         'can_add_events': True,
-        'can_edit_events': True,
+        'can_edit_events': False,
         'can_add_schedule': True,
         'can_invite_members': False,
         'can_approve_requests': False,
@@ -92,7 +105,6 @@ def get_user_permissions(user_id):
     })
 
 def update_user_permissions(user_id, permissions):
-    """تحديث صلاحيات المستخدم"""
     perms = load_json(PERMISSIONS_FILE, {})
     perms[user_id] = permissions
     save_json(PERMISSIONS_FILE, perms)
@@ -131,40 +143,34 @@ def register():
     users.append(new_user)
     save_json(USERS_FILE, users)
     
-    # إنشاء عائلة للمستخدم الجديد إذا كان أول مستخدم
+    # إنشاء عائلة للمستخدم الجديد (دائماً)
     families = load_json(FAMILIES_FILE, [])
-    if len(users) == 1:
-        new_family = {
-            'id': generate_family_code(),
-            'name': f"Семья {new_user['fullName']}",
-            'members': [new_user['uniqueId']],
-            'createdBy': new_user['uniqueId'],
-            'createdAt': datetime.now().isoformat()
-        }
-        families.append(new_family)
-        save_json(FAMILIES_FILE, families)
-        new_user['familyId'] = new_family['id']
-        for i, u in enumerate(users):
-            if u['uniqueId'] == new_user['uniqueId']:
-                users[i]['familyId'] = new_family['id']
-                break
-        save_json(USERS_FILE, users)
-        
-        # تعيين صلاحيات كاملة لرب الأسرة
-        update_user_permissions(new_user['uniqueId'], {
-            'can_add_tasks': True,
-            'can_complete_tasks': True,
-            'can_add_shopping': True,
-            'can_buy_shopping': True,
-            'can_add_expenses': True,
-            'can_view_expenses': True,
-            'can_add_events': True,
-            'can_edit_events': True,
-            'can_add_schedule': True,
-            'can_invite_members': True,
-            'can_approve_requests': True,
-            'can_manage_permissions': True
-        })
+    new_family = {
+        'id': generate_family_code(),
+        'name': f"Семья {new_user['fullName']}",
+        'members': [new_user['uniqueId']],
+        'createdBy': new_user['uniqueId'],
+        'createdAt': datetime.now().isoformat()
+    }
+    families.append(new_family)
+    save_json(FAMILIES_FILE, families)
+    
+    new_user['familyId'] = new_family['id']
+    for i, u in enumerate(users):
+        if u['uniqueId'] == new_user['uniqueId']:
+            users[i]['familyId'] = new_family['id']
+            break
+    save_json(USERS_FILE, users)
+    
+    # تعيين صلاحيات كاملة لرب الأسرة
+    update_user_permissions(new_user['uniqueId'], {
+        'can_add_tasks': True, 'can_complete_tasks': True,
+        'can_add_shopping': True, 'can_buy_shopping': True,
+        'can_add_expenses': True, 'can_view_expenses': True,
+        'can_add_events': True, 'can_edit_events': True,
+        'can_add_schedule': True, 'can_invite_members': True,
+        'can_approve_requests': True, 'can_manage_permissions': True
+    })
     
     session.permanent = True
     session['user_id'] = new_user['uniqueId']
@@ -209,32 +215,30 @@ def social_login():
         save_json(USERS_FILE, users)
         
         families = load_json(FAMILIES_FILE, [])
-        if len(users) == 1:
-            new_family = {
-                'id': generate_family_code(),
-                'name': f"Семья {name}",
-                'members': [new_id],
-                'createdBy': new_id,
-                'createdAt': datetime.now().isoformat()
-            }
-            families.append(new_family)
-            save_json(FAMILIES_FILE, families)
-            user['familyId'] = new_family['id']
-            for i, u in enumerate(users):
-                if u['uniqueId'] == new_id:
-                    users[i]['familyId'] = new_family['id']
-                    break
-            save_json(USERS_FILE, users)
-            
-            # صلاحيات كاملة لرب الأسرة
-            update_user_permissions(new_id, {
-                'can_add_tasks': True, 'can_complete_tasks': True,
-                'can_add_shopping': True, 'can_buy_shopping': True,
-                'can_add_expenses': True, 'can_view_expenses': True,
-                'can_add_events': True, 'can_edit_events': True,
-                'can_add_schedule': True, 'can_invite_members': True,
-                'can_approve_requests': True, 'can_manage_permissions': True
-            })
+        new_family = {
+            'id': generate_family_code(),
+            'name': f"Семья {name}",
+            'members': [new_id],
+            'createdBy': new_id,
+            'createdAt': datetime.now().isoformat()
+        }
+        families.append(new_family)
+        save_json(FAMILIES_FILE, families)
+        user['familyId'] = new_family['id']
+        for i, u in enumerate(users):
+            if u['uniqueId'] == new_id:
+                users[i]['familyId'] = new_family['id']
+                break
+        save_json(USERS_FILE, users)
+        
+        update_user_permissions(new_id, {
+            'can_add_tasks': True, 'can_complete_tasks': True,
+            'can_add_shopping': True, 'can_buy_shopping': True,
+            'can_add_expenses': True, 'can_view_expenses': True,
+            'can_add_events': True, 'can_edit_events': True,
+            'can_add_schedule': True, 'can_invite_members': True,
+            'can_approve_requests': True, 'can_manage_permissions': True
+        })
     
     session.permanent = True
     session['user_id'] = user['uniqueId']
@@ -257,20 +261,106 @@ def logout():
     session.pop('user_id', None)
     return jsonify({'success': True})
 
-@app.route('/api/check_session', methods=['GET'])
-def check_session():
-    if 'user_id' in session:
-        return jsonify({'success': True, 'userId': session['user_id']})
-    return jsonify({'success': False})
+# ============= API إنشاء عائلة للمستخدم =============
+@app.route('/api/create_family_for_user', methods=['POST'])
+def create_family_for_user():
+    """إنشاء عائلة للمستخدم الحالي إذا لم يكن لديه"""
+    if 'user_id' not in session:
+        return jsonify({'success': False, 'message': 'Не авторизован'})
+    
+    user_id = session['user_id']
+    users = load_json(USERS_FILE, [])
+    families = load_json(FAMILIES_FILE, [])
+    
+    user = next((u for u in users if u['uniqueId'] == user_id), None)
+    if not user:
+        return jsonify({'success': False, 'message': 'Пользователь не найден'})
+    
+    # إذا كان المستخدم لديه عائلة بالفعل
+    if user.get('familyId'):
+        family = next((f for f in families if f['id'] == user['familyId']), None)
+        if family:
+            return jsonify({'success': True, 'message': 'Семья уже существует', 'family': family})
+    
+    # إنشاء عائلة جديدة
+    new_family = {
+        'id': generate_family_code(),
+        'name': f"Семья {user['fullName']}",
+        'members': [user_id],
+        'createdBy': user_id,
+        'createdAt': datetime.now().isoformat()
+    }
+    families.append(new_family)
+    save_json(FAMILIES_FILE, families)
+    
+    # تحديث المستخدم
+    user['familyId'] = new_family['id']
+    for i, u in enumerate(users):
+        if u['uniqueId'] == user_id:
+            users[i] = user
+            break
+    save_json(USERS_FILE, users)
+    
+    # إعطاء صلاحيات كاملة للمستخدم
+    update_user_permissions(user_id, {
+        'can_add_tasks': True, 'can_complete_tasks': True,
+        'can_add_shopping': True, 'can_buy_shopping': True,
+        'can_add_expenses': True, 'can_view_expenses': True,
+        'can_add_events': True, 'can_edit_events': True,
+        'can_add_schedule': True, 'can_invite_members': True,
+        'can_approve_requests': True, 'can_manage_permissions': True
+    })
+    
+    return jsonify({'success': True, 'message': 'Семья создана', 'family': new_family})
 
-# ============= API إدارة المستخدمين والصلاحيات =============
+# ============= API إصلاح العائلة =============
+@app.route('/api/fix_family', methods=['POST'])
+def fix_family():
+    """إصلاح العائلة وإظهار جميع الأعضاء لبعضهم البعض"""
+    users = load_json(USERS_FILE, [])
+    families = load_json(FAMILIES_FILE, [])
+    
+    # ابحث عن جميع المستخدمين الذين لديهم نفس familyId
+    family_groups = {}
+    for user in users:
+        if user.get('familyId'):
+            if user['familyId'] not in family_groups:
+                family_groups[user['familyId']] = []
+            family_groups[user['familyId']].append(user['uniqueId'])
+    
+    # تحديث كل عائلة
+    for family in families:
+        if family['id'] in family_groups:
+            for member_id in family_groups[family['id']]:
+                if member_id not in family['members']:
+                    family['members'].append(member_id)
+            
+            if not family.get('createdBy') and family['members']:
+                family['createdBy'] = family['members'][0]
+                update_user_permissions(family['members'][0], {
+                    'can_add_tasks': True, 'can_complete_tasks': True,
+                    'can_add_shopping': True, 'can_buy_shopping': True,
+                    'can_add_expenses': True, 'can_view_expenses': True,
+                    'can_add_events': True, 'can_edit_events': True,
+                    'can_add_schedule': True, 'can_invite_members': True,
+                    'can_approve_requests': True, 'can_manage_permissions': True
+                })
+    
+    save_json(FAMILIES_FILE, families)
+    
+    return jsonify({
+        'success': True,
+        'message': 'Семьи исправлены',
+        'families': families
+    })
+
+# ============= API المستخدمين =============
 @app.route('/api/users', methods=['GET'])
 def get_users():
     users = load_json(USERS_FILE, [])
     family_id = request.args.get('familyId')
     if family_id:
         users = [u for u in users if u.get('familyId') == family_id]
-    # إضافة الصلاحيات لكل مستخدم
     for u in users:
         u['permissions'] = get_user_permissions(u['uniqueId'])
         u['isFamilyHead'] = is_family_head(u['uniqueId'])
@@ -280,10 +370,6 @@ def get_users():
 def update_user(user_id):
     data = request.json
     users = load_json(USERS_FILE, [])
-    
-    # التحقق من الصلاحيات
-    if not is_family_head(session.get('user_id')):
-        return jsonify({'success': False, 'message': 'Только глава семьи может редактировать'})
     
     for i, user in enumerate(users):
         if user['uniqueId'] == user_id:
@@ -295,10 +381,6 @@ def update_user(user_id):
 
 @app.route('/api/users/<user_id>/permissions', methods=['PUT'])
 def update_user_permissions_api(user_id):
-    """تحديث صلاحيات المستخدم (فقط لرب الأسرة)"""
-    if not is_family_head(session.get('user_id')):
-        return jsonify({'success': False, 'message': 'Только глава семьи может изменять права'})
-    
     data = request.json
     update_user_permissions(user_id, data)
     return jsonify({'success': True, 'permissions': data})
@@ -315,12 +397,20 @@ def get_family(family_id):
     family = next((f for f in families if f['id'] == family_id), None)
     return jsonify({'success': True, 'family': family})
 
+@app.route('/api/families/<family_id>', methods=['PUT'])
+def update_family(family_id):
+    data = request.json
+    families = load_json(FAMILIES_FILE, [])
+    for i, family in enumerate(families):
+        if family['id'] == family_id:
+            families[i].update(data)
+            save_json(FAMILIES_FILE, families)
+            return jsonify({'success': True, 'family': families[i]})
+    return jsonify({'success': False, 'message': 'Семья не найдена'})
+
 @app.route('/api/families', methods=['POST'])
 def create_family():
     data = request.json
-    if not is_family_head(session.get('user_id')):
-        return jsonify({'success': False, 'message': 'Только глава семьи может создавать'})
-    
     families = load_json(FAMILIES_FILE, [])
     new_family = {
         'id': generate_family_code(),
@@ -352,7 +442,7 @@ def add_member(family_id):
                 return jsonify({'success': True, 'family': family})
     return jsonify({'success': False, 'message': 'Семья не найдена'})
 
-# ============= API المهام مع التحقق من الصلاحيات =============
+# ============= API المهام =============
 @app.route('/api/tasks', methods=['GET'])
 def get_tasks():
     tasks = load_json(TASKS_FILE, [])
@@ -363,10 +453,6 @@ def get_tasks():
 
 @app.route('/api/tasks', methods=['POST'])
 def add_task():
-    user_perms = get_user_permissions(session.get('user_id'))
-    if not user_perms.get('can_add_tasks', True):
-        return jsonify({'success': False, 'message': 'У вас нет прав на добавление задач'})
-    
     data = request.json
     tasks = load_json(TASKS_FILE, [])
     new_task = {
@@ -384,10 +470,6 @@ def add_task():
 
 @app.route('/api/tasks/<int:task_id>', methods=['PUT'])
 def update_task(task_id):
-    user_perms = get_user_permissions(session.get('user_id'))
-    if not user_perms.get('can_complete_tasks', True):
-        return jsonify({'success': False, 'message': 'У вас нет прав на изменение задач'})
-    
     data = request.json
     tasks = load_json(TASKS_FILE, [])
     for task in tasks:
@@ -397,7 +479,7 @@ def update_task(task_id):
             return jsonify({'success': True, 'task': task})
     return jsonify({'success': False, 'message': 'Задача не найдена'})
 
-# ============= API المشتريات مع التحقق من الصلاحيات =============
+# ============= API المشتريات =============
 @app.route('/api/shopping', methods=['GET'])
 def get_shopping():
     shopping = load_json(SHOPPING_FILE, [])
@@ -408,10 +490,6 @@ def get_shopping():
 
 @app.route('/api/shopping', methods=['POST'])
 def add_shopping():
-    user_perms = get_user_permissions(session.get('user_id'))
-    if not user_perms.get('can_add_shopping', True):
-        return jsonify({'success': False, 'message': 'У вас нет прав на добавление покупок'})
-    
     data = request.json
     shopping = load_json(SHOPPING_FILE, [])
     new_item = {
@@ -429,10 +507,6 @@ def add_shopping():
 
 @app.route('/api/shopping/<int:item_id>', methods=['PUT'])
 def update_shopping(item_id):
-    user_perms = get_user_permissions(session.get('user_id'))
-    if not user_perms.get('can_buy_shopping', True):
-        return jsonify({'success': False, 'message': 'У вас нет прав на покупку товаров'})
-    
     data = request.json
     shopping = load_json(SHOPPING_FILE, [])
     for item in shopping:
@@ -442,7 +516,7 @@ def update_shopping(item_id):
             return jsonify({'success': True, 'item': item})
     return jsonify({'success': False, 'message': 'Товар не найден'})
 
-# ============= API المصاريف مع التحقق من الصلاحيات =============
+# ============= API المصاريف =============
 @app.route('/api/expenses', methods=['GET'])
 def get_expenses():
     expenses = load_json(EXPENSES_FILE, [])
@@ -453,10 +527,6 @@ def get_expenses():
 
 @app.route('/api/expenses', methods=['POST'])
 def add_expense():
-    user_perms = get_user_permissions(session.get('user_id'))
-    if not user_perms.get('can_add_expenses', True):
-        return jsonify({'success': False, 'message': 'У вас нет прав на добавление расходов'})
-    
     data = request.json
     expenses = load_json(EXPENSES_FILE, [])
     new_expense = {
@@ -474,16 +544,12 @@ def add_expense():
 
 @app.route('/api/expenses/<int:expense_id>', methods=['DELETE'])
 def delete_expense(expense_id):
-    user_perms = get_user_permissions(session.get('user_id'))
-    if not user_perms.get('can_view_expenses', True):
-        return jsonify({'success': False, 'message': 'У вас нет прав на удаление расходов'})
-    
     expenses = load_json(EXPENSES_FILE, [])
     expenses = [e for e in expenses if e['id'] != expense_id]
     save_json(EXPENSES_FILE, expenses)
     return jsonify({'success': True})
 
-# ============= API الأحداث مع التذكير =============
+# ============= API الأحداث =============
 @app.route('/api/events', methods=['GET'])
 def get_events():
     events = load_json(EVENTS_FILE, [])
@@ -494,20 +560,9 @@ def get_events():
 
 @app.route('/api/events', methods=['POST'])
 def add_event():
-    user_perms = get_user_permissions(session.get('user_id'))
-    if not user_perms.get('can_add_events', True):
-        return jsonify({'success': False, 'message': 'У вас нет прав на добавление событий'})
-    
     data = request.json
     events = load_json(EVENTS_FILE, [])
-    
-    # إضافة التذكير
     reminder_days = data.get('reminderDays', 5)
-    reminder_date = None
-    if reminder_days > 0 and data.get('date'):
-        event_date = datetime.fromisoformat(data.get('date'))
-        reminder_date = (event_date - timedelta(days=reminder_days)).isoformat()
-    
     new_event = {
         'id': len(events) + 1,
         'title': data.get('title'),
@@ -515,22 +570,16 @@ def add_event():
         'personId': data.get('personId'),
         'color': data.get('color', '#667eea'),
         'reminderDays': reminder_days,
-        'reminderDate': reminder_date,
         'familyId': data.get('familyId'),
         'createdBy': data.get('createdBy'),
         'createdAt': datetime.now().isoformat()
     }
-    
     events.append(new_event)
     save_json(EVENTS_FILE, events)
     return jsonify({'success': True, 'event': new_event})
 
 @app.route('/api/events/<int:event_id>', methods=['DELETE'])
 def delete_event(event_id):
-    user_perms = get_user_permissions(session.get('user_id'))
-    if not user_perms.get('can_edit_events', True):
-        return jsonify({'success': False, 'message': 'У вас нет прав на удаление событий'})
-    
     events = load_json(EVENTS_FILE, [])
     events = [e for e in events if e['id'] != event_id]
     save_json(EVENTS_FILE, events)
@@ -547,10 +596,6 @@ def get_schedules():
 
 @app.route('/api/schedules', methods=['POST'])
 def add_schedule():
-    user_perms = get_user_permissions(session.get('user_id'))
-    if not user_perms.get('can_add_schedule', True):
-        return jsonify({'success': False, 'message': 'У вас нет прав на добавление расписания'})
-    
     data = request.json
     schedules = load_json(SCHEDULES_FILE, [])
     new_schedule = {
@@ -602,10 +647,6 @@ def add_request():
 
 @app.route('/api/requests/<int:request_id>', methods=['PUT'])
 def update_request(request_id):
-    # التحقق من صلاحيات الموافقة
-    if not is_family_head(session.get('user_id')):
-        return jsonify({'success': False, 'message': 'Только глава семьи может одобрять заявки'})
-    
     data = request.json
     requests = load_json(REQUESTS_FILE, [])
     
@@ -627,20 +668,13 @@ def update_request(request_id):
                                     user['familyId'] = family['id']
                             save_json(USERS_FILE, users)
                             
-                            # تعيين صلاحيات افتراضية للعضو الجديد
                             update_user_permissions(req['userId'], {
-                                'can_add_tasks': True,
-                                'can_complete_tasks': True,
-                                'can_add_shopping': True,
-                                'can_buy_shopping': True,
-                                'can_add_expenses': True,
-                                'can_view_expenses': True,
-                                'can_add_events': True,
-                                'can_edit_events': False,
-                                'can_add_schedule': True,
-                                'can_invite_members': False,
-                                'can_approve_requests': False,
-                                'can_manage_permissions': False
+                                'can_add_tasks': True, 'can_complete_tasks': True,
+                                'can_add_shopping': True, 'can_buy_shopping': True,
+                                'can_add_expenses': True, 'can_view_expenses': True,
+                                'can_add_events': True, 'can_edit_events': False,
+                                'can_add_schedule': True, 'can_invite_members': False,
+                                'can_approve_requests': False, 'can_manage_permissions': False
                             })
             return jsonify({'success': True, 'request': req})
     
@@ -664,49 +698,6 @@ def check_session():
     if 'user_id' in session:
         return jsonify({'success': True, 'userId': session['user_id']})
     return jsonify({'success': False})
-# ============= API إصلاح العائلة =============
-@app.route('/api/fix_family', methods=['POST'])
-def fix_family():
-    """إصلاح العائلة وإظهار جميع الأعضاء لبعضهم البعض"""
-    users = load_json(USERS_FILE, [])
-    families = load_json(FAMILIES_FILE, [])
-    
-    # ابحث عن جميع المستخدمين الذين لديهم نفس familyId
-    family_groups = {}
-    for user in users:
-        if user.get('familyId'):
-            if user['familyId'] not in family_groups:
-                family_groups[user['familyId']] = []
-            family_groups[user['familyId']].append(user['uniqueId'])
-    
-    # تحديث كل عائلة
-    for family in families:
-        if family['id'] in family_groups:
-            # تأكد من أن جميع الأعضاء في قائمة العائلة
-            for member_id in family_groups[family['id']]:
-                if member_id not in family['members']:
-                    family['members'].append(member_id)
-            
-            # تأكد من وجود createdBy (رب الأسرة)
-            if not family.get('createdBy') and family['members']:
-                family['createdBy'] = family['members'][0]
-                # أعط صلاحيات كاملة لرب الأسرة
-                update_user_permissions(family['members'][0], {
-                    'can_add_tasks': True, 'can_complete_tasks': True,
-                    'can_add_shopping': True, 'can_buy_shopping': True,
-                    'can_add_expenses': True, 'can_view_expenses': True,
-                    'can_add_events': True, 'can_edit_events': True,
-                    'can_add_schedule': True, 'can_invite_members': True,
-                    'can_approve_requests': True, 'can_manage_permissions': True
-                })
-    
-    save_json(FAMILIES_FILE, families)
-    
-    return jsonify({
-        'success': True,
-        'message': 'Семьи исправлены',
-        'families': families
-    })
 
 # التشغيل
 if __name__ == '__main__':
