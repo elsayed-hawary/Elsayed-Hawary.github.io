@@ -47,7 +47,7 @@
                 
                 <div class="auth-footer">
                     <button class="text-btn" id="goToRegisterBtn">Создать аккаунт</button>
-                    <button class="text-btn" id="joinFamilyBtn">Присоединиться к семье</button>
+                    <button class="text-btn" id="openJoinGroupBtn">Присоединиться к семье</button>
                 </div>
             </div>
         </div>
@@ -147,6 +147,7 @@
                             <div class="header-actions">
                                 <button class="icon-btn" id="notificationsBtn">
                                     <i class="fas fa-bell"></i>
+                                    <span class="notification-badge" id="notificationBadge" style="display: none;">0</span>
                                 </button>
                                 <button class="icon-btn" id="settingsBtn">
                                     <i class="fas fa-gear"></i>
@@ -201,9 +202,14 @@
                         <div class="section-card">
                             <div class="section-header">
                                 <h3><i class="fas fa-people-group"></i> Члены семьи</h3>
-                                <button class="small-btn" id="inviteMemberBtn">
-                                    <i class="fas fa-share-nodes"></i> Пригласить
-                                </button>
+                                <div>
+                                    <button class="small-btn" id="inviteMemberBtn">
+                                        <i class="fas fa-share-nodes"></i> Пригласить
+                                    </button>
+                                    <button class="small-btn" id="showInviteCodeBtn" style="margin-left: 8px;">
+                                        <i class="fas fa-qrcode"></i> Код
+                                    </button>
+                                </div>
                             </div>
                             <div class="family-list" id="familyMembersList"></div>
                         </div>
@@ -343,7 +349,83 @@
         </div>
     </div>
     
-    <!-- Модальные окна -->
+    <!-- Modal присоединения к семье -->
+    <div id="joinGroupModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-users"></i> Присоединиться к семье</h3>
+                <span class="close-modal closeJoinGroup">&times;</span>
+            </div>
+            
+            <div class="form-group">
+                <label>Код приглашения</label>
+                <div class="input-field">
+                    <i class="fas fa-qrcode"></i>
+                    <input type="text" id="inviteCode" placeholder="Введите код приглашения (например: FAMILY-ABC123)">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>Ваше имя</label>
+                <div class="input-field">
+                    <i class="fas fa-user"></i>
+                    <input type="text" id="joinUserName" placeholder="Как вас зовут?">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>Ваша роль в семье</label>
+                <div class="input-field">
+                    <i class="fas fa-users"></i>
+                    <select id="joinUserRole">
+                        <option value="Отец">👨 Отец</option>
+                        <option value="Мать">👩 Мать</option>
+                        <option value="Муж">👨‍💼 Муж</option>
+                        <option value="Жена">👩‍💼 Жена</option>
+                        <option value="Сын">👦 Сын</option>
+                        <option value="Дочь">👧 Дочь</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>Email (необязательно)</label>
+                <div class="input-field">
+                    <i class="fas fa-envelope"></i>
+                    <input type="email" id="joinUserEmail" placeholder="example@email.com">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>Телефон (необязательно)</label>
+                <div class="input-field">
+                    <i class="fas fa-phone"></i>
+                    <input type="tel" id="joinUserPhone" placeholder="+7 999 123-45-67">
+                </div>
+            </div>
+            
+            <button class="primary-btn" id="confirmJoinGroupBtn">Отправить заявку</button>
+            <p class="note-text">После отправки заявки, глава семьи должен одобрить ваше вступление</p>
+        </div>
+    </div>
+    
+    <!-- Modal отображения кода приглашения -->
+    <div id="inviteCodeModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-qrcode"></i> Код приглашения</h3>
+                <span class="close-modal closeInviteCode">&times;</span>
+            </div>
+            <p>Поделитесь этим кодом с теми, кого хотите пригласить:</p>
+            <div class="code-display highlight" id="familyInviteCodeDisplay">---</div>
+            <button class="secondary-btn" id="copyInviteCodeBtn">Копировать код</button>
+            <button class="primary-btn" id="shareInviteCodeBtn" style="margin-top: 12px;">
+                <i class="fas fa-share-alt"></i> Поделиться
+            </button>
+        </div>
+    </div>
+    
+    <!-- Modal добавления события -->
     <div id="addEventModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -384,6 +466,7 @@
         </div>
     </div>
     
+    <!-- Modal редактирования профиля -->
     <div id="editProfileModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -415,6 +498,7 @@
         </div>
     </div>
     
+    <!-- Modal уведомлений -->
     <div id="notificationsModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -425,6 +509,7 @@
         </div>
     </div>
     
+    <!-- Modal настроек -->
     <div id="settingsModal" class="modal">
         <div class="modal-content settings-modal">
             <div class="modal-header">
@@ -471,9 +556,16 @@
                     </label>
                 </div>
                 <div class="toggle-setting">
-                    <span>Напоминания о событиях</span>
+                    <span>Напоминания о событиях (за 5 дней)</span>
                     <label class="toggle-switch">
                         <input type="checkbox" id="eventReminders">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                <div class="toggle-setting">
+                    <span>Ежедневные напоминания</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="dailyReminders">
                         <span class="toggle-slider"></span>
                     </label>
                 </div>
@@ -483,6 +575,7 @@
         </div>
     </div>
     
+    <!-- Modal добавления расписания -->
     <div id="addScheduleModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -523,6 +616,7 @@
         </div>
     </div>
     
+    <!-- Modal добавления задачи -->
     <div id="addTaskModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -540,6 +634,7 @@
         </div>
     </div>
     
+    <!-- Modal добавления покупки -->
     <div id="addShoppingModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -558,6 +653,7 @@
         </div>
     </div>
     
+    <!-- Modal добавления расхода -->
     <div id="addExpenseModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -583,21 +679,7 @@
         </div>
     </div>
     
-    <div id="joinFamilyModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Присоединиться к семье</h3>
-                <span class="close-modal closeJoin">&times;</span>
-            </div>
-            <p>Введите код семьи, который вы получили:</p>
-            <div class="input-field">
-                <i class="fas fa-qrcode"></i>
-                <input type="text" id="familyCodeInput" placeholder="Пример: FAMILY-ABC123">
-            </div>
-            <button class="primary-btn" id="submitJoinRequest">Отправить заявку</button>
-        </div>
-    </div>
-    
+    <!-- Modal подтверждения заявки -->
     <div id="approvalModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -612,6 +694,7 @@
         </div>
     </div>
     
+    <!-- Modal отчета -->
     <div id="monthlyReportModal" class="modal">
         <div class="modal-content report-modal">
             <div class="modal-header">
@@ -638,6 +721,7 @@
         </div>
     </div>
     
+    <!-- Modal уникального ID -->
     <div id="uniqueIdModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
