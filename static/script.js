@@ -1,7 +1,7 @@
-// API URLs
+// ============= إعدادات API =============
 const API_BASE = window.location.origin;
 
-// Глобальные переменные
+// ============= المتغيرات العامة =============
 let currentUser = null;
 let users = [];
 let families = [];
@@ -11,38 +11,46 @@ let expenses = [];
 let events = [];
 let schedules = [];
 let pendingRequests = [];
+let notifications = [];
 let settings = {
     currency: '₽',
     homeAddress: '',
     monthlyBudget: 0,
     taskReminders: true,
-    eventReminders: true
+    eventReminders: true,
+    dailyReminders: true
 };
 
 let currentReportMonth = new Date();
 
-// ============= ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ =============
+// ============= دوال مساعدة =============
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
 
-async function apiCall(endpoint, method = 'GET', data = null) {
-    const options = {
-        method,
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        credentials: 'include'
-    };
-    
-    if (data) {
-        options.body = JSON.stringify(data);
-    }
-    
-    try {
-        const response = await fetch(`${API_BASE}${endpoint}`, options);
-        return await response.json();
-    } catch (error) {
-        console.error('API Error:', error);
-        return { success: false, message: 'Ошибка соединения с сервером' };
-    }
+function formatDate(dateString) {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return '';
+    const monthNames = ['Января', 'Февраля', 'Марта', 'Апреля', 'Мая', 'Июня', 'Июля', 'Августа', 'Сентября', 'Октября', 'Ноября', 'Декабря'];
+    return `${date.getDate()} ${monthNames[date.getMonth()]} ${date.getFullYear()}`;
+}
+
+function formatDateShort(dateString) {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return '';
+    return `${date.getDate()}.${date.getMonth() + 1}.${date.getFullYear()}`;
+}
+
+function formatDateForInput(dateString) {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return '';
+    return date.toISOString().split('T')[0];
 }
 
 function calculateAge(birthDate) {
@@ -57,54 +65,272 @@ function calculateAge(birthDate) {
     return age;
 }
 
-function formatDate(dateString) {
-    if (!dateString) return '';
-    const date = new Date(dateString);
-    if (isNaN(date.getTime())) return '';
-    const monthNames = ['Января', 'Февраля', 'Марта', 'Апреля', 'Мая', 'Июня', 'Июля', 'Августа', 'Сентября', 'Октября', 'Ноября', 'Декабря'];
-    return `${date.getDate()} ${monthNames[date.getMonth()]} ${date.getFullYear()}`;
-}
-
-function formatDateForInput(dateString) {
-    if (!dateString) return '';
-    const date = new Date(dateString);
-    if (isNaN(date.getTime())) return '';
-    return date.toISOString().split('T')[0];
-}
-
 function generateUniqueID(name) {
     const random = Math.floor(Math.random() * 1000000).toString().padStart(6, '0');
     const prefix = name.substring(0, 2).toUpperCase();
     return `FAM-${prefix}${random}`;
 }
 
-function escapeHtml(text) {
-    if (!text) return '';
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
+function generateFamilyCode() {
+    return 'FAMILY-' + Math.random().toString(36).substring(2, 8).toUpperCase();
 }
 
-function addNotification(title, message, type = 'info') {
-    console.log(`[${type}] ${title}: ${message}`);
-    // Можно добавить визуальное уведомление
+// ============= دوال API =============
+async function apiCall(endpoint, method = 'GET', data = null) {
+    const options = {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include'
+    };
+    if (data) options.body = JSON.stringify(data);
+    
+    try {
+        const response = await fetch(`${API_BASE}${endpoint}`, options);
+        return await response.json();
+    } catch (error) {
+        console.error('API Error:', error);
+        return { success: false, message: 'Ошибка соединения' };
+    }
 }
 
-// ============= ДАТА ПИКЕР =============
+// ============= دوال الإشعارات =============
+function addNotification(title, message, type = 'info', relatedId = null, relatedType = null) {
+    const notification = {
+        id: Date.now(),
+        title,
+        message,
+        type,
+        relatedId,
+        relatedType,
+        date: new Date().toISOString(),
+        read: false
+    };
+    notifications.unshift(notification);
+    if (notifications.length > 100) notifications.pop();
+    saveNotifications();
+    updateNotificationBadge();
+    
+    // عرض الإشعار في المتصفح (إذا كان مسموحاً)
+    if (Notification.permission === 'granted') {
+        new Notification(title, { body: message, icon: '/favicon.ico' });
+    }
+    
+    return notification;
+}
 
+function saveNotifications() {
+    localStorage.setItem('family_notifications', JSON.stringify(notifications));
+}
+
+function loadNotifications() {
+    const stored = localStorage.getItem('family_notifications');
+    if (stored) notifications = JSON.parse(stored);
+}
+
+function updateNotificationBadge() {
+    const unreadCount = notifications.filter(n => !n.read).length;
+    const badge = document.getElementById('notificationBadge');
+    if (badge) {
+        if (unreadCount > 0) {
+            badge.style.display = 'flex';
+            badge.innerText = unreadCount > 99 ? '99+' : unreadCount;
+        } else {
+            badge.style.display = 'none';
+        }
+    }
+}
+
+function markNotificationAsRead(notificationId) {
+    const notif = notifications.find(n => n.id === notificationId);
+    if (notif) {
+        notif.read = true;
+        saveNotifications();
+        updateNotificationBadge();
+        renderNotifications();
+    }
+}
+
+function markAllNotificationsAsRead() {
+    notifications.forEach(n => n.read = true);
+    saveNotifications();
+    updateNotificationBadge();
+    renderNotifications();
+}
+
+function renderNotifications() {
+    const container = document.getElementById('notificationsList');
+    if (!container) return;
+    
+    const unreadNotifications = notifications.filter(n => !n.read);
+    const readNotifications = notifications.filter(n => n.read).slice(0, 20);
+    
+    if (notifications.length === 0) {
+        container.innerHTML = '<div style="text-align:center; padding: 40px; color:#8e8e93;"><i class="fas fa-bell-slash" style="font-size: 32px; margin-bottom: 8px; display: block;"></i>Нет уведомлений</div>';
+        return;
+    }
+    
+    let html = '';
+    
+    if (unreadNotifications.length > 0) {
+        html += `<div style="margin-bottom: 16px;"><strong>Новые (${unreadNotifications.length})</strong></div>`;
+        html += unreadNotifications.map(notif => `
+            <div class="notification-item ${notif.type} unread">
+                <div class="notification-title">${escapeHtml(notif.title)}</div>
+                <div class="notification-message">${escapeHtml(notif.message)}</div>
+                <div class="notification-date">${formatDate(notif.date)}</div>
+                <div class="notification-actions">
+                    <button class="mark-read-btn" data-id="${notif.id}">✓ Прочитано</button>
+                </div>
+            </div>
+        `).join('');
+    }
+    
+    if (readNotifications.length > 0) {
+        html += `<div style="margin: 16px 0 8px;"><strong>Ранее</strong></div>`;
+        html += readNotifications.map(notif => `
+            <div class="notification-item ${notif.type}">
+                <div class="notification-title">${escapeHtml(notif.title)}</div>
+                <div class="notification-message">${escapeHtml(notif.message)}</div>
+                <div class="notification-date">${formatDate(notif.date)}</div>
+            </div>
+        `).join('');
+    }
+    
+    container.innerHTML = html;
+    
+    document.querySelectorAll('.mark-read-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const id = parseInt(btn.dataset.id);
+            markNotificationAsRead(id);
+        });
+    });
+}
+
+// ============= دوال التذكيرات =============
+function checkEventReminders() {
+    if (!settings.eventReminders) return;
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    events.forEach(event => {
+        const eventDate = new Date(event.date);
+        eventDate.setHours(0, 0, 0, 0);
+        
+        const daysDiff = Math.ceil((eventDate - today) / (1000 * 60 * 60 * 24));
+        
+        // تذكير قبل 5 أيام
+        if (daysDiff === 5) {
+            const existingNotif = notifications.find(n => n.relatedId === event.id && n.title.includes('5 дней'));
+            if (!existingNotif) {
+                addNotification(
+                    `⏰ Напоминание: ${event.title}`,
+                    `Событие "${event.title}" через 5 дней!`,
+                    'warning',
+                    event.id,
+                    'event'
+                );
+            }
+        }
+        // تذكير قبل يوم واحد
+        else if (daysDiff === 1) {
+            const existingNotif = notifications.find(n => n.relatedId === event.id && n.title.includes('завтра'));
+            if (!existingNotif) {
+                addNotification(
+                    `⚠️ Событие завтра: ${event.title}`,
+                    `Событие "${event.title}" состоится завтра!`,
+                    'warning',
+                    event.id,
+                    'event'
+                );
+            }
+        }
+        // تذكير في نفس اليوم
+        else if (daysDiff === 0) {
+            const existingNotif = notifications.find(n => n.relatedId === event.id && n.title.includes('сегодня'));
+            if (!existingNotif) {
+                addNotification(
+                    `🎉 Сегодня: ${event.title}`,
+                    `Событие "${event.title}" происходит сегодня!`,
+                    'success',
+                    event.id,
+                    'event'
+                );
+            }
+        }
+    });
+}
+
+function checkDailyReminders() {
+    if (!settings.dailyReminders) return;
+    
+    const lastCheck = localStorage.getItem('lastDailyCheck');
+    const today = new Date().toDateString();
+    
+    if (lastCheck !== today) {
+        localStorage.setItem('lastDailyCheck', today);
+        
+        // تذكير بالمهام المعلقة
+        const pendingTasks = tasks.filter(t => !t.completed && t.familyId === currentUser?.familyId);
+        if (pendingTasks.length > 0) {
+            addNotification(
+                '📋 Задачи на сегодня',
+                `У вас ${pendingTasks.length} ${getTaskDeclension(pendingTasks.length)}`,
+                'info',
+                null,
+                'daily'
+            );
+        }
+        
+        // تذكير بالمشتريات المعلقة
+        const pendingShopping = shopping.filter(s => !s.purchased && s.familyId === currentUser?.familyId);
+        if (pendingShopping.length > 0) {
+            addNotification(
+                '🛒 Список покупок',
+                `${pendingShopping.length} ${getShoppingDeclension(pendingShopping.length)} ожидают покупки`,
+                'info',
+                null,
+                'daily'
+            );
+        }
+        
+        // تذكير بالميزانية
+        if (settings.monthlyBudget > 0) {
+            const monthlyExpenses = getCurrentMonthExpenses().reduce((sum, e) => sum + e.amount, 0);
+            const remaining = settings.monthlyBudget - monthlyExpenses;
+            if (remaining < settings.monthlyBudget * 0.2 && remaining > 0) {
+                addNotification(
+                    '💰 Бюджет',
+                    `Осталось ${remaining} ${settings.currency} до конца месяца`,
+                    'warning',
+                    null,
+                    'budget'
+                );
+            }
+        }
+    }
+}
+
+function getTaskDeclension(count) {
+    if (count % 10 === 1 && count % 100 !== 11) return 'задача';
+    if ([2, 3, 4].includes(count % 10) && ![12, 13, 14].includes(count % 100)) return 'задачи';
+    return 'задач';
+}
+
+function getShoppingDeclension(count) {
+    if (count % 10 === 1 && count % 100 !== 11) return 'товар';
+    if ([2, 3, 4].includes(count % 10) && ![12, 13, 14].includes(count % 100)) return 'товара';
+    return 'товаров';
+}
+
+// ============= دوال التاريخ =============
 function triggerDatePicker(inputId) {
     const input = document.getElementById(inputId);
     if (input) {
         try {
-            if (input.showPicker) {
-                input.showPicker();
-            } else {
-                input.focus();
-                input.click();
-            }
-        } catch(e) {
-            input.focus();
-        }
+            if (input.showPicker) input.showPicker();
+            else input.focus();
+        } catch(e) { input.focus(); }
     }
 }
 
@@ -112,7 +338,6 @@ function initializeAllDatePickers() {
     document.querySelectorAll('.date-input').forEach(input => {
         const newInput = input.cloneNode(true);
         input.parentNode.replaceChild(newInput, input);
-        
         const wrapper = newInput.closest('.date-field');
         if (wrapper) {
             wrapper.addEventListener('click', (e) => {
@@ -121,7 +346,6 @@ function initializeAllDatePickers() {
                 }
             });
         }
-        
         newInput.addEventListener('click', (e) => {
             e.stopPropagation();
             triggerDatePicker(newInput.id);
@@ -129,13 +353,67 @@ function initializeAllDatePickers() {
     });
 }
 
-// ============= ЗАГРУЗКА ДАННЫХ =============
+// ============= إدارة الشاشات =============
+const screens = {
+    login: document.getElementById('loginScreen'),
+    register: document.getElementById('registerScreen'),
+    main: document.getElementById('mainAppScreen')
+};
 
+function showScreen(screenName) {
+    Object.values(screens).forEach(s => s.classList.remove('active'));
+    screens[screenName].classList.add('active');
+    setTimeout(() => initializeAllDatePickers(), 100);
+}
+
+// ============= إدارة التبويبات =============
+function switchTab(tabId) {
+    document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
+    document.querySelectorAll('.tab-item').forEach(item => item.classList.remove('active'));
+    document.getElementById(`${tabId}Tab`).classList.add('active');
+    document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');
+    
+    if (tabId === 'tasks') renderTasks();
+    if (tabId === 'shopping') renderShopping();
+    if (tabId === 'expenses') renderExpenses();
+    if (tabId === 'schedule') { updateScheduleMemberFilter(); renderSchedules(); }
+    if (tabId === 'profile') updateProfile();
+}
+
+// ============= دوال البيانات =============
+function getCurrentFamily() {
+    if (!currentUser) return null;
+    return families.find(f => f.members && f.members.includes(currentUser.uniqueId));
+}
+
+function getCurrentMonthExpenses() {
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+    const family = getCurrentFamily();
+    const familyExpenses = expenses.filter(e => e.familyId === (family?.id || currentUser?.familyId));
+    return familyExpenses.filter(e => {
+        const date = new Date(e.date);
+        return date.getMonth() === currentMonth && date.getFullYear() === currentYear;
+    });
+}
+
+function getExpensesForMonth(year, month) {
+    const family = getCurrentFamily();
+    const familyExpenses = expenses.filter(e => e.familyId === (family?.id || currentUser?.familyId));
+    return familyExpenses.filter(e => {
+        const date = new Date(e.date);
+        return date.getMonth() === month && date.getFullYear() === year;
+    });
+}
+
+// ============= تحميل البيانات =============
 async function loadCurrentUser() {
     const result = await apiCall('/api/current_user');
     if (result.success && result.user) {
         currentUser = result.user;
         await loadAllData();
+        loadNotifications();
         return true;
     }
     return false;
@@ -170,75 +448,13 @@ async function loadAllData() {
     
     const settingsResult = await apiCall('/api/settings');
     if (settingsResult.success) settings = { ...settings, ...settingsResult.settings };
-}
-
-// ============= УПРАВЛЕНИЕ ЭКРАНАМИ =============
-
-const screens = {
-    login: document.getElementById('loginScreen'),
-    register: document.getElementById('registerScreen'),
-    main: document.getElementById('mainAppScreen')
-};
-
-function showScreen(screenName) {
-    Object.values(screens).forEach(s => s.classList.remove('active'));
-    screens[screenName].classList.add('active');
-    setTimeout(() => initializeAllDatePickers(), 100);
-}
-
-// ============= УПРАВЛЕНИЕ ВКЛАДКАМИ =============
-
-function switchTab(tabId) {
-    document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
-    document.querySelectorAll('.tab-item').forEach(item => item.classList.remove('active'));
-    document.getElementById(`${tabId}Tab`).classList.add('active');
-    document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');
     
-    if (tabId === 'tasks') renderTasks();
-    if (tabId === 'shopping') renderShopping();
-    if (tabId === 'expenses') renderExpenses();
-    if (tabId === 'schedule') {
-        updateScheduleMemberFilter();
-        renderSchedules();
-    }
-    if (tabId === 'profile') updateProfile();
+    // التحقق من التذكيرات
+    checkEventReminders();
+    checkDailyReminders();
 }
 
-// ============= ПОЛУЧЕНИЕ ТЕКУЩЕЙ СЕМЬИ =============
-
-function getCurrentFamily() {
-    if (!currentUser) return null;
-    return families.find(f => f.members && f.members.includes(currentUser.uniqueId));
-}
-
-// ============= РАСХОДЫ =============
-
-function getCurrentMonthExpenses() {
-    const now = new Date();
-    const currentMonth = now.getMonth();
-    const currentYear = now.getFullYear();
-    
-    const family = getCurrentFamily();
-    const familyExpenses = expenses.filter(e => e.familyId === (family?.id || currentUser?.familyId));
-    
-    return familyExpenses.filter(e => {
-        const date = new Date(e.date);
-        return date.getMonth() === currentMonth && date.getFullYear() === currentYear;
-    });
-}
-
-function getExpensesForMonth(year, month) {
-    const family = getCurrentFamily();
-    const familyExpenses = expenses.filter(e => e.familyId === (family?.id || currentUser?.familyId));
-    
-    return familyExpenses.filter(e => {
-        const date = new Date(e.date);
-        return date.getMonth() === month && date.getFullYear() === year;
-    });
-}
-
-// ============= ОБНОВЛЕНИЕ СТАТИСТИКИ =============
-
+// ============= تحديث الإحصائيات =============
 function updateStats() {
     const family = getCurrentFamily();
     const familyTasks = tasks.filter(t => t.familyId === (family?.id || currentUser?.familyId) && !t.completed);
@@ -253,7 +469,15 @@ function updateStats() {
     document.getElementById('monthlyExpenses').innerText = monthlyExpenses;
 }
 
-// ============= РЕНДЕР СОБЫТИЙ =============
+// ============= عرض الأحداث مع أيام متبقية =============
+function getDaysRemaining(dateString) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const eventDate = new Date(dateString);
+    eventDate.setHours(0, 0, 0, 0);
+    const diffDays = Math.ceil((eventDate - today) / (1000 * 60 * 60 * 24));
+    return diffDays;
+}
 
 function renderEvents() {
     const family = getCurrentFamily();
@@ -272,9 +496,24 @@ function renderEvents() {
         const monthNames = ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек'];
         const month = monthNames[eventDate.getMonth()];
         const person = event.personId ? users.find(u => u.uniqueId === event.personId) : null;
+        const daysRemaining = getDaysRemaining(event.date);
+        
+        let reminderText = '';
+        let reminderClass = '';
+        if (daysRemaining === 0) {
+            reminderText = '🎉 Сегодня!';
+            reminderClass = 'event-reminder-badge';
+        } else if (daysRemaining === 1) {
+            reminderText = '⚠️ Завтра!';
+            reminderClass = 'event-reminder-badge';
+        } else if (daysRemaining > 1 && daysRemaining <= 5) {
+            reminderText = `📅 Через ${daysRemaining} дня`;
+            reminderClass = 'event-reminder-badge';
+        }
         
         return `
             <div class="event-item" style="border-right-color: ${event.color || '#667eea'}">
+                ${reminderText ? `<div class="${reminderClass}">${reminderText}</div>` : ''}
                 <div class="event-date">
                     <div class="event-day">${day}</div>
                     <div class="event-month">${month}</div>
@@ -297,13 +536,13 @@ function renderEvents() {
             if (result.success) {
                 await loadAllData();
                 renderEvents();
+                addNotification('Событие удалено', 'Событие успешно удалено', 'info');
             }
         });
     });
 }
 
-// ============= РЕНДЕР ЧЛЕНОВ СЕМЬИ =============
-
+// ============= عرض أعضاء العائلة =============
 function renderFamilyMembers() {
     if (!currentUser) return;
     const family = getCurrentFamily();
@@ -338,8 +577,7 @@ function renderFamilyMembers() {
     }).join('');
 }
 
-// ============= РЕНДЕР ЗАДАЧ =============
-
+// ============= عرض المهام =============
 function renderTasks() {
     const family = getCurrentFamily();
     const familyTasks = tasks.filter(t => t.familyId === (family?.id || currentUser?.familyId));
@@ -363,19 +601,24 @@ function renderTasks() {
     document.querySelectorAll('.complete-btn').forEach(btn => {
         btn.addEventListener('click', async (e) => {
             const taskId = parseInt(btn.dataset.id);
-            const result = await apiCall(`/api/tasks/${taskId}`, 'PUT', { completed: true });
-            if (result.success) {
-                await loadAllData();
-                renderTasks();
-                updateStats();
-                addNotification('Задача выполнена', `Задача "${result.task.title}" выполнена`, 'success');
+            const task = tasks.find(t => t.id === taskId);
+            if (task) {
+                const result = await apiCall(`/api/tasks/${taskId}`, 'PUT', { completed: true });
+                if (result.success) {
+                    await loadAllData();
+                    renderTasks();
+                    updateStats();
+                    addNotification('✅ Задача выполнена', `Задача "${task.title}" выполнена!`, 'success', task.id, 'task');
+                    if (settings.taskReminders) {
+                        addNotification('Отлично!', `Вы выполнили задачу "${task.title}"`, 'success');
+                    }
+                }
             }
         });
     });
 }
 
-// ============= РЕНДЕР ПОКУПОК =============
-
+// ============= عرض المشتريات =============
 function renderShopping() {
     const family = getCurrentFamily();
     const familyShopping = shopping.filter(s => s.familyId === (family?.id || currentUser?.familyId));
@@ -399,19 +642,21 @@ function renderShopping() {
     document.querySelectorAll('.buy-btn').forEach(btn => {
         btn.addEventListener('click', async (e) => {
             const itemId = parseInt(btn.dataset.id);
-            const result = await apiCall(`/api/shopping/${itemId}`, 'PUT', { purchased: true });
-            if (result.success) {
-                await loadAllData();
-                renderShopping();
-                updateStats();
-                addNotification('Товар куплен', `Товар "${result.item.name}" куплен`, 'success');
+            const item = shopping.find(s => s.id === itemId);
+            if (item) {
+                const result = await apiCall(`/api/shopping/${itemId}`, 'PUT', { purchased: true });
+                if (result.success) {
+                    await loadAllData();
+                    renderShopping();
+                    updateStats();
+                    addNotification('🛍️ Товар куплен', `Товар "${item.name}" куплен!`, 'success', item.id, 'shopping');
+                }
             }
         });
     });
 }
 
-// ============= РЕНДЕР РАСХОДОВ =============
-
+// ============= عرض المصاريف =============
 function renderExpenses() {
     const family = getCurrentFamily();
     const familyExpenses = expenses.filter(e => e.familyId === (family?.id || currentUser?.familyId));
@@ -447,8 +692,7 @@ function renderExpenses() {
     });
 }
 
-// ============= РЕНДЕР РАСПИСАНИЯ =============
-
+// ============= عرض الجداول =============
 function renderSchedules() {
     const family = getCurrentFamily();
     const memberFilter = document.getElementById('scheduleMemberFilter').value;
@@ -459,10 +703,7 @@ function renderSchedules() {
     }
     
     const daysOrder = ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье'];
-    const sortedSchedules = [...familySchedules].sort((a, b) => {
-        return daysOrder.indexOf(a.day) - daysOrder.indexOf(b.day);
-    });
-    
+    const sortedSchedules = [...familySchedules].sort((a, b) => daysOrder.indexOf(a.day) - daysOrder.indexOf(b.day));
     const container = document.getElementById('scheduleList');
     
     if (sortedSchedules.length === 0) {
@@ -505,16 +746,13 @@ function updateScheduleMemberFilter() {
     const family = getCurrentFamily();
     const select = document.getElementById('scheduleMemberFilter');
     if (!family) return;
-    
     const familyMembers = users.filter(u => family.members && family.members.includes(u.uniqueId));
     select.innerHTML = '<option value="all">Все члены семьи</option>' + 
         familyMembers.map(m => `<option value="${m.uniqueId}">${escapeHtml(m.fullName)} (${m.role})</option>`).join('');
-    
     select.addEventListener('change', () => renderSchedules());
 }
 
-// ============= РЕНДЕР ЗАЯВОК =============
-
+// ============= عرض طلبات الانضمام =============
 function renderPendingRequests() {
     const family = getCurrentFamily();
     if (!family) return;
@@ -542,8 +780,9 @@ function renderPendingRequests() {
                 const reqId = parseInt(btn.dataset.id);
                 const request = pendingRequests.find(r => r.id === reqId);
                 if (request) {
+                    const requester = users.find(u => u.uniqueId === request.userId);
                     document.getElementById('approvalDetails').innerHTML = `
-                        <p style="margin-bottom: 12px;"><strong>${users.find(u => u.uniqueId === request.userId)?.fullName}</strong> хочет присоединиться к вашей семье</p>
+                        <p style="margin-bottom: 12px;"><strong>${requester?.fullName}</strong> хочет присоединиться к вашей семье</p>
                         <p>Роль: ${request.requestedRole}</p>
                     `;
                     window.currentRequestId = reqId;
@@ -556,8 +795,7 @@ function renderPendingRequests() {
     }
 }
 
-// ============= ОБНОВЛЕНИЕ ПРОФИЛЯ =============
-
+// ============= تحديث الملف الشخصي =============
 function updateProfile() {
     if (!currentUser) return;
     document.getElementById('profileName').innerText = currentUser.fullName;
@@ -588,8 +826,7 @@ function updateProfile() {
     }
 }
 
-// ============= ОБНОВЛЕНИЕ ГЛАВНОЙ ПАНЕЛИ =============
-
+// ============= تحديث لوحة التحكم =============
 function updateDashboard() {
     document.getElementById('dashboardUserName').innerHTML = currentUser.fullName.split(' ')[0];
     document.getElementById('dashboardUserRole').innerHTML = `Роль: ${currentUser.role}`;
@@ -599,14 +836,117 @@ function updateDashboard() {
     renderPendingRequests();
 }
 
-// ============= НАСТРОЙКИ =============
+// ============= دوال الانضمام إلى مجموعة =============
+function openJoinGroupModal() {
+    document.getElementById('inviteCode').value = '';
+    document.getElementById('joinUserName').value = '';
+    document.getElementById('joinUserRole').value = 'Сын';
+    document.getElementById('joinUserEmail').value = '';
+    document.getElementById('joinUserPhone').value = '';
+    document.getElementById('joinGroupModal').style.display = 'flex';
+}
 
+async function sendJoinRequest() {
+    const inviteCode = document.getElementById('inviteCode').value.trim();
+    const userName = document.getElementById('joinUserName').value.trim();
+    const userRole = document.getElementById('joinUserRole').value;
+    const userEmail = document.getElementById('joinUserEmail').value.trim();
+    const userPhone = document.getElementById('joinUserPhone').value.trim();
+    
+    if (!inviteCode) { alert('Пожалуйста, введите код приглашения'); return; }
+    if (!userName) { alert('Пожалуйста, введите ваше имя'); return; }
+    
+    const familiesResult = await apiCall('/api/families');
+    if (!familiesResult.success) { alert('Ошибка при поиске семьи'); return; }
+    
+    const family = familiesResult.families.find(f => f.id === inviteCode);
+    if (!family) { alert('Неверный код приглашения'); return; }
+    
+    if (currentUser && family.members.includes(currentUser.uniqueId)) {
+        alert('Вы уже являетесь членом этой семьи');
+        document.getElementById('joinGroupModal').style.display = 'none';
+        return;
+    }
+    
+    if (currentUser) {
+        const updatedUser = { ...currentUser, fullName: userName, role: userRole, email: userEmail || currentUser.email, phone: userPhone || currentUser.phone };
+        const updateResult = await apiCall(`/api/users/${currentUser.uniqueId}`, 'PUT', updatedUser);
+        if (updateResult.success) currentUser = updateResult.user;
+        
+        const requestResult = await apiCall('/api/requests', 'POST', {
+            familyId: family.id, userId: currentUser.uniqueId, requestedRole: userRole
+        });
+        
+        if (requestResult.success) {
+            alert(`Заявка на вступление в семью "${family.name}" отправлена!`);
+            document.getElementById('joinGroupModal').style.display = 'none';
+            addNotification('Заявка отправлена', `Заявка на вступление в семью "${family.name}" отправлена`, 'info');
+        }
+    } else {
+        const newId = generateUniqueID(userName);
+        const registerResult = await apiCall('/api/register', 'POST', {
+            uniqueId: newId, fullName: userName, role: userRole, email: userEmail, phone: userPhone, familyId: null
+        });
+        
+        if (registerResult.success) {
+            currentUser = registerResult.user;
+            const requestResult = await apiCall('/api/requests', 'POST', {
+                familyId: family.id, userId: currentUser.uniqueId, requestedRole: userRole
+            });
+            
+            if (requestResult.success) {
+                alert(`Аккаунт создан! Заявка на вступление в семью "${family.name}" отправлена!`);
+                document.getElementById('joinGroupModal').style.display = 'none';
+                await loadAllData();
+                showScreen('main');
+                switchTab('home');
+                updateDashboard();
+                updateProfile();
+                renderTasks();
+                renderShopping();
+                renderExpenses();
+                renderSchedules();
+                addNotification('Добро пожаловать!', `Аккаунт создан. Заявка отправлена`, 'success');
+            }
+        }
+    }
+}
+
+async function showInviteCode() {
+    const family = getCurrentFamily();
+    if (!family) { alert('У вас нет семьи. Сначала создайте семью.'); return; }
+    if (currentUser.role !== 'Отец' && currentUser.role !== 'Мать' && currentUser.role !== 'Муж') {
+        alert('Только глава семьи может создавать код приглашения');
+        return;
+    }
+    
+    document.getElementById('familyInviteCodeDisplay').innerText = family.id;
+    document.getElementById('inviteCodeModal').style.display = 'flex';
+}
+
+function copyInviteCode() {
+    const code = document.getElementById('familyInviteCodeDisplay').innerText;
+    navigator.clipboard.writeText(code);
+    alert('Код скопирован: ' + code);
+}
+
+function shareInviteCode() {
+    const code = document.getElementById('familyInviteCodeDisplay').innerText;
+    if (navigator.share) {
+        navigator.share({ title: 'Присоединяйтесь к моей семье!', text: `Код приглашения: ${code}` });
+    } else {
+        copyInviteCode();
+    }
+}
+
+// ============= إعدادات التطبيق =============
 function loadSettingsToModal() {
     document.getElementById('currencySelect').value = settings.currency;
     document.getElementById('homeAddress').value = settings.homeAddress || '';
     document.getElementById('monthlyBudget').value = settings.monthlyBudget || '';
     document.getElementById('taskReminders').checked = settings.taskReminders;
     document.getElementById('eventReminders').checked = settings.eventReminders;
+    document.getElementById('dailyReminders').checked = settings.dailyReminders;
     
     if (settings.monthlyBudget > 0) {
         const monthlyExpenses = getCurrentMonthExpenses().reduce((sum, e) => sum + e.amount, 0);
@@ -625,7 +965,8 @@ async function saveSettings() {
         homeAddress: document.getElementById('homeAddress').value,
         monthlyBudget: parseFloat(document.getElementById('monthlyBudget').value) || 0,
         taskReminders: document.getElementById('taskReminders').checked,
-        eventReminders: document.getElementById('eventReminders').checked
+        eventReminders: document.getElementById('eventReminders').checked,
+        dailyReminders: document.getElementById('dailyReminders').checked
     };
     
     const result = await apiCall('/api/settings', 'POST', newSettings);
@@ -638,36 +979,7 @@ async function saveSettings() {
     }
 }
 
-// ============= ПРИГЛАШЕНИЕ =============
-
-function shareInviteLink() {
-    const family = getCurrentFamily();
-    if (!family) {
-        alert('Ошибка. Пожалуйста, создайте семью сначала.');
-        return;
-    }
-    
-    const inviteCode = family.id;
-    
-    if (navigator.share) {
-        navigator.share({
-            title: 'Присоединяйтесь к моей семье в приложении Моя Семья',
-            text: `Используйте этот код для присоединения к моей семье: ${inviteCode}`,
-        }).catch(() => {
-            copyToClipboard(inviteCode);
-        });
-    } else {
-        copyToClipboard(inviteCode);
-    }
-}
-
-function copyToClipboard(text) {
-    navigator.clipboard.writeText(text);
-    alert('Код приглашения скопирован: ' + text);
-}
-
-// ============= ОТЧЕТ =============
-
+// ============= التقرير الشهري =============
 function showMonthlyReport() {
     const year = currentReportMonth.getFullYear();
     const month = currentReportMonth.getMonth();
@@ -682,32 +994,39 @@ function showMonthlyReport() {
     document.getElementById('reportRemaining').innerHTML = `${remaining} ${settings.currency}`;
     
     const categories = {};
-    monthExpenses.forEach(e => {
-        categories[e.category] = (categories[e.category] || 0) + e.amount;
-    });
+    monthExpenses.forEach(e => { categories[e.category] = (categories[e.category] || 0) + e.amount; });
     
     const categoriesHtml = Object.entries(categories).map(([cat, amount]) => `
-        <div class="category-item">
-            <span>${cat}</span>
-            <strong>${amount} ${settings.currency}</strong>
-        </div>
+        <div class="category-item"><span>${cat}</span><strong>${amount} ${settings.currency}</strong></div>
     `).join('');
     document.getElementById('reportCategories').innerHTML = categoriesHtml || '<p style="text-align:center; color:#8e8e93;">Нет расходов в этом месяце</p>';
     
     const transactionsHtml = monthExpenses.map(e => `
-        <div class="transaction-item">
-            <span>${escapeHtml(e.description)}</span>
-            <span>${e.amount} ${settings.currency}</span>
-        </div>
+        <div class="transaction-item"><span>${escapeHtml(e.description)}</span><span>${e.amount} ${settings.currency}</span></div>
     `).join('');
     document.getElementById('reportTransactions').innerHTML = transactionsHtml || '<p style="text-align:center; color:#8e8e93;">Нет транзакций</p>';
     
     document.getElementById('monthlyReportModal').style.display = 'flex';
 }
 
-// ============= ОБРАБОТЧИКИ СОБЫТИЙ =============
+// ============= طلب الإشعارات =============
+function requestNotificationPermission() {
+    if ('Notification' in window) {
+        Notification.requestPermission().then(permission => {
+            if (permission === 'granted') {
+                addNotification('Уведомления включены', 'Вы будете получать напоминания', 'success');
+            }
+        });
+    }
+}
 
-// Регистрация
+// ============= معالجو الأحداث =============
+document.addEventListener('DOMContentLoaded', () => {
+    requestNotificationPermission();
+    initializeAllDatePickers();
+});
+
+// تسجيل
 document.getElementById('submitRegisterBtn').addEventListener('click', async () => {
     const fullName = document.getElementById('regFullName').value.trim();
     const role = document.getElementById('regRole').value;
@@ -716,22 +1035,11 @@ document.getElementById('submitRegisterBtn').addEventListener('click', async () 
     const email = document.getElementById('regEmail').value.trim();
     const phone = document.getElementById('regPhone').value.trim();
     
-    if (!fullName) {
-        alert('Пожалуйста, введите полное имя');
-        return;
-    }
+    if (!fullName) { alert('Пожалуйста, введите полное имя'); return; }
     
     const newId = generateUniqueID(fullName);
-    
     const result = await apiCall('/api/register', 'POST', {
-        uniqueId: newId,
-        fullName,
-        role,
-        birthDate: birthDate || null,
-        bio,
-        email,
-        phone,
-        familyId: null
+        uniqueId: newId, fullName, role, birthDate: birthDate || null, bio, email, phone, familyId: null
     });
     
     if (result.success) {
@@ -753,10 +1061,9 @@ document.getElementById('submitRegisterBtn').addEventListener('click', async () 
     }
 });
 
-// Вход по ID
+// تسجيل الدخول
 document.getElementById('loginWithIdBtn').addEventListener('click', async () => {
     const enteredId = document.getElementById('loginUniqueId').value.trim();
-    
     const result = await apiCall('/api/login', 'POST', { userId: enteredId });
     
     if (result.success) {
@@ -776,18 +1083,14 @@ document.getElementById('loginWithIdBtn').addEventListener('click', async () => 
     }
 });
 
-// Социальный вход
+// تسجيل الدخول الاجتماعي
 function socialLoginMock(provider) {
     const name = prompt('Введите ваше имя:', `Пользователь ${provider}`);
     if (!name) return;
-    
     const role = prompt('Введите вашу роль (Отец, Мать, Сын, Дочь и т.д.):', 'Пользователь');
     
     apiCall('/api/login/social', 'POST', {
-        provider: provider,
-        email: `${provider.toLowerCase()}@example.com`,
-        name: name,
-        role: role || 'Пользователь'
+        provider, email: `${provider.toLowerCase()}@example.com`, name, role: role || 'Пользователь'
     }).then(async (result) => {
         if (result.success) {
             currentUser = result.user;
@@ -808,138 +1111,128 @@ function socialLoginMock(provider) {
 document.getElementById('socialApple').addEventListener('click', () => socialLoginMock('Apple'));
 document.getElementById('socialGoogle').addEventListener('click', () => socialLoginMock('Google'));
 
-// Присоединение к семье
-document.getElementById('joinFamilyBtn').addEventListener('click', () => {
-    if (!currentUser) {
-        alert('Пожалуйста, войдите в систему');
-        return;
-    }
-    document.getElementById('joinFamilyModal').style.display = 'flex';
+// أزرار الانضمام
+document.getElementById('openJoinGroupBtn').addEventListener('click', openJoinGroupModal);
+document.getElementById('confirmJoinGroupBtn').addEventListener('click', sendJoinRequest);
+document.getElementById('showInviteCodeBtn').addEventListener('click', showInviteCode);
+document.getElementById('copyInviteCodeBtn').addEventListener('click', copyInviteCode);
+document.getElementById('shareInviteCodeBtn').addEventListener('click', shareInviteCode);
+
+// أزرار المودالات
+document.querySelectorAll('.close-modal, .closeJoinGroup, .closeInviteCode, .closeEvent, .closeEditProfile, .closeNotifications, .closeSettings, .closeSchedule, .closeTask, .closeShopping, .closeExpense, .closeApproval, .closeReport, .closeUnique').forEach(el => {
+    el.addEventListener('click', () => { document.querySelectorAll('.modal').forEach(m => m.style.display = 'none'); });
 });
 
-document.getElementById('submitJoinRequest').addEventListener('click', async () => {
-    const familyCode = document.getElementById('familyCodeInput').value.trim();
-    const family = families.find(f => f.id === familyCode);
-    
-    if (family) {
-        if (family.members && family.members.includes(currentUser.uniqueId)) {
-            alert('Вы уже являетесь членом этой семьи');
-            document.getElementById('joinFamilyModal').style.display = 'none';
-            return;
-        }
-        
-        const existingRequest = pendingRequests.find(r => r.userId === currentUser.uniqueId && r.familyId === family.id);
-        if (existingRequest) {
-            alert('У вас уже есть ожидающая заявка');
-            return;
-        }
-        
-        const result = await apiCall('/api/requests', 'POST', {
-            familyId: family.id,
-            userId: currentUser.uniqueId,
-            requestedRole: currentUser.role
-        });
-        
-        if (result.success) {
-            alert('Заявка отправлена успешно, ожидайте одобрения');
-            document.getElementById('joinFamilyModal').style.display = 'none';
-            document.getElementById('familyCodeInput').value = '';
-            addNotification('Заявка отправлена', `Заявка на вступление в семью ${family.name} отправлена`, 'info');
-            await loadAllData();
-            renderPendingRequests();
-        }
-    } else {
-        alert('Неверный код семьи');
-    }
-});
-
-// Одобрение заявок
-document.getElementById('approveRequest').addEventListener('click', async () => {
-    const request = pendingRequests.find(r => r.id === window.currentRequestId);
-    if (request) {
-        const result = await apiCall(`/api/requests/${request.id}`, 'PUT', { status: 'approved' });
-        if (result.success) {
-            alert('Заявка одобрена');
-            document.getElementById('approvalModal').style.display = 'none';
-            await loadAllData();
-            if (currentUser.uniqueId === request.userId) {
-                currentUser.familyId = request.familyId;
-                updateDashboard();
-            }
-            renderFamilyMembers();
-            renderPendingRequests();
-            updateScheduleMemberFilter();
-            addNotification('Новый член семьи', `Пользователь присоединился к семье`, 'success');
-        }
-    }
-});
-
-document.getElementById('rejectRequest').addEventListener('click', async () => {
-    const request = pendingRequests.find(r => r.id === window.currentRequestId);
-    if (request) {
-        const result = await apiCall(`/api/requests/${request.id}`, 'PUT', { status: 'rejected' });
-        if (result.success) {
-            document.getElementById('approvalModal').style.display = 'none';
-            await loadAllData();
-            renderPendingRequests();
-            addNotification('Заявка отклонена', 'Заявка отклонена', 'warning');
-        }
-    }
-});
-
-// Пригласить члена семьи
-document.getElementById('inviteMemberBtn').addEventListener('click', shareInviteLink);
-
-// Уведомления
+// زر الإشعارات
 document.getElementById('notificationsBtn').addEventListener('click', () => {
+    renderNotifications();
     document.getElementById('notificationsModal').style.display = 'flex';
 });
 
-// Редактирование профиля
-document.getElementById('editProfileBtn').addEventListener('click', () => {
-    document.getElementById('editBirthDate').value = formatDateForInput(currentUser.birthDate);
-    document.getElementById('editBio').value = currentUser.bio || '';
-    document.getElementById('editEmail').value = currentUser.email || '';
-    document.getElementById('editPhone').value = currentUser.phone || '';
-    document.getElementById('editProfileModal').style.display = 'flex';
-    setTimeout(() => initializeAllDatePickers(), 100);
+// زر الإعدادات
+document.getElementById('settingsBtn').addEventListener('click', () => {
+    loadSettingsToModal();
+    document.getElementById('settingsModal').style.display = 'flex';
+});
+document.getElementById('saveSettingsBtn').addEventListener('click', saveSettings);
+
+// زر التقرير
+document.getElementById('monthlyReportBtn').addEventListener('click', showMonthlyReport);
+document.getElementById('prevMonth').addEventListener('click', () => { currentReportMonth.setMonth(currentReportMonth.getMonth() - 1); showMonthlyReport(); });
+document.getElementById('nextMonth').addEventListener('click', () => { currentReportMonth.setMonth(currentReportMonth.getMonth() + 1); showMonthlyReport(); });
+
+// زر الخروج
+document.getElementById('logoutBtnMain').addEventListener('click', async () => {
+    await apiCall('/api/logout', 'POST');
+    currentUser = null;
+    showScreen('login');
 });
 
-document.getElementById('saveProfileBtn').addEventListener('click', async () => {
-    const updatedUser = {
-        ...currentUser,
-        birthDate: document.getElementById('editBirthDate').value,
-        bio: document.getElementById('editBio').value,
-        email: document.getElementById('editEmail').value,
-        phone: document.getElementById('editPhone').value
-    };
-    
-    const result = await apiCall(`/api/users/${currentUser.uniqueId}`, 'PUT', updatedUser);
+// التنقل بين الشاشات
+document.getElementById('backFromRegister').addEventListener('click', () => showScreen('login'));
+document.getElementById('goToRegisterBtn').addEventListener('click', () => showScreen('register'));
+
+// نسخ ID
+document.getElementById('copyIdBtn').addEventListener('click', () => {
+    const idText = document.getElementById('generatedUniqueIdText').innerText;
+    navigator.clipboard.writeText(idText);
+    alert('ID скопирован');
+});
+
+// أزرار الإضافة
+document.getElementById('addTaskBtn').addEventListener('click', () => {
+    const family = getCurrentFamily();
+    const members = users.filter(u => family?.members?.includes(u.uniqueId));
+    const select = document.getElementById('taskAssignee');
+    select.innerHTML = '<option value="">Выберите ответственного</option>' + members.map(m => `<option value="${escapeHtml(m.fullName)}">${escapeHtml(m.fullName)} (${m.role})</option>`).join('');
+    document.getElementById('addTaskModal').style.display = 'flex';
+});
+
+document.getElementById('confirmAddTask').addEventListener('click', async () => {
+    const title = document.getElementById('taskTitle').value.trim();
+    const assignee = document.getElementById('taskAssignee').value;
+    if (!title) { alert('Введите название задачи'); return; }
+    const family = getCurrentFamily();
+    const result = await apiCall('/api/tasks', 'POST', { title, assignee, familyId: family.id, createdBy: currentUser.uniqueId });
     if (result.success) {
-        currentUser = result.user;
         await loadAllData();
-        updateProfile();
-        document.getElementById('editProfileModal').style.display = 'none';
-        addNotification('Профиль обновлен', 'Ваша информация обновлена успешно', 'success');
-        alert('Изменения сохранены');
+        renderTasks();
+        updateStats();
+        document.getElementById('addTaskModal').style.display = 'none';
+        document.getElementById('taskTitle').value = '';
+        addNotification('📋 Новая задача', `Добавлена задача: ${title}`, 'info', result.task.id, 'task');
     }
 });
 
-// Добавление события
+document.getElementById('addShoppingBtn').addEventListener('click', () => { document.getElementById('addShoppingModal').style.display = 'flex'; });
+document.getElementById('confirmAddShopping').addEventListener('click', async () => {
+    const name = document.getElementById('shoppingItem').value.trim();
+    const price = parseFloat(document.getElementById('shoppingPrice').value);
+    if (!name) { alert('Введите название товара'); return; }
+    const family = getCurrentFamily();
+    const result = await apiCall('/api/shopping', 'POST', { name, price: price || 0, familyId: family.id, createdBy: currentUser.uniqueId });
+    if (result.success) {
+        await loadAllData();
+        renderShopping();
+        updateStats();
+        document.getElementById('addShoppingModal').style.display = 'none';
+        document.getElementById('shoppingItem').value = '';
+        document.getElementById('shoppingPrice').value = '';
+        addNotification('🛒 Новый товар', `Добавлен товар: ${name}`, 'info', result.item.id, 'shopping');
+    }
+});
+
+document.getElementById('addExpenseBtn').addEventListener('click', () => { document.getElementById('addExpenseModal').style.display = 'flex'; });
+document.getElementById('confirmAddExpense').addEventListener('click', async () => {
+    const description = document.getElementById('expenseDesc').value.trim();
+    const amount = parseFloat(document.getElementById('expenseAmount').value);
+    const category = document.getElementById('expenseCategory').value;
+    if (!description) { alert('Введите описание расхода'); return; }
+    if (!amount || amount <= 0) { alert('Введите корректную сумму'); return; }
+    const family = getCurrentFamily();
+    const result = await apiCall('/api/expenses', 'POST', { description, amount, category, familyId: family.id, createdBy: currentUser.uniqueId, date: new Date().toISOString() });
+    if (result.success) {
+        await loadAllData();
+        renderExpenses();
+        updateStats();
+        document.getElementById('addExpenseModal').style.display = 'none';
+        document.getElementById('expenseDesc').value = '';
+        document.getElementById('expenseAmount').value = '';
+        addNotification('💰 Новый расход', `Добавлен расход: ${description} - ${amount} ${settings.currency}`, 'info', result.expense.id, 'expense');
+        if (settings.monthlyBudget > 0) {
+            const monthlyTotal = getCurrentMonthExpenses().reduce((sum, e) => sum + e.amount, 0);
+            if (monthlyTotal > settings.monthlyBudget) {
+                addNotification('⚠️ Предупреждение о бюджете', `Превышение месячного бюджета на ${monthlyTotal - settings.monthlyBudget} ${settings.currency}`, 'warning');
+            }
+        }
+    }
+});
+
 document.getElementById('addEventBtn').addEventListener('click', () => {
     const family = getCurrentFamily();
-    if (!family) {
-        alert('Сначала создайте семью');
-        return;
-    }
-    const familyMembers = users.filter(u => family.members && family.members.includes(u.uniqueId));
+    const familyMembers = users.filter(u => family?.members?.includes(u.uniqueId));
     const select = document.getElementById('eventPerson');
-    select.innerHTML = '<option value="">Выберите человека</option>' + 
-        familyMembers.map(m => `<option value="${m.uniqueId}">${escapeHtml(m.fullName)} (${m.role})</option>`).join('');
-    
-    const eventDateInput = document.getElementById('eventDate');
-    if (eventDateInput) eventDateInput.value = '';
-    
+    select.innerHTML = '<option value="">Выберите человека</option>' + familyMembers.map(m => `<option value="${m.uniqueId}">${escapeHtml(m.fullName)} (${m.role})</option>`).join('');
     document.getElementById('addEventModal').style.display = 'flex';
     setTimeout(() => initializeAllDatePickers(), 100);
 });
@@ -949,41 +1242,24 @@ document.getElementById('confirmAddEvent').addEventListener('click', async () =>
     const date = document.getElementById('eventDate').value;
     const personId = document.getElementById('eventPerson').value;
     const color = document.getElementById('eventColor').value;
-    
-    if (!title) {
-        alert('Введите название события');
-        return;
-    }
-    
-    if (!date) {
-        alert('Выберите дату события');
-        return;
-    }
-    
+    if (!title) { alert('Введите название события'); return; }
+    if (!date) { alert('Выберите дату события'); return; }
     const family = getCurrentFamily();
-    const result = await apiCall('/api/events', 'POST', {
-        title,
-        date,
-        personId: personId || null,
-        color,
-        familyId: family.id,
-        createdBy: currentUser.uniqueId
-    });
-    
+    const result = await apiCall('/api/events', 'POST', { title, date, personId: personId || null, color, familyId: family.id, createdBy: currentUser.uniqueId });
     if (result.success) {
         await loadAllData();
         renderEvents();
         document.getElementById('addEventModal').style.display = 'none';
         document.getElementById('eventTitle').value = '';
         document.getElementById('eventDate').value = '';
-        addNotification('Новое событие', `Добавлено событие: ${title}`, 'info');
+        addNotification('📅 Новое событие', `Добавлено событие: ${title}`, 'info', result.event.id, 'event');
+        checkEventReminders();
     }
 });
 
-// Добавление расписания
 document.getElementById('addScheduleBtn').addEventListener('click', () => {
     const family = getCurrentFamily();
-    const familyMembers = users.filter(u => family.members && family.members.includes(u.uniqueId));
+    const familyMembers = users.filter(u => family?.members?.includes(u.uniqueId));
     const select = document.getElementById('scheduleMember');
     select.innerHTML = familyMembers.map(m => `<option value="${m.uniqueId}">${escapeHtml(m.fullName)} (${m.role})</option>`).join('');
     document.getElementById('addScheduleModal').style.display = 'flex';
@@ -995,201 +1271,76 @@ document.getElementById('confirmAddSchedule').addEventListener('click', async ()
     const day = document.getElementById('scheduleDay').value;
     const time = document.getElementById('scheduleTime').value;
     const location = document.getElementById('scheduleLocation').value.trim();
-    
-    if (!memberId || !title) {
-        alert('Выберите человека и введите название');
-        return;
-    }
-    
+    if (!memberId || !title) { alert('Выберите человека и введите название'); return; }
     const family = getCurrentFamily();
-    const result = await apiCall('/api/schedules', 'POST', {
-        memberId,
-        title,
-        day,
-        time,
-        location,
-        familyId: family.id,
-        createdBy: currentUser.uniqueId
-    });
-    
+    const result = await apiCall('/api/schedules', 'POST', { memberId, title, day, time, location, familyId: family.id, createdBy: currentUser.uniqueId });
     if (result.success) {
         await loadAllData();
         renderSchedules();
         document.getElementById('addScheduleModal').style.display = 'none';
         document.getElementById('scheduleTitle').value = '';
         document.getElementById('scheduleLocation').value = '';
-        addNotification('Новая запись', `Добавлена запись в расписание: ${title}`, 'info');
+        addNotification('📅 Новая запись', `Добавлена запись в расписание: ${title}`, 'info', result.schedule.id, 'schedule');
     }
 });
 
-// Добавление задачи
-document.getElementById('addTaskBtn').addEventListener('click', () => {
-    const family = getCurrentFamily();
-    const members = users.filter(u => family.members && family.members.includes(u.uniqueId));
-    const select = document.getElementById('taskAssignee');
-    select.innerHTML = '<option value="">Выберите ответственного</option>' + 
-        members.map(m => `<option value="${escapeHtml(m.fullName)}">${escapeHtml(m.fullName)} (${m.role})</option>`).join('');
-    document.getElementById('addTaskModal').style.display = 'flex';
+document.getElementById('editProfileBtn').addEventListener('click', () => {
+    document.getElementById('editBirthDate').value = formatDateForInput(currentUser.birthDate);
+    document.getElementById('editBio').value = currentUser.bio || '';
+    document.getElementById('editEmail').value = currentUser.email || '';
+    document.getElementById('editPhone').value = currentUser.phone || '';
+    document.getElementById('editProfileModal').style.display = 'flex';
+    setTimeout(() => initializeAllDatePickers(), 100);
 });
 
-document.getElementById('confirmAddTask').addEventListener('click', async () => {
-    const title = document.getElementById('taskTitle').value.trim();
-    const assignee = document.getElementById('taskAssignee').value;
-    if (!title) {
-        alert('Введите название задачи');
-        return;
-    }
-    
-    const family = getCurrentFamily();
-    const result = await apiCall('/api/tasks', 'POST', {
-        title,
-        assignee,
-        familyId: family.id,
-        createdBy: currentUser.uniqueId
-    });
-    
+document.getElementById('saveProfileBtn').addEventListener('click', async () => {
+    const updatedUser = { ...currentUser, birthDate: document.getElementById('editBirthDate').value, bio: document.getElementById('editBio').value, email: document.getElementById('editEmail').value, phone: document.getElementById('editPhone').value };
+    const result = await apiCall(`/api/users/${currentUser.uniqueId}`, 'PUT', updatedUser);
     if (result.success) {
+        currentUser = result.user;
         await loadAllData();
-        renderTasks();
-        updateStats();
-        document.getElementById('addTaskModal').style.display = 'none';
-        document.getElementById('taskTitle').value = '';
-        addNotification('Новая задача', `Добавлена задача: ${title}`, 'info');
+        updateProfile();
+        document.getElementById('editProfileModal').style.display = 'none';
+        addNotification('Профиль обновлен', 'Ваша информация обновлена успешно', 'success');
+        alert('Изменения сохранены');
     }
 });
 
-// Добавление покупки
-document.getElementById('addShoppingBtn').addEventListener('click', () => {
-    document.getElementById('addShoppingModal').style.display = 'flex';
-});
-
-document.getElementById('confirmAddShopping').addEventListener('click', async () => {
-    const name = document.getElementById('shoppingItem').value.trim();
-    const price = parseFloat(document.getElementById('shoppingPrice').value);
-    if (!name) {
-        alert('Введите название товара');
-        return;
-    }
-    
-    const family = getCurrentFamily();
-    const result = await apiCall('/api/shopping', 'POST', {
-        name,
-        price: price || 0,
-        familyId: family.id,
-        createdBy: currentUser.uniqueId
-    });
-    
-    if (result.success) {
-        await loadAllData();
-        renderShopping();
-        updateStats();
-        document.getElementById('addShoppingModal').style.display = 'none';
-        document.getElementById('shoppingItem').value = '';
-        document.getElementById('shoppingPrice').value = '';
-        addNotification('Новый товар', `Добавлен товар: ${name}`, 'info');
-    }
-});
-
-// Добавление расхода
-document.getElementById('addExpenseBtn').addEventListener('click', () => {
-    document.getElementById('addExpenseModal').style.display = 'flex';
-});
-
-document.getElementById('confirmAddExpense').addEventListener('click', async () => {
-    const description = document.getElementById('expenseDesc').value.trim();
-    const amount = parseFloat(document.getElementById('expenseAmount').value);
-    const category = document.getElementById('expenseCategory').value;
-    
-    if (!description) {
-        alert('Введите описание расхода');
-        return;
-    }
-    if (!amount || amount <= 0) {
-        alert('Введите корректную сумму');
-        return;
-    }
-    
-    const family = getCurrentFamily();
-    const result = await apiCall('/api/expenses', 'POST', {
-        description,
-        amount,
-        category,
-        familyId: family.id,
-        createdBy: currentUser.uniqueId,
-        date: new Date().toISOString()
-    });
-    
-    if (result.success) {
-        await loadAllData();
-        renderExpenses();
-        updateStats();
-        document.getElementById('addExpenseModal').style.display = 'none';
-        document.getElementById('expenseDesc').value = '';
-        document.getElementById('expenseAmount').value = '';
-        addNotification('Новый расход', `Добавлен расход: ${description} - ${amount} ${settings.currency}`, 'info');
-        
-        if (settings.monthlyBudget > 0) {
-            const monthlyTotal = getCurrentMonthExpenses().reduce((sum, e) => sum + e.amount, 0);
-            if (monthlyTotal > settings.monthlyBudget) {
-                addNotification('Предупреждение о бюджете', `Превышение месячного бюджета на ${monthlyTotal - settings.monthlyBudget} ${settings.currency}`, 'warning');
-            }
+document.getElementById('approveRequest').addEventListener('click', async () => {
+    const request = pendingRequests.find(r => r.id === window.currentRequestId);
+    if (request) {
+        const result = await apiCall(`/api/requests/${request.id}`, 'PUT', { status: 'approved' });
+        if (result.success) {
+            alert('Заявка одобрена');
+            document.getElementById('approvalModal').style.display = 'none';
+            await loadAllData();
+            renderFamilyMembers();
+            renderPendingRequests();
+            updateScheduleMemberFilter();
+            addNotification('👨‍👩‍👧 Новый член семьи', `Пользователь присоединился к семье`, 'success');
         }
     }
 });
 
-// Настройки
-document.getElementById('settingsBtn').addEventListener('click', () => {
-    loadSettingsToModal();
-    document.getElementById('settingsModal').style.display = 'flex';
+document.getElementById('rejectRequest').addEventListener('click', async () => {
+    const request = pendingRequests.find(r => r.id === window.currentRequestId);
+    if (request) {
+        await apiCall(`/api/requests/${request.id}`, 'PUT', { status: 'rejected' });
+        document.getElementById('approvalModal').style.display = 'none';
+        await loadAllData();
+        renderPendingRequests();
+        addNotification('Заявка отклонена', 'Заявка отклонена', 'warning');
+    }
 });
 
-document.getElementById('saveSettingsBtn').addEventListener('click', saveSettings);
+document.getElementById('inviteMemberBtn').addEventListener('click', showInviteCode);
 
-// Ежемесячный отчет
-document.getElementById('monthlyReportBtn').addEventListener('click', showMonthlyReport);
-document.getElementById('prevMonth').addEventListener('click', () => {
-    currentReportMonth.setMonth(currentReportMonth.getMonth() - 1);
-    showMonthlyReport();
-});
-document.getElementById('nextMonth').addEventListener('click', () => {
-    currentReportMonth.setMonth(currentReportMonth.getMonth() + 1);
-    showMonthlyReport();
-});
-
-// Переключение вкладок
+// التبويبات
 document.querySelectorAll('.tab-item').forEach(tab => {
-    tab.addEventListener('click', () => {
-        const tabId = tab.dataset.tab;
-        switchTab(tabId);
-    });
+    tab.addEventListener('click', () => { switchTab(tab.dataset.tab); });
 });
 
-// Выход
-document.getElementById('logoutBtnMain').addEventListener('click', async () => {
-    await apiCall('/api/logout', 'POST');
-    currentUser = null;
-    showScreen('login');
-});
-
-// Навигация
-document.getElementById('backFromRegister').addEventListener('click', () => showScreen('login'));
-document.getElementById('goToRegisterBtn').addEventListener('click', () => showScreen('register'));
-
-// Копирование ID
-document.getElementById('copyIdBtn').addEventListener('click', () => {
-    const idText = document.getElementById('generatedUniqueIdText').innerText;
-    navigator.clipboard.writeText(idText);
-    alert('ID скопирован');
-});
-
-// Закрытие модальных окон
-document.querySelectorAll('.close-modal, .closeTask, .closeShopping, .closeExpense, .closeEvent, .closeSchedule, .closeInvite, .closeJoin, .closeApproval, .closeUnique, .closeSettings, .closeReport, .closeNotifications, .closeEditProfile').forEach(el => {
-    el.addEventListener('click', () => {
-        document.querySelectorAll('.modal').forEach(m => m.style.display = 'none');
-    });
-});
-
-// Инициализация
+// التهيئة
 async function init() {
     const loggedIn = await loadCurrentUser();
     if (loggedIn) {
@@ -1205,6 +1356,7 @@ async function init() {
         showScreen('login');
     }
     setTimeout(() => initializeAllDatePickers(), 200);
+    setInterval(() => { checkEventReminders(); checkDailyReminders(); }, 3600000); // كل ساعة
 }
 
 init();
