@@ -365,6 +365,7 @@ body {
 .header-actions {
     display: flex;
     gap: 8px;
+    position: relative;
 }
 
 .icon-btn {
@@ -377,11 +378,31 @@ body {
     cursor: pointer;
     font-size: 18px;
     transition: all 0.2s;
+    position: relative;
 }
 
 .icon-btn:hover {
     background: #f8f9fc;
     transform: scale(0.95);
+}
+
+/* Badge для уведомлений */
+.notification-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #ff3b30;
+    color: white;
+    font-size: 10px;
+    font-weight: 600;
+    min-width: 18px;
+    height: 18px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 4px;
+    border: 2px solid white;
 }
 
 /* Сетка статистики */
@@ -492,6 +513,19 @@ body {
     background: #f8f9fc;
     border-radius: 16px;
     border-right: 4px solid;
+    position: relative;
+}
+
+.event-reminder-badge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: #ff9500;
+    color: white;
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 20px;
+    font-weight: 500;
 }
 
 .event-date {
@@ -1225,6 +1259,8 @@ input:checked + .toggle-slider:before {
     display: flex;
     flex-direction: column;
     gap: 12px;
+    max-height: 400px;
+    overflow-y: auto;
 }
 
 .notification-item {
@@ -1232,17 +1268,64 @@ input:checked + .toggle-slider:before {
     background: #f8f9fc;
     border-radius: 14px;
     border-right: 3px solid #667eea;
+    transition: all 0.2s;
+}
+
+.notification-item.unread {
+    background: #fff5e6;
+    border-right-color: #ff9500;
+}
+
+.notification-item.success {
+    border-right-color: #34c759;
+}
+
+.notification-item.warning {
+    border-right-color: #ff9500;
+    background: #fff8e8;
+}
+
+.notification-item.info {
+    border-right-color: #667eea;
 }
 
 .notification-title {
-    font-weight: 500;
+    font-weight: 600;
     color: #1c1c1e;
     margin-bottom: 4px;
+    font-size: 14px;
+}
+
+.notification-message {
+    font-size: 12px;
+    color: #6c6c70;
+    margin: 4px 0;
 }
 
 .notification-date {
-    font-size: 11px;
+    font-size: 10px;
     color: #8e8e93;
+    margin-top: 6px;
+}
+
+.notification-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.mark-read-btn {
+    background: none;
+    border: none;
+    color: #667eea;
+    font-size: 11px;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 12px;
+}
+
+.mark-read-btn:hover {
+    background: rgba(102, 126, 234, 0.1);
 }
 
 /* Кнопки подтверждения */
