@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+    <title>Моя Семья - Семейный менеджер</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="background-gradient"></div>
+
+    <div class="app-container" id="appContainer">
+        <!-- Экран входа -->
+        <div id="loginScreen" class="screen active">
+            <div class="iphone-card login-card">
+                <div class="logo-area">
+                    <div class="logo-icon">
+                        <i class="fas fa-house-chimney-user"></i>
+                    </div>
+                    <h1>Моя Семья</h1>
+                    <p>Управляйте семейными делами с умом</p>
+                </div>
+                
+                <div class="social-login">
+                    <button class="social-btn apple" id="socialApple">
+                        <i class="fab fa-apple"></i>
+                        <span>Apple</span>
+                    </button>
+                    <button class="social-btn google" id="socialGoogle">
+                        <i class="fab fa-google"></i>
+                        <span>Google</span>
+                    </button>
+                </div>
+                
+                <div class="divider">
+                    <span>или</span>
+                </div>
+                
+                <div class="input-field">
+                    <i class="fas fa-qrcode"></i>
+                    <input type="text" id="loginUniqueId" placeholder="Уникальный ID">
+                </div>
+                
+                <button class="primary-btn" id="loginWithIdBtn">Войти</button>
+                
+                <div class="auth-footer">
+                    <button class="text-btn" id="goToRegisterBtn">Создать аккаунт</button>
+                    <button class="text-btn" id="joinFamilyBtn">Присоединиться к семье</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Регистрация -->
+        <div id="registerScreen" class="screen">
+            <div class="iphone-card register-card">
+                <div class="screen-header">
+                    <button class="back-btn" id="backFromRegister">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <h2>Новый аккаунт</h2>
+                    <div style="width: 32px;"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Полное имя</label>
+                    <div class="input-field">
+                        <i class="fas fa-user"></i>
+                        <input type="text" id="regFullName" placeholder="Введите ваше полное имя">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Ваша роль в семье</label>
+                    <div class="input-field">
+                        <i class="fas fa-users"></i>
+                        <select id="regRole">
+                            <option value="Отец">Отец</option>
+                            <option value="Мать">Мать</option>
+                            <option value="Муж">Муж</option>
+                            <option value="Жена">Жена</option>
+                            <option value="Сын">Сын</option>
+                            <option value="Дочь">Дочь</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Дата рождения</label>
+                    <div class="date-wrapper">
+                        <div class="input-field date-field">
+                            <i class="fas fa-cake-candles"></i>
+                            <input type="date" id="regBirthDate" class="date-input" placeholder="Выберите дату">
+                            <button type="button" class="date-picker-trigger" onclick="triggerDatePicker('regBirthDate')">
+                                <i class="fas fa-calendar-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>О себе</label>
+                    <div class="input-field">
+                        <i class="fas fa-pen"></i>
+                        <textarea id="regBio" rows="2" placeholder="Напишите немного о себе..."></textarea>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Email</label>
+                    <div class="input-field">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" id="regEmail" placeholder="example@email.com">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Телефон</label>
+                    <div class="input-field">
+                        <i class="fas fa-phone"></i>
+                        <input type="tel" id="regPhone" placeholder="+7 999 123-45-67">
+                    </div>
+                </div>
+                
+                <button class="primary-btn" id="submitRegisterBtn">Создать аккаунт</button>
+                <p class="note-text">Вы получите уникальный ID для входа</p>
+            </div>
+        </div>
+
+        <!-- Главное приложение -->
+        <div id="mainAppScreen" class="screen">
+            <div class="main-container">
+                <div class="content-area" id="tabContent">
+                    <!-- Главная вкладка -->
+                    <div class="tab-pane active" id="homeTab">
+                        <div class="welcome-header">
+                            <div class="user-info">
+                                <div class="avatar">
+                                    <i class="fas fa-user-circle"></i>
+                                </div>
+                                <div class="user-text">
+                                    <h2 id="dashboardUserName">Здравствуйте, Пользователь</h2>
+                                    <p id="dashboardUserRole">Роль: ---</p>
+                                </div>
+                            </div>
+                            <div class="header-actions">
+                                <button class="icon-btn" id="notificationsBtn">
+                                    <i class="fas fa-bell"></i>
+                                </button>
+                                <button class="icon-btn" id="settingsBtn">
+                                    <i class="fas fa-gear"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Статистика -->
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-icon">
+                                    <i class="fas fa-tasks"></i>
+                                </div>
+                                <div class="stat-value" id="pendingTasksCount">0</div>
+                                <div class="stat-label">Ожидающих задач</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon">
+                                    <i class="fas fa-cart-shopping"></i>
+                                </div>
+                                <div class="stat-value" id="pendingShoppingCount">0</div>
+                                <div class="stat-label">Покупок</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon">
+                                    <i class="fas fa-wallet"></i>
+                                </div>
+                                <div class="stat-value" id="totalExpenses">0</div>
+                                <div class="stat-label">Всего расходов</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon">
+                                    <i class="fas fa-calendar-week"></i>
+                                </div>
+                                <div class="stat-value" id="monthlyExpenses">0</div>
+                                <div class="stat-label">В этом месяце</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Важные события -->
+                        <div class="section-card">
+                            <div class="section-header">
+                                <h3><i class="fas fa-calendar-star"></i> Важные события</h3>
+                                <button class="small-btn" id="addEventBtn">
+                                    <i class="fas fa-plus"></i> Добавить
+                                </button>
+                            </div>
+                            <div class="events-list" id="eventsList"></div>
+                        </div>
+                        
+                        <!-- Члены семьи -->
+                        <div class="section-card">
+                            <div class="section-header">
+                                <h3><i class="fas fa-people-group"></i> Члены семьи</h3>
+                                <button class="small-btn" id="inviteMemberBtn">
+                                    <i class="fas fa-share-nodes"></i> Пригласить
+                                </button>
+                            </div>
+                            <div class="family-list" id="familyMembersList"></div>
+                        </div>
+                        
+                        <!-- Заявки на вступление -->
+                        <div class="section-card" id="pendingApprovalsSection" style="display: none;">
+                            <div class="section-header">
+                                <h3><i class="fas fa-bell"></i> Заявки на вступление</h3>
+                            </div>
+                            <div id="pendingRequestsList"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Задачи -->
+                    <div class="tab-pane" id="tasksTab">
+                        <div class="page-header">
+                            <h2>Задачи</h2>
+                            <button class="add-btn" id="addTaskBtn">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                        <div class="tasks-list" id="tasksList"></div>
+                    </div>
+                    
+                    <!-- Покупки -->
+                    <div class="tab-pane" id="shoppingTab">
+                        <div class="page-header">
+                            <h2>Покупки</h2>
+                            <button class="add-btn" id="addShoppingBtn">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                        <div class="shopping-list" id="shoppingList"></div>
+                    </div>
+                    
+                    <!-- Расписание -->
+                    <div class="tab-pane" id="scheduleTab">
+                        <div class="page-header">
+                            <h2><i class="fas fa-calendar-week"></i> Расписание</h2>
+                            <button class="add-btn" id="addScheduleBtn">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                        <div class="schedule-filters">
+                            <select id="scheduleMemberFilter" class="filter-select">
+                                <option value="all">Все члены семьи</option>
+                            </select>
+                        </div>
+                        <div class="schedule-list" id="scheduleList"></div>
+                    </div>
+                    
+                    <!-- Расходы -->
+                    <div class="tab-pane" id="expensesTab">
+                        <div class="page-header">
+                            <h2>Расходы</h2>
+                            <button class="add-btn" id="addExpenseBtn">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                        <div class="report-bar">
+                            <button class="report-btn" id="monthlyReportBtn">
+                                <i class="fas fa-calendar-alt"></i> Отчет за текущий месяц
+                            </button>
+                        </div>
+                        <div class="expenses-list" id="expensesList"></div>
+                    </div>
+                    
+                    <!-- Профиль -->
+                    <div class="tab-pane" id="profileTab">
+                        <div class="profile-card">
+                            <div class="profile-avatar">
+                                <i class="fas fa-user-circle"></i>
+                            </div>
+                            <h3 id="profileName">Имя</h3>
+                            <p class="profile-role" id="profileRole">Роль</p>
+                            <p class="profile-id" id="profileId">ID: ---</p>
+                            <p class="profile-age" id="profileAge"></p>
+                            
+                            <div class="profile-bio" id="profileBio">
+                                <i class="fas fa-quote-right"></i>
+                                <span>О себе</span>
+                            </div>
+                            
+                            <div class="profile-details">
+                                <div class="detail-row">
+                                    <i class="fas fa-cake-candles"></i>
+                                    <span id="profileBirthDate">Дата рождения: ---</span>
+                                </div>
+                                <div class="detail-row">
+                                    <i class="fas fa-envelope"></i>
+                                    <span id="profileEmail">Email</span>
+                                </div>
+                                <div class="detail-row">
+                                    <i class="fas fa-phone"></i>
+                                    <span id="profilePhone">Телефон</span>
+                                </div>
+                            </div>
+                            
+                            <button class="edit-profile-btn" id="editProfileBtn">
+                                <i class="fas fa-pen"></i> Редактировать профиль
+                            </button>
+                            <button class="logout-btn" id="logoutBtnMain">
+                                <i class="fas fa-sign-out-alt"></i> Выйти
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Нижняя панель -->
+                <div class="tab-bar">
+                    <div class="tab-item active" data-tab="home">
+                        <i class="fas fa-house"></i>
+                        <span>Главная</span>
+                    </div>
+                    <div class="tab-item" data-tab="tasks">
+                        <i class="fas fa-list-check"></i>
+                        <span>Задачи</span>
+                    </div>
+                    <div class="tab-item" data-tab="shopping">
+                        <i class="fas fa-cart-shopping"></i>
+                        <span>Покупки</span>
+                    </div>
+                    <div class="tab-item" data-tab="schedule">
+                        <i class="fas fa-calendar-week"></i>
+                        <span>Расписание</span>
+                    </div>
+                    <div class="tab-item" data-tab="expenses">
+                        <i class="fas fa-wallet"></i>
+                        <span>Расходы</span>
+                    </div>
+                    <div class="tab-item" data-tab="profile">
+                        <i class="fas fa-person"></i>
+                        <span>Профиль</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Модальные окна -->
+    <div id="addEventModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Добавить событие</h3>
+                <span class="close-modal closeEvent">&times;</span>
+            </div>
+            <div class="input-field">
+                <i class="fas fa-calendar-day"></i>
+                <input type="text" id="eventTitle" placeholder="Название события">
+            </div>
+            <div class="date-wrapper">
+                <div class="input-field date-field">
+                    <i class="fas fa-calendar-alt"></i>
+                    <input type="date" id="eventDate" class="date-input" placeholder="Выберите дату">
+                    <button type="button" class="date-picker-trigger" onclick="triggerDatePicker('eventDate')">
+                        <i class="fas fa-calendar-alt"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="input-field">
+                <i class="fas fa-users"></i>
+                <select id="eventPerson">
+                    <option value="">Выберите человека</option>
+                </select>
+            </div>
+            <div class="input-field">
+                <i class="fas fa-palette"></i>
+                <select id="eventColor">
+                    <option value="#667eea">Фиолетовый</option>
+                    <option value="#34c759">Зеленый</option>
+                    <option value="#ff9500">Оранжевый</option>
+                    <option value="#ff3b30">Красный</option>
+                    <option value="#af52de">Пурпурный</option>
+                    <option value="#007aff">Синий</option>
+                </select>
+            </div>
+            <button class="primary-btn" id="confirmAddEvent">Добавить</button>
+        </div>
+    </div>
+    
+    <div id="editProfileModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Редактировать профиль</h3>
+                <span class="close-modal closeEditProfile">&times;</span>
+            </div>
+            <div class="date-wrapper">
+                <div class="input-field date-field">
+                    <i class="fas fa-cake-candles"></i>
+                    <input type="date" id="editBirthDate" class="date-input" placeholder="Дата рождения">
+                    <button type="button" class="date-picker-trigger" onclick="triggerDatePicker('editBirthDate')">
+                        <i class="fas fa-calendar-alt"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="input-field">
+                <i class="fas fa-pen"></i>
+                <textarea id="editBio" rows="3" placeholder="О себе..."></textarea>
+            </div>
+            <div class="input-field">
+                <i class="fas fa-envelope"></i>
+                <input type="email" id="editEmail" placeholder="Email">
+            </div>
+            <div class="input-field">
+                <i class="fas fa-phone"></i>
+                <input type="tel" id="editPhone" placeholder="Телефон">
+            </div>
+            <button class="primary-btn" id="saveProfileBtn">Сохранить</button>
+        </div>
+    </div>
+    
+    <div id="notificationsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-bell"></i> Уведомления</h3>
+                <span class="close-modal closeNotifications">&times;</span>
+            </div>
+            <div id="notificationsList" class="notifications-list"></div>
+        </div>
+    </div>
+    
+    <div id="settingsModal" class="modal">
+        <div class="modal-content settings-modal">
+            <div class="modal-header">
+                <h3><i class="fas fa-sliders-h"></i> Настройки</h3>
+                <span class="close-modal closeSettings">&times;</span>
+            </div>
+            <div class="settings-section">
+                <h4>Валюта</h4>
+                <div class="input-field">
+                    <i class="fas fa-coins"></i>
+                    <select id="currencySelect">
+                        <option value="₽">Российский рубль (₽)</option>
+                        <option value="$">Доллар США ($)</option>
+                        <option value="€">Евро (€)</option>
+                        <option value="ر.س">Саудовский риал (ر.س)</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="settings-section">
+                <h4>Домашний адрес</h4>
+                <div class="input-field">
+                    <i class="fas fa-location-dot"></i>
+                    <input type="text" id="homeAddress" placeholder="Введите домашний адрес">
+                </div>
+            </div>
+            
+            <div class="settings-section">
+                <h4>Месячный бюджет</h4>
+                <div class="input-field">
+                    <i class="fas fa-chart-line"></i>
+                    <input type="number" id="monthlyBudget" placeholder="Месячный бюджет">
+                </div>
+                <p class="budget-info" id="budgetStatus"></p>
+            </div>
+            
+            <div class="settings-section">
+                <h4>Уведомления</h4>
+                <div class="toggle-setting">
+                    <span>Напоминания о задачах</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="taskReminders">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                <div class="toggle-setting">
+                    <span>Напоминания о событиях</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="eventReminders">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+            
+            <button class="primary-btn" id="saveSettingsBtn">Сохранить</button>
+        </div>
+    </div>
+    
+    <div id="addScheduleModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Добавить в расписание</h3>
+                <span class="close-modal closeSchedule">&times;</span>
+            </div>
+            <div class="input-field">
+                <i class="fas fa-user"></i>
+                <select id="scheduleMember">
+                    <option value="">Выберите человека</option>
+                </select>
+            </div>
+            <div class="input-field">
+                <i class="fas fa-tag"></i>
+                <input type="text" id="scheduleTitle" placeholder="Название (работа, учеба)">
+            </div>
+            <div class="input-field">
+                <i class="fas fa-calendar-week"></i>
+                <select id="scheduleDay">
+                    <option value="Понедельник">Понедельник</option>
+                    <option value="Вторник">Вторник</option>
+                    <option value="Среда">Среда</option>
+                    <option value="Четверг">Четверг</option>
+                    <option value="Пятница">Пятница</option>
+                    <option value="Суббота">Суббота</option>
+                    <option value="Воскресенье">Воскресенье</option>
+                </select>
+            </div>
+            <div class="input-field">
+                <i class="fas fa-clock"></i>
+                <input type="time" id="scheduleTime" value="09:00">
+            </div>
+            <div class="input-field">
+                <i class="fas fa-location-dot"></i>
+                <input type="text" id="scheduleLocation" placeholder="Место">
+            </div>
+            <button class="primary-btn" id="confirmAddSchedule">Добавить</button>
+        </div>
+    </div>
+    
+    <div id="addTaskModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Новая задача</h3>
+                <span class="close-modal closeTask">&times;</span>
+            </div>
+            <div class="input-field">
+                <i class="fas fa-pencil"></i>
+                <input type="text" id="taskTitle" placeholder="Название задачи">
+            </div>
+            <select id="taskAssignee" class="modal-select">
+                <option value="">Выберите ответственного</option>
+            </select>
+            <button class="primary-btn" id="confirmAddTask">Добавить</button>
+        </div>
+    </div>
+    
+    <div id="addShoppingModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Новый товар</h3>
+                <span class="close-modal closeShopping">&times;</span>
+            </div>
+            <div class="input-field">
+                <i class="fas fa-tag"></i>
+                <input type="text" id="shoppingItem" placeholder="Название товара">
+            </div>
+            <div class="input-field">
+                <i class="fas fa-money-bill"></i>
+                <input type="number" id="shoppingPrice" placeholder="Цена">
+            </div>
+            <button class="primary-btn" id="confirmAddShopping">Добавить</button>
+        </div>
+    </div>
+    
+    <div id="addExpenseModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Новый расход</h3>
+                <span class="close-modal closeExpense">&times;</span>
+            </div>
+            <div class="input-field">
+                <i class="fas fa-receipt"></i>
+                <input type="text" id="expenseDesc" placeholder="Описание">
+            </div>
+            <div class="input-field">
+                <i class="fas fa-money-bill-wave"></i>
+                <input type="number" id="expenseAmount" placeholder="Сумма">
+            </div>
+            <select id="expenseCategory" class="modal-select">
+                <option value="Еда">🍕 Еда</option>
+                <option value="Транспорт">🚗 Транспорт</option>
+                <option value="Коммунальные">💡 Коммунальные</option>
+                <option value="Развлечения">🎬 Развлечения</option>
+                <option value="Другое">📦 Другое</option>
+            </select>
+            <button class="primary-btn" id="confirmAddExpense">Добавить</button>
+        </div>
+    </div>
+    
+    <div id="joinFamilyModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Присоединиться к семье</h3>
+                <span class="close-modal closeJoin">&times;</span>
+            </div>
+            <p>Введите код семьи, который вы получили:</p>
+            <div class="input-field">
+                <i class="fas fa-qrcode"></i>
+                <input type="text" id="familyCodeInput" placeholder="Пример: FAMILY-ABC123">
+            </div>
+            <button class="primary-btn" id="submitJoinRequest">Отправить заявку</button>
+        </div>
+    </div>
+    
+    <div id="approvalModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Подтверждение вступления</h3>
+                <span class="close-modal closeApproval">&times;</span>
+            </div>
+            <div id="approvalDetails"></div>
+            <div class="approval-buttons">
+                <button class="primary-btn" id="approveRequest">Одобрить</button>
+                <button class="secondary-btn" id="rejectRequest">Отклонить</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="monthlyReportModal" class="modal">
+        <div class="modal-content report-modal">
+            <div class="modal-header">
+                <h3><i class="fas fa-chart-pie"></i> Отчет о расходах</h3>
+                <span class="close-modal closeReport">&times;</span>
+            </div>
+            <div class="report-month">
+                <button class="month-nav" id="prevMonth"><i class="fas fa-chevron-right"></i></button>
+                <span id="reportMonthYear">Январь 2024</span>
+                <button class="month-nav" id="nextMonth"><i class="fas fa-chevron-left"></i></button>
+            </div>
+            <div class="report-summary">
+                <div class="report-item">
+                    <span>Всего расходов:</span>
+                    <strong id="reportTotal">0</strong>
+                </div>
+                <div class="report-item">
+                    <span>Остаток бюджета:</span>
+                    <strong id="reportRemaining">0</strong>
+                </div>
+            </div>
+            <div class="report-categories" id="reportCategories"></div>
+            <div class="report-transactions" id="reportTransactions"></div>
+        </div>
+    </div>
+    
+    <div id="uniqueIdModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Ваш уникальный ID</h3>
+                <span class="close-modal closeUnique">&times;</span>
+            </div>
+            <div class="code-display highlight" id="generatedUniqueIdText">ID-XXXXXX</div>
+            <p>Сохраните этот ID для входа в приложение</p>
+            <button class="secondary-btn" id="copyIdBtn">Копировать ID</button>
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
