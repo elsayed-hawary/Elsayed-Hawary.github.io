@@ -1,0 +1,1030 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    
+    <!-- Primary SEO Tags -->
+    <title>السيد الهواري | Full Stack Developer - مطور ويب محترف</title>
+    <meta name="description" content="السيد الهواري - مطور Full Stack محترف مع أكثر من 5 سنوات خبرة في تطوير تطبيقات الويب والموبايل. أقدم حلول رقمية مبتكرة عالية الجودة.">
+    <meta name="keywords" content="مطور Full Stack, تصميم مواقع, تطوير تطبيقات, React, Node.js, Python, MongoDB, السيد الهواري, Elsayed Elhawary, web developer, app developer">
+    <meta name="author" content="السيد الهواري, Elsayed Elhawary">
+    <meta name="robots" content="index, follow">
+    <meta name="language" content="Arabic, English, Russian">
+    <meta name="revisit-after" content="7 days">
+    
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://elsayed.dev/">
+    <meta property="og:title" content="السيد الهواري | Full Stack Developer">
+    <meta property="og:description" content="مطور Full Stack محترف - حلول رقمية مبتكرة">
+    <meta property="og:image" content="https://elsayed.dev/a.png">
+    
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://elsayed.dev/">
+    <meta property="twitter:title" content="السيد الهواري | Full Stack Developer">
+    <meta property="twitter:description" content="مطور Full Stack محترف - حلول رقمية مبتكرة">
+    <meta property="twitter:image" content="https://elsayed.dev/a.png">
+    
+    <link rel="canonical" href="https://elsayed.dev/">
+    <link rel="alternate" hreflang="ar" href="https://elsayed.dev/ar">
+    <link rel="alternate" hreflang="en" href="https://elsayed.dev/en">
+    <link rel="alternate" hreflang="ru" href="https://elsayed.dev/ru">
+    <link rel="alternate" hreflang="x-default" href="https://elsayed.dev/">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Cairo:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": "السيد الهواري",
+        "alternateName": "Elsayed Elhawary",
+        "jobTitle": "Full Stack Developer",
+        "url": "https://elsayed.dev/",
+        "image": "https://elsayed.dev/a.png",
+        "email": "elsayedelhawary93@gmail.com",
+        "sameAs": ["https://github.com/elsayed", "https://linkedin.com/in/elsayed", "https://instagram.com/elsayed"],
+        "knowsAbout": ["Web Development", "Mobile Development", "Backend Development", "React", "Node.js", "Python", "MongoDB"]
+    }
+    </script>
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #0A0A0A;
+            color: #FFFFFF;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+        body.rtl { font-family: 'Cairo', 'Poppins', sans-serif; direction: rtl; text-align: right; }
+        body.en { font-family: 'Inter', 'Poppins', sans-serif; direction: ltr; text-align: left; }
+        body.ru { font-family: 'Georgia', 'Times New Roman', serif; direction: ltr; text-align: left; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #0A0A0A; }
+        ::-webkit-scrollbar-thumb { background: #00F5A0; border-radius: 3px; }
+        
+        .navbar {
+            position: fixed; top: 0; left: 0; right: 0;
+            background: rgba(10, 10, 10, 0.8); backdrop-filter: blur(16px);
+            z-index: 1000; padding: 1rem 5%; transition: all 0.4s;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .navbar.scrolled { padding: 0.7rem 5%; background: rgba(10, 10, 10, 0.95); border-bottom-color: rgba(0, 245, 160, 0.2); }
+        .nav-container { max-width: 1400px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 2rem; }
+        .nav-left { flex: 1; display: flex; justify-content: flex-start; }
+        .nav-center { flex: 2; display: flex; justify-content: center; align-items: center; gap: 3rem; }
+        .nav-right { flex: 1; display: flex; justify-content: flex-end; }
+        .logo { font-size: 1.7rem; font-weight: 800; text-decoration: none; background: linear-gradient(135deg, #FFFFFF, #00F5A0); -webkit-background-clip: text; -webkit-text-fill-color: transparent; white-space: nowrap; }
+        .logo span { background: linear-gradient(135deg, #00F5A0, #7C3AED); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        
+        .lang-btn { background: transparent; border: none; color: rgba(255, 255, 255, 0.8); font-size: 0.9rem; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 30px; transition: all 0.3s; }
+        .lang-btn:hover { color: #00F5A0; transform: translateY(-2px); }
+        .lang-dropdown { position: relative; }
+        .lang-menu { position: absolute; top: 100%; background: rgba(20, 20, 20, 0.98); backdrop-filter: blur(16px); border-radius: 16px; padding: 8px; min-width: 110px; opacity: 0; visibility: hidden; transform: translateY(-10px); transition: all 0.3s; z-index: 100; border: 1px solid rgba(0, 245, 160, 0.2); }
+        body.rtl .lang-menu { right: 0; }
+        body.en .lang-menu, body.ru .lang-menu { left: 0; }
+        .lang-dropdown.active .lang-menu { opacity: 1; visibility: visible; transform: translateY(8px); }
+        .lang-item { padding: 8px 16px; cursor: pointer; border-radius: 12px; transition: all 0.2s; color: rgba(255, 255, 255, 0.8); text-align: center; font-size: 0.85rem; }
+        .lang-item:hover { background: rgba(0, 245, 160, 0.15); color: #00F5A0; }
+        
+        .main-nav { display: flex; gap: 0.5rem; align-items: center; background: rgba(255, 255, 255, 0.03); padding: 0.3rem; border-radius: 60px; border: 1px solid rgba(255, 255, 255, 0.05); }
+        .main-nav a { color: rgba(255, 255, 255, 0.8); text-decoration: none; font-size: 0.9rem; font-weight: 500; transition: all 0.3s; padding: 8px 18px; border-radius: 40px; }
+        .main-nav a:hover, .main-nav a.active { color: #00F5A0; background: rgba(0, 245, 160, 0.1); }
+        .mobile-menu-toggle { display: none; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #FFFFFF; font-size: 1.2rem; cursor: pointer; padding: 10px; border-radius: 12px; }
+        .mobile-menu { position: fixed; top: 70px; left: 0; right: 0; background: rgba(10, 10, 10, 0.98); backdrop-filter: blur(20px); padding: 1rem; display: none; flex-direction: column; gap: 0.5rem; z-index: 999; border-bottom: 1px solid rgba(0, 245, 160, 0.2); }
+        .mobile-menu.active { display: flex; }
+        .mobile-menu a { color: #FFFFFF; text-decoration: none; padding: 14px 20px; font-size: 1rem; border-radius: 14px; text-align: center; font-weight: 500; }
+        .mobile-menu a:hover { background: rgba(0, 245, 160, 0.1); color: #00F5A0; }
+        
+        .hero { min-height: 100vh; display: flex; align-items: center; justify-content: center; text-align: center; position: relative; padding: 0 5%; }
+        .hero::before { content: ''; position: absolute; width: 100%; height: 100%; background: radial-gradient(circle at 30% 50%, rgba(0, 245, 160, 0.05) 0%, transparent 70%); }
+        .hero-content { position: relative; z-index: 1; max-width: 900px; }
+        .hero h1 { font-size: clamp(2rem, 6vw, 3.8rem); margin-bottom: 1.2rem; background: linear-gradient(135deg, #FFFFFF 0%, #00F5A0 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 700; }
+        .hero p { font-size: clamp(1rem, 1.8vw, 1.2rem); color: #9CA3AF; margin-bottom: 2rem; }
+        .hero-buttons { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+        
+        .btn { display: inline-flex; align-items: center; justify-content: center; padding: 12px 32px; border-radius: 40px; font-weight: 600; transition: all 0.3s; gap: 8px; cursor: pointer; border: none; font-size: 0.95rem; }
+        .btn-primary { background: linear-gradient(135deg, #00F5A0, #7C3AED); color: #0A0A0A; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(0, 245, 160, 0.3); }
+        .btn-secondary { border: 1.5px solid rgba(0, 245, 160, 0.5); color: #00F5A0; background: transparent; }
+        .btn-secondary:hover { background: rgba(0, 245, 160, 0.1); border-color: #00F5A0; transform: translateY(-2px); }
+        
+        section { padding: 80px 5%; }
+        .section-title { text-align: center; font-size: clamp(1.8rem, 3.5vw, 2.3rem); margin-bottom: 2.5rem; position: relative; }
+        .section-title::after { content: ''; position: absolute; bottom: -12px; left: 50%; transform: translateX(-50%); width: 50px; height: 2px; background: linear-gradient(90deg, #00F5A0, #7C3AED); border-radius: 2px; }
+        
+        .about-grid { display: grid; grid-template-columns: 1fr 1.5fr; gap: 3rem; max-width: 1200px; margin: 0 auto; align-items: center; }
+        .about-image img { width: 260px; height: 260px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(0, 245, 160, 0.5); box-shadow: 0 0 30px rgba(0, 245, 160, 0.2); transition: all 0.3s; }
+        .about-text h3 { color: #00F5A0; margin-bottom: 0.8rem; font-size: 1.6rem; }
+        .about-text p { color: #9CA3AF; margin-bottom: 0.8rem; }
+        .about-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin: 1.5rem 0; }
+        .stat-item { text-align: center; background: rgba(255, 255, 255, 0.03); padding: 0.8rem; border-radius: 16px; transition: all 0.3s; }
+        .stat-number { font-size: 1.8rem; font-weight: 700; color: #00F5A0; }
+        .skills-list { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 1rem; }
+        .skill-tag { background: rgba(0, 245, 160, 0.08); padding: 0.4rem 1rem; border-radius: 30px; font-size: 0.8rem; color: #00F5A0; }
+        
+        .services-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; max-width: 1200px; margin: 0 auto; }
+        .service-card { background: rgba(255, 255, 255, 0.03); padding: 2rem; border-radius: 24px; text-align: center; transition: all 0.3s; border: 1px solid rgba(255, 255, 255, 0.05); cursor: pointer; }
+        .service-card:hover { border-color: rgba(0, 245, 160, 0.4); transform: translateY(-5px); background: rgba(0, 245, 160, 0.02); }
+        .service-card i { font-size: 2.5rem; margin-bottom: 1rem; color: #00F5A0; }
+        .service-card h3 { margin-bottom: 0.5rem; font-size: 1.3rem; }
+        .service-card p { color: #9CA3AF; font-size: 0.9rem; margin-bottom: 1rem; }
+        
+        .portfolio-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; max-width: 1200px; margin: 0 auto; }
+        .portfolio-card { background: rgba(255, 255, 255, 0.03); border-radius: 20px; overflow: hidden; transition: all 0.3s; border: 1px solid rgba(255, 255, 255, 0.05); text-align: center; }
+        .portfolio-card:hover { transform: translateY(-5px); border-color: rgba(0, 245, 160, 0.4); }
+        .portfolio-card-img { width: 100%; height: 220px; overflow: hidden; }
+        .portfolio-card-img img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s; }
+        .portfolio-card:hover .portfolio-card-img img { transform: scale(1.05); }
+        .portfolio-card-info { padding: 1.2rem; }
+        .portfolio-card-info h3 { color: #00F5A0; font-size: 1.1rem; margin-bottom: 0.3rem; }
+        .portfolio-tech { color: #6B7280; font-size: 0.75rem; margin-bottom: 0.5rem; }
+        .portfolio-card-info p { color: #9CA3AF; font-size: 0.85rem; margin-bottom: 0.8rem; }
+        
+        .contact-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 2rem; max-width: 1000px; margin: 0 auto; }
+        .contact-form { display: flex; flex-direction: column; gap: 1rem; }
+        .contact-form input, .contact-form textarea, .contact-form select { width: 100%; padding: 12px 16px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.1); background: rgba(255, 255, 255, 0.03); color: #FFFFFF; font-family: inherit; font-size: 0.9rem; }
+        .contact-form input:focus, .contact-form textarea:focus, .contact-form select:focus { outline: none; border-color: #00F5A0; }
+        .contact-form button { background: linear-gradient(135deg, #00F5A0, #7C3AED); padding: 12px; border-radius: 40px; color: #0A0A0A; border: none; cursor: pointer; font-weight: 600; }
+        
+        .contact-info { background: rgba(255, 255, 255, 0.03); padding: 1.8rem; border-radius: 24px; border: 1px solid rgba(255, 255, 255, 0.05); }
+        .contact-info h3 { color: #00F5A0; margin-bottom: 1.5rem; text-align: center; font-size: 1.3rem; }
+        .contact-item { display: flex; align-items: center; gap: 15px; padding: 12px 15px; margin: 10px 0; background: rgba(255, 255, 255, 0.02); border-radius: 16px; transition: all 0.3s; }
+        .contact-item:hover { background: rgba(0, 245, 160, 0.08); transform: translateX(5px); }
+        body.rtl .contact-item:hover { transform: translateX(-5px); }
+        .contact-icon { width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, rgba(0, 245, 160, 0.15), rgba(124, 58, 237, 0.15)); border-radius: 14px; transition: all 0.3s; }
+        .contact-icon i { font-size: 1.3rem; color: #00F5A0; }
+        .contact-details .label { font-size: 0.7rem; color: #6B7280; }
+        .contact-details .value { font-size: 0.85rem; color: #FFFFFF; }
+        
+        .social-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 20px; }
+        .social-card { display: flex; align-items: center; gap: 12px; padding: 10px 14px; background: rgba(255, 255, 255, 0.03); border-radius: 14px; text-decoration: none; transition: all 0.3s; border: 1px solid rgba(255, 255, 255, 0.05); }
+        .social-card:hover { transform: translateY(-3px); border-color: rgba(0, 245, 160, 0.4); }
+        .social-icon-circle { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; background: rgba(0, 245, 160, 0.12); border-radius: 50%; transition: all 0.3s; }
+        .social-card:hover .social-icon-circle { background: #00F5A0; }
+        .social-card:hover .social-icon-circle i { color: #0A0A0A; }
+        .social-icon-circle i { font-size: 1.2rem; color: #00F5A0; }
+        .social-name { font-size: 0.85rem; font-weight: 500; color: #FFFFFF; }
+        
+        .cta { text-align: center; background: linear-gradient(135deg, rgba(0, 245, 160, 0.05), rgba(124, 58, 237, 0.05)); }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(8px);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        .modal.active { display: flex; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .modal-content {
+            background: linear-gradient(135deg, #0F0F0F, #1A1A1A);
+            border-radius: 28px;
+            max-width: 500px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 1.8rem;
+            border: 1px solid rgba(0, 245, 160, 0.3);
+            position: relative;
+            animation: slideUp 0.4s ease;
+        }
+        @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .modal-content::-webkit-scrollbar { width: 4px; }
+        .modal-content::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); border-radius: 4px; }
+        .modal-content::-webkit-scrollbar-thumb { background: #00F5A0; border-radius: 4px; }
+        .modal-close {
+            position: sticky; top: 0; float: right;
+            font-size: 1.8rem; cursor: pointer; color: #9CA3AF;
+            background: none; border: none; width: 40px; height: 40px;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 50%; margin-bottom: 10px; z-index: 10;
+        }
+        body.rtl .modal-close { float: left; }
+        .modal-close:hover { color: #00F5A0; background: rgba(0, 245, 160, 0.1); transform: rotate(90deg); }
+        .modal-icon { font-size: 3rem; color: #00F5A0; margin-bottom: 1rem; text-align: center; clear: both; }
+        .modal-title { font-size: 1.6rem; color: #00F5A0; margin-bottom: 1rem; text-align: center; }
+        .modal-desc { color: #9CA3AF; margin-bottom: 1rem; line-height: 1.6; font-size: 0.95rem; }
+        .modal-features { list-style: none; margin: 1rem 0; }
+        .modal-features li { padding: 8px 0; display: flex; align-items: center; gap: 10px; color: #FFFFFF; font-size: 0.9rem; }
+        .modal-features li i { color: #00F5A0; font-size: 1rem; min-width: 20px; }
+        .modal-price { font-size: 1.4rem; color: #00F5A0; font-weight: 700; margin: 1rem 0; text-align: center; }
+        .modal-btn {
+            width: 100%; padding: 14px;
+            background: linear-gradient(135deg, #00F5A0, #7C3AED);
+            border: none; border-radius: 40px; color: #0A0A0A;
+            font-weight: 700; font-size: 1rem; cursor: pointer;
+            transition: all 0.3s; margin-top: 0.5rem;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .modal-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(0, 245, 160, 0.3); }
+        
+        footer { background: #0A0A0A; border-top: 1px solid rgba(0, 245, 160, 0.15); padding: 3rem 5% 1.5rem; }
+        .footer-container { max-width: 1200px; margin: 0 auto; }
+        .footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2rem; margin-bottom: 2rem; }
+        .footer-col h4 { color: #00F5A0; font-size: 1.1rem; margin-bottom: 1rem; position: relative; display: inline-block; padding-bottom: 0.5rem; }
+        .footer-col h4::after { content: ''; position: absolute; bottom: 0; left: 0; width: 30px; height: 2px; background: #00F5A0; }
+        body.rtl .footer-col h4::after { left: auto; right: 0; }
+        .footer-links { list-style: none; }
+        .footer-links li { margin-bottom: 0.6rem; }
+        .footer-links a { color: #9CA3AF; text-decoration: none; font-size: 0.85rem; transition: all 0.3s; display: inline-flex; align-items: center; gap: 6px; }
+        .footer-links a:hover { color: #00F5A0; transform: translateX(4px); }
+        body.rtl .footer-links a:hover { transform: translateX(-4px); }
+        .footer-bottom { text-align: center; padding-top: 1.5rem; border-top: 1px solid rgba(255, 255, 255, 0.05); color: #6B7280; font-size: 0.8rem; }
+        
+        .fade-up { opacity: 0; transform: translateY(30px); transition: all 0.6s ease; }
+        .fade-up.active { opacity: 1; transform: translateY(0); }
+        
+        @media (max-width: 1024px) { .main-nav a { padding: 8px 14px; font-size: 0.85rem; } .nav-center { gap: 1.5rem; } }
+        @media (max-width: 768px) {
+            .main-nav { display: none; }
+            .mobile-menu-toggle { display: block; }
+            .services-grid { grid-template-columns: 1fr; }
+            .about-grid { grid-template-columns: 1fr; text-align: center; }
+            .nav-container { gap: 1rem; }
+            .nav-left, .nav-center, .nav-right { flex: none; }
+            .nav-center { order: 2; }
+            .nav-left { order: 1; }
+            .nav-right { order: 3; }
+            .lang-btn span { display: none; }
+            .lang-btn { padding: 8px; }
+            .logo { font-size: 1.4rem; }
+            .social-grid { grid-template-columns: 1fr; }
+            .footer-grid { grid-template-columns: 1fr; text-align: center; }
+            .footer-col h4::after { left: 50%; transform: translateX(-50%); }
+            body.rtl .footer-col h4::after { right: 50%; left: auto; transform: translateX(50%); }
+            .modal-content { max-width: 95%; padding: 1.2rem; }
+        }
+        @media (min-width: 769px) { .mobile-menu-toggle { display: none; } }
+    </style>
+</head>
+<body>
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <div class="nav-left">
+                <div class="lang-dropdown" id="langDropdown">
+                    <button class="lang-btn" id="langBtn">
+                        <i class="fas fa-globe"></i>
+                        <span id="currentLangText">عربي</span>
+                        <i class="fas fa-chevron-down" style="font-size: 10px;"></i>
+                    </button>
+                    <div class="lang-menu">
+                        <div class="lang-item" data-lang="ar" data-dir="rtl" data-name="عربي">عربي</div>
+                        <div class="lang-item" data-lang="en" data-dir="ltr" data-name="English">English</div>
+                        <div class="lang-item" data-lang="ru" data-dir="ltr" data-name="Русский">Русский</div>
+                    </div>
+                </div>
+            </div>
+            <div class="nav-center">
+                <a href="#" class="logo">ELSAYED<span>Dev</span></a>
+                <div class="main-nav">
+                    <a href="#home" id="navHome">الرئيسية</a>
+                    <a href="#about" id="navAbout">عني</a>
+                    <a href="#services" id="navServices">الخدمات</a>
+                    <a href="#portfolio" id="navPortfolio">الأعمال</a>
+                    <a href="#contact" id="navContact">اتصل</a>
+                </div>
+            </div>
+            <div class="nav-right">
+                <button class="mobile-menu-toggle" id="mobileMenuToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+        <div class="mobile-menu" id="mobileMenu">
+            <a href="#home" id="mobileHome">الرئيسية</a>
+            <a href="#about" id="mobileAbout">عني</a>
+            <a href="#services" id="mobileServices">الخدمات</a>
+            <a href="#portfolio" id="mobilePortfolio">الأعمال</a>
+            <a href="#contact" id="mobileContact">اتصل</a>
+        </div>
+    </nav>
+    
+    <div class="modal" id="serviceModal">
+        <div class="modal-content">
+            <button class="modal-close" id="modalClose">&times;</button>
+            <div class="modal-icon"><i class="fas fa-code" id="modalIcon"></i></div>
+            <h2 class="modal-title" id="modalTitle">تطوير الويب</h2>
+            <p class="modal-desc" id="modalDesc">خدمة تطوير ويب احترافية</p>
+            <ul class="modal-features" id="modalFeatures"></ul>
+            <div class="modal-price" id="modalPrice">يبدأ من $999</div>
+            <button class="modal-btn" id="modalOrderBtn"><i class="fas fa-shopping-cart"></i> <span id="modalBtnText">طلب الخدمة الآن</span></button>
+        </div>
+    </div>
+    
+    <section class="hero" id="home">
+        <div class="hero-content">
+            <h1 id="heroTitle">أبني حلول رقمية قوية</h1>
+            <p id="heroDesc">مطور Full Stack مع خبرة 5+ سنوات في بناء تطبيقات ويب استثنائية</p>
+            <div class="hero-buttons">
+                <button class="btn btn-primary" id="hireBtn"><i class="fas fa-rocket"></i> <span id="hireBtnText">توظيفي</span></button>
+                <button class="btn btn-secondary" id="portfolioBtn"><i class="fas fa-eye"></i> <span id="portfolioBtnText">عرض الأعمال</span></button>
+            </div>
+        </div>
+    </section>
+    
+    <section id="about">
+        <h2 class="section-title" id="aboutTitle">من أنا</h2>
+        <div class="about-grid">
+            <div class="about-image"><img src="a.png" alt="السيد الهواري" onerror="this.src='https://randomuser.me/api/portraits/men/32.jpg'"></div>
+            <div class="about-text">
+                <h3 id="aboutName">السيد الهواري</h3>
+                <p id="aboutDesc1">مطور Full Stack محترف مع أكثر من 5 سنوات من الخبرة في بناء تطبيقات ويب وموبايل استثنائية.</p>
+                <p id="aboutDesc2">شغوف بالتكنولوجيا وحل المشكلات المعقدة، وأعمل دائماً على تقديم أفضل الحلول الرقمية.</p>
+                <div class="about-stats">
+                    <div class="stat-item"><div class="stat-number">50+</div><div id="stat1">مشروع</div></div>
+                    <div class="stat-item"><div class="stat-number">30+</div><div id="stat2">عميل</div></div>
+                    <div class="stat-item"><div class="stat-number">5+</div><div id="stat3">سنوات</div></div>
+                </div>
+                <div class="skills-list">
+                    <span class="skill-tag">React</span><span class="skill-tag">Node.js</span><span class="skill-tag">Python</span>
+                    <span class="skill-tag">MongoDB</span><span class="skill-tag">JavaScript</span><span class="skill-tag">TypeScript</span>
+                    <span class="skill-tag">Next.js</span><span class="skill-tag">UX/UI</span>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <section id="services">
+        <h2 class="section-title" id="servicesTitle">خدماتي</h2>
+        <div class="services-grid" id="servicesGrid"></div>
+    </section>
+    
+    <section id="portfolio" style="background:#0F0F0F">
+        <h2 class="section-title" id="portfolioTitle">أحدث الأعمال</h2>
+        <div class="portfolio-grid" id="portfolioGrid"></div>
+    </section>
+    
+    <section id="contact">
+        <h2 class="section-title" id="contactTitle">تواصل معي</h2>
+        <div class="contact-grid">
+            <form class="contact-form" id="contactForm">
+                <input type="text" id="contactName" placeholder="الاسم" required>
+                <input type="email" id="contactEmail" placeholder="البريد الإلكتروني" required>
+                <select id="contactService"></select>
+                <textarea rows="4" id="contactMsg" placeholder="رسالتك..." required></textarea>
+                <button type="submit" id="sendBtn"><i class="fas fa-paper-plane"></i> <span>إرسال</span></button>
+            </form>
+            <div class="contact-info">
+                <h3 id="contactInfoTitle">معلومات التواصل</h3>
+                <div class="contact-item">
+                    <div class="contact-icon"><i class="fas fa-envelope"></i></div>
+                    <div class="contact-details">
+                        <div class="label">Email</div>
+                        <div class="value">elsayedelhawary93@gmail.com</div>
+                    </div>
+                </div>
+                <div class="contact-item">
+                    <div class="contact-icon"><i class="fas fa-phone-alt"></i></div>
+                    <div class="contact-details">
+                        <div class="label">Phone</div>
+                        <div class="value">+20 123 456 7890</div>
+                    </div>
+                </div>
+                <div class="social-grid" id="socialLinks"></div>
+            </div>
+        </div>
+    </section>
+    
+    <section class="cta"><h2 id="ctaTitle">لنبني شيئاً مذهلاً معاً</h2><button class="btn btn-primary" id="ctaBtn">ابدأ مشروعك</button></section>
+    
+    <footer>
+        <div class="footer-container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h4 id="footerAboutTitle">السيد الهواري</h4>
+                    <p id="footerAboutText" style="color: #9CA3AF; font-size: 0.85rem;">مطور Full Stack محترف يقدم حلول رقمية مبتكرة وعالية الجودة.</p>
+                </div>
+                <div class="footer-col">
+                    <h4 id="footerQuickLinks">روابط سريعة</h4>
+                    <ul class="footer-links" id="quickLinksList"></ul>
+                </div>
+                <div class="footer-col">
+                    <h4 id="footerLegalTitle">الصفحات القانونية</h4>
+                    <ul class="footer-links" id="legalLinksList"></ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>© 2026 <span id="copyrightName">السيد الهواري</span>. <span id="copyrightText">جميع الحقوق محفوظة</span> | <i class="fas fa-heart" style="color:#00F5A0;"></i></p>
+            </div>
+        </div>
+    </footer>
+    
+    <script>
+        // ==================== البيانات الافتراضية (القيم المترجمة بالكامل) ====================
+        const DEFAULT_BUTTONS = {
+            titleAr: "أبني حلول رقمية قوية",
+            titleEn: "I Build Powerful Digital Solutions",
+            titleRu: "Создаю мощные цифровые решения",
+            descAr: "مطور Full Stack مع خبرة 5+ سنوات في بناء تطبيقات ويب استثنائية",
+            descEn: "Full Stack Developer with 5+ years of experience building exceptional web applications",
+            descRu: "Full Stack разработчик с опытом 5+ лет в создании исключительных веб-приложений",
+            hireBtnAr: "توظيفي",
+            hireBtnEn: "Hire Me",
+            hireBtnRu: "Нанять",
+            hireBtnUrl: "#contact",
+            portfolioBtnAr: "عرض الأعمال",
+            portfolioBtnEn: "View Work",
+            portfolioBtnRu: "Портфолио",
+            portfolioBtnUrl: "#portfolio",
+            ctaBtnAr: "ابدأ مشروعك",
+            ctaBtnEn: "Start Project",
+            ctaBtnRu: "Начать проект",
+            ctaBtnUrl: "#contact"
+        };
+        
+        const DEFAULT_PROJECTS = [
+            { id: 1, title: "منصة تجارة إلكترونية", titleEn: "E-Commerce Platform", titleRu: "Платформа электронной коммерции", tech: "React, Node.js, MongoDB", desc: "منصة متكاملة للبيع", descEn: "Complete e-commerce solution", descRu: "Комплексное решение для электронной коммерции", img: "a.png", link: "#contact", github: "" },
+            { id: 2, title: "تطبيق بنكي", titleEn: "Banking App", titleRu: "Банковское приложение", tech: "React Native, Firebase", desc: "تطبيق مصرفي متكامل", descEn: "Complete banking app", descRu: "Полное банковское приложение", img: "a.png", link: "#contact", github: "" },
+            { id: 3, title: "لوحة تحكم ذكاء اصطناعي", titleEn: "AI Dashboard", titleRu: "Панель управления ИИ", tech: "Python, TensorFlow", desc: "تحليل البيانات بالذكاء الاصطناعي", descEn: "AI data analysis", descRu: "Анализ данных ИИ", img: "a.png", link: "#contact", github: "" },
+            { id: 4, title: "منصة تواصل اجتماعي", titleEn: "Social Platform", titleRu: "Социальная платформа", tech: "MERN Stack", desc: "منصة اجتماعية متكاملة", descEn: "Complete social platform", descRu: "Полная социальная платформа", img: "a.png", link: "#contact", github: "" },
+            { id: 5, title: "تطبيق توصيل طلبات", titleEn: "Delivery App", titleRu: "Приложение доставки", tech: "Flutter, Node.js", desc: "تتبع الموقع في الوقت الفعلي", descEn: "Real-time location tracking", descRu: "Отслеживание местоположения", img: "a.png", link: "#contact", github: "" },
+            { id: 6, title: "نظام إدارة محتوى", titleEn: "CMS System", titleRu: "CMS система", tech: "Laravel, Vue.js", desc: "إدارة المحتوى المتكاملة", descEn: "Complete content management", descRu: "Полное управление контентом", img: "a.png", link: "#contact", github: "" }
+        ];
+        
+        const DEFAULT_SERVICES = [
+            { id: 1, nameAr: "تطوير الويب", nameEn: "Web Development", nameRu: "Веб-разработка", shortAr: "مواقع حديثة بأداء عالي", shortEn: "Modern high-performance websites", shortRu: "Современные высокопроизводительные сайты", icon: "fas fa-code", url: "#contact", features: ["تصميم متجاوب مع جميع الأجهزة", "تحسين محركات البحث SEO", "أداء فائق وسرعة تحميل عالية", "دعم فني لمدة 3 أشهر"], featuresEn: ["Responsive design for all devices", "SEO optimization", "High performance & fast loading", "3 months technical support"], featuresRu: ["Адаптивный дизайн для всех устройств", "SEO оптимизация", "Высокая производительность и быстрая загрузка", "3 месяца технической поддержки"], priceAr: "يبدأ من $999", priceEn: "Starting from $999", priceRu: "От $999" },
+            { id: 2, nameAr: "تطبيقات الجوال", nameEn: "Mobile Apps", nameRu: "Мобильные приложения", shortAr: "تطبيقات Android و iOS احترافية", shortEn: "Professional Android & iOS apps", shortRu: "Профессиональные приложения для Android и iOS", icon: "fas fa-mobile-alt", url: "#contact", features: ["تطبيقات Android و iOS", "واجهة مستخدم جذابة", "تكامل مع APIs", "إشعارات فورية", "أداء عالي", "نشر على المتاجر الرسمية"], featuresEn: ["Android & iOS apps", "Attractive UI", "API integration", "Push notifications", "High performance", "App store deployment"], featuresRu: ["Приложения для Android и iOS", "Привлекательный интерфейс", "Интеграция с API", "Push-уведомления", "Высокая производительность", "Публикация в магазинах"], priceAr: "يبدأ من $1999", priceEn: "Starting from $1999", priceRu: "От $1999" },
+            { id: 3, nameAr: "أنظمة الخلفية", nameEn: "Backend Systems", nameRu: "Backend системы", shortAr: "واجهات برمجية آمنة وقابلة للتوسع", shortEn: "Secure & Scalable APIs", shortRu: "Безопасные и масштабируемые API", icon: "fas fa-server", url: "#contact", features: ["واجهات برمجية RESTful API", "قواعد بيانات عالية الأداء", "نظام مصادقة آمن", "قابلية التوسع", "توثيق شامل", "اختبارات متكاملة"], featuresEn: ["RESTful APIs", "High-performance databases", "Secure authentication system", "Scalability", "Comprehensive documentation", "Integrated tests"], featuresRu: ["RESTful API", "Высокопроизводительные базы данных", "Безопасная система аутентификации", "Масштабируемость", "Полная документация", "Интегрированные тесты"], priceAr: "يبدأ من $1499", priceEn: "Starting from $1499", priceRu: "От $1499" }
+        ];
+        
+        const DEFAULT_LINKS = [
+            { id: 1, text: "الرئيسية", textEn: "Home", textRu: "Главная", url: "#home", icon: "fas fa-home", section: "quick" },
+            { id: 2, text: "عني", textEn: "About", textRu: "Обо мне", url: "#about", icon: "fas fa-user", section: "quick" },
+            { id: 3, text: "الخدمات", textEn: "Services", textRu: "Услуги", url: "#services", icon: "fas fa-cog", section: "quick" },
+            { id: 4, text: "الأعمال", textEn: "Work", textRu: "Работы", url: "#portfolio", icon: "fas fa-briefcase", section: "quick" },
+            { id: 5, text: "اتصل", textEn: "Contact", textRu: "Контакты", url: "#contact", icon: "fas fa-envelope", section: "quick" },
+            { id: 6, text: "الشروط والأحكام", textEn: "Terms & Conditions", textRu: "Условия использования", url: "#", icon: "fas fa-file-contract", section: "legal" },
+            { id: 7, text: "سياسة الخصوصية", textEn: "Privacy Policy", textRu: "Политика конфиденциальности", url: "#", icon: "fas fa-shield-alt", section: "legal" },
+            { id: 8, text: "سياسة ملفات الارتباط", textEn: "Cookie Policy", textRu: "Cookie политика", url: "#", icon: "fas fa-cookie-bite", section: "legal" },
+            { id: 9, text: "بيان النشر", textEn: "Imprint", textRu: "Выходные данные", url: "#", icon: "fas fa-info-circle", section: "legal" }
+        ];
+        
+        const DEFAULT_SOCIAL = [
+            { id: 1, name: "Instagram", nameRu: "Instagram", url: "https://instagram.com", icon: "fab fa-instagram" },
+            { id: 2, name: "Telegram", nameRu: "Telegram", url: "https://t.me", icon: "fab fa-telegram" },
+            { id: 3, name: "VK", nameRu: "ВК", url: "https://vk.com", icon: "fab fa-vk" },
+            { id: 4, name: "GitHub", nameRu: "GitHub", url: "https://github.com", icon: "fab fa-github" }
+        ];
+        
+        // متغيرات التخزين
+        let projects = [];
+        let services = [];
+        let links = [];
+        let social = [];
+        let buttons = {};
+        
+        function loadData() {
+            // تحميل الأزرار مع التأكد من وجود القيم الافتراضية
+            const savedButtons = localStorage.getItem('admin_buttons');
+            if (savedButtons) {
+                try {
+                    const parsed = JSON.parse(savedButtons);
+                    buttons = { ...DEFAULT_BUTTONS, ...parsed };
+                } catch(e) {
+                    buttons = { ...DEFAULT_BUTTONS };
+                }
+            } else {
+                buttons = { ...DEFAULT_BUTTONS };
+            }
+            
+            // تحميل المشاريع
+            const savedProjects = localStorage.getItem('admin_projects');
+            if (savedProjects) {
+                try {
+                    projects = JSON.parse(savedProjects);
+                } catch(e) {
+                    projects = JSON.parse(JSON.stringify(DEFAULT_PROJECTS));
+                }
+            } else {
+                projects = JSON.parse(JSON.stringify(DEFAULT_PROJECTS));
+            }
+            
+            // تحميل الخدمات
+            const savedServices = localStorage.getItem('admin_services');
+            if (savedServices) {
+                try {
+                    services = JSON.parse(savedServices);
+                } catch(e) {
+                    services = JSON.parse(JSON.stringify(DEFAULT_SERVICES));
+                }
+            } else {
+                services = JSON.parse(JSON.stringify(DEFAULT_SERVICES));
+            }
+            
+            // تحميل الروابط
+            const savedLinks = localStorage.getItem('admin_links');
+            if (savedLinks) {
+                try {
+                    links = JSON.parse(savedLinks);
+                } catch(e) {
+                    links = JSON.parse(JSON.stringify(DEFAULT_LINKS));
+                }
+            } else {
+                links = JSON.parse(JSON.stringify(DEFAULT_LINKS));
+            }
+            
+            // تحميل وسائل التواصل
+            const savedSocial = localStorage.getItem('admin_social');
+            if (savedSocial) {
+                try {
+                    social = JSON.parse(savedSocial);
+                } catch(e) {
+                    social = JSON.parse(JSON.stringify(DEFAULT_SOCIAL));
+                }
+            } else {
+                social = JSON.parse(JSON.stringify(DEFAULT_SOCIAL));
+            }
+        }
+        
+        // ==================== الترجمة الكاملة ====================
+        const translations = {
+            ar: {
+                home: "الرئيسية", about: "عني", services: "الخدمات", portfolio: "الأعمال", contact: "اتصل",
+                aboutTitle: "من أنا", aboutName: "السيد الهواري",
+                aboutDesc1: "مطور Full Stack محترف مع أكثر من 5 سنوات من الخبرة في بناء تطبيقات ويب وموبايل استثنائية.",
+                aboutDesc2: "شغوف بالتكنولوجيا وحل المشكلات المعقدة، وأعمل دائماً على تقديم أفضل الحلول الرقمية.",
+                stat1: "مشروع", stat2: "عميل", stat3: "سنوات",
+                servicesTitle: "خدماتي", portfolioTitle: "أحدث الأعمال", contactTitle: "تواصل معي", contactInfoTitle: "معلومات التواصل", sendBtn: "إرسال",
+                ctaTitle: "لنبني شيئاً مذهلاً معاً", orderBtn: "اطلب الخدمة",
+                namePlaceholder: "الاسم", emailPlaceholder: "البريد الإلكتروني", messagePlaceholder: "رسالتك...",
+                webOpt: "تطوير الويب", mobileOpt: "تطبيقات الجوال", backendOpt: "أنظمة الخلفية", hireOpt: "توظيف مباشر",
+                footerAboutTitle: "السيد الهواري", footerAboutText: "مطور Full Stack محترف يقدم حلول رقمية مبتكرة وعالية الجودة.",
+                footerQuickLinks: "روابط سريعة", footerLegalTitle: "الصفحات القانونية",
+                copyrightText: "جميع الحقوق محفوظة", copyrightName: "السيد الهواري", modalBtnText: "طلب الخدمة الآن", serviceDetails: "تفاصيل الخدمة"
+            },
+            en: {
+                home: "Home", about: "About", services: "Services", portfolio: "Work", contact: "Contact",
+                aboutTitle: "About Me", aboutName: "Elsayed Elhawary",
+                aboutDesc1: "Professional Full Stack Developer with over 5 years of experience building exceptional web and mobile applications.",
+                aboutDesc2: "Passionate about technology and solving complex problems, always working to deliver the best digital solutions.",
+                stat1: "Projects", stat2: "Clients", stat3: "Years",
+                servicesTitle: "My Services", portfolioTitle: "Recent Projects", contactTitle: "Get In Touch", contactInfoTitle: "Contact Info", sendBtn: "Send",
+                ctaTitle: "Let's Build Something Amazing", orderBtn: "Order Now",
+                namePlaceholder: "Your Name", emailPlaceholder: "Your Email", messagePlaceholder: "Your Message...",
+                webOpt: "Web Development", mobileOpt: "Mobile Apps", backendOpt: "Backend Systems", hireOpt: "Hire Me",
+                footerAboutTitle: "Elsayed Elhawary", footerAboutText: "Professional Full Stack Developer delivering innovative digital solutions.",
+                footerQuickLinks: "Quick Links", footerLegalTitle: "Legal Pages",
+                copyrightText: "All rights reserved", copyrightName: "Elsayed Elhawary", modalBtnText: "Order Now", serviceDetails: "Details"
+            },
+            ru: {
+                home: "Главная", about: "Обо мне", services: "Услуги", portfolio: "Работы", contact: "Контакты",
+                aboutTitle: "Обо мне", aboutName: "Елсаед Елхавари",
+                aboutDesc1: "Профессиональный Full Stack разработчик с более чем 5-летним опытом создания исключительных веб и мобильных приложений.",
+                aboutDesc2: "Увлечен технологиями и решением сложных проблем, всегда работаю над предоставлением лучших цифровых решений.",
+                stat1: "Проекты", stat2: "Клиенты", stat3: "Лет",
+                servicesTitle: "Мои услуги", portfolioTitle: "Последние проекты", contactTitle: "Связаться со мной", contactInfoTitle: "Контактная информация", sendBtn: "Отправить",
+                ctaTitle: "Давайте создадим что-то удивительное", orderBtn: "Заказать",
+                namePlaceholder: "Ваше имя", emailPlaceholder: "Ваш Email", messagePlaceholder: "Ваше сообщение...",
+                webOpt: "Веб-разработка", mobileOpt: "Мобильные приложения", backendOpt: "Backend системы", hireOpt: "Нанять меня",
+                footerAboutTitle: "Елсаед Елхавари", footerAboutText: "Профессиональный Full Stack разработчик, предлагающий инновационные цифровые решения.",
+                footerQuickLinks: "Быстрые ссылки", footerLegalTitle: "Юридические страницы",
+                copyrightText: "Все права защищены", copyrightName: "Елсаед Елхавари", modalBtnText: "Заказать", serviceDetails: "Подробнее"
+            }
+        };
+        
+        let currentLang = 'ar';
+        
+        // ==================== دوال التمرير ====================
+        function scrollToSection(sectionId) {
+            const section = document.getElementById(sectionId);
+            if (section) {
+                section.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+        
+        function scrollToContactWithService(serviceName) {
+            const select = document.getElementById('contactService');
+            if (select && serviceName) {
+                for (let i = 0; i < select.options.length; i++) {
+                    if (select.options[i].value === serviceName || select.options[i].text.includes(serviceName)) {
+                        select.selectedIndex = i;
+                        break;
+                    }
+                }
+            }
+            scrollToSection('contact');
+        }
+        
+        // ==================== عرض المحتوى ====================
+        function renderHero() {
+            let title, desc, hireText, portfolioText, ctaText;
+            let hireUrl, portfolioUrl, ctaUrl;
+            
+            if (currentLang === 'ar') {
+                title = buttons.titleAr || DEFAULT_BUTTONS.titleAr;
+                desc = buttons.descAr || DEFAULT_BUTTONS.descAr;
+                hireText = buttons.hireBtnAr || DEFAULT_BUTTONS.hireBtnAr;
+                portfolioText = buttons.portfolioBtnAr || DEFAULT_BUTTONS.portfolioBtnAr;
+                ctaText = buttons.ctaBtnAr || DEFAULT_BUTTONS.ctaBtnAr;
+                hireUrl = buttons.hireBtnUrl || DEFAULT_BUTTONS.hireBtnUrl;
+                portfolioUrl = buttons.portfolioBtnUrl || DEFAULT_BUTTONS.portfolioBtnUrl;
+                ctaUrl = buttons.ctaBtnUrl || DEFAULT_BUTTONS.ctaBtnUrl;
+            } else if (currentLang === 'en') {
+                title = buttons.titleEn || DEFAULT_BUTTONS.titleEn;
+                desc = buttons.descEn || DEFAULT_BUTTONS.descEn;
+                hireText = buttons.hireBtnEn || DEFAULT_BUTTONS.hireBtnEn;
+                portfolioText = buttons.portfolioBtnEn || DEFAULT_BUTTONS.portfolioBtnEn;
+                ctaText = buttons.ctaBtnEn || DEFAULT_BUTTONS.ctaBtnEn;
+                hireUrl = buttons.hireBtnUrl || DEFAULT_BUTTONS.hireBtnUrl;
+                portfolioUrl = buttons.portfolioBtnUrl || DEFAULT_BUTTONS.portfolioBtnUrl;
+                ctaUrl = buttons.ctaBtnUrl || DEFAULT_BUTTONS.ctaBtnUrl;
+            } else {
+                title = buttons.titleRu || DEFAULT_BUTTONS.titleRu;
+                desc = buttons.descRu || DEFAULT_BUTTONS.descRu;
+                hireText = buttons.hireBtnRu || DEFAULT_BUTTONS.hireBtnRu;
+                portfolioText = buttons.portfolioBtnRu || DEFAULT_BUTTONS.portfolioBtnRu;
+                ctaText = buttons.ctaBtnRu || DEFAULT_BUTTONS.ctaBtnRu;
+                hireUrl = buttons.hireBtnUrl || DEFAULT_BUTTONS.hireBtnUrl;
+                portfolioUrl = buttons.portfolioBtnUrl || DEFAULT_BUTTONS.portfolioBtnUrl;
+                ctaUrl = buttons.ctaBtnUrl || DEFAULT_BUTTONS.ctaBtnUrl;
+            }
+            
+            document.getElementById('heroTitle').textContent = title;
+            document.getElementById('heroDesc').textContent = desc;
+            document.getElementById('hireBtnText').textContent = hireText;
+            document.getElementById('portfolioBtnText').textContent = portfolioText;
+            document.getElementById('ctaBtn').innerHTML = ctaText;
+            
+            // إضافة أحداث الأزرار
+            const hireBtn = document.getElementById('hireBtn');
+            const portfolioBtn = document.getElementById('portfolioBtn');
+            const ctaBtn = document.getElementById('ctaBtn');
+            
+            const newHireBtn = hireBtn.cloneNode(true);
+            const newPortfolioBtn = portfolioBtn.cloneNode(true);
+            const newCtaBtn = ctaBtn.cloneNode(true);
+            hireBtn.parentNode.replaceChild(newHireBtn, hireBtn);
+            portfolioBtn.parentNode.replaceChild(newPortfolioBtn, portfolioBtn);
+            ctaBtn.parentNode.replaceChild(newCtaBtn, ctaBtn);
+            
+            newHireBtn.addEventListener('click', () => {
+                if (hireUrl && hireUrl.startsWith('#')) {
+                    scrollToSection(hireUrl.substring(1));
+                } else if (hireUrl) {
+                    window.open(hireUrl, '_blank');
+                } else {
+                    scrollToSection('contact');
+                }
+            });
+            
+            newPortfolioBtn.addEventListener('click', () => {
+                if (portfolioUrl && portfolioUrl.startsWith('#')) {
+                    scrollToSection(portfolioUrl.substring(1));
+                } else if (portfolioUrl) {
+                    window.open(portfolioUrl, '_blank');
+                } else {
+                    scrollToSection('portfolio');
+                }
+            });
+            
+            newCtaBtn.addEventListener('click', () => {
+                if (ctaUrl && ctaUrl.startsWith('#')) {
+                    scrollToSection(ctaUrl.substring(1));
+                } else if (ctaUrl) {
+                    window.open(ctaUrl, '_blank');
+                } else {
+                    scrollToSection('contact');
+                }
+            });
+        }
+        
+        function renderProjects() {
+            const t = translations[currentLang];
+            const grid = document.getElementById('portfolioGrid');
+            if (!grid) return;
+            grid.innerHTML = projects.map(p => {
+                let title = p.title, desc = p.desc;
+                if (currentLang === 'en') { title = p.titleEn; desc = p.descEn; }
+                if (currentLang === 'ru') { title = p.titleRu; desc = p.descRu; }
+                return `
+                    <div class="portfolio-card fade-up">
+                        <div class="portfolio-card-img"><img src="${p.img}" alt="${title}" loading="lazy" onerror="this.src='a.png'"></div>
+                        <div class="portfolio-card-info">
+                            <h3>${title}</h3>
+                            <div class="portfolio-tech">${p.tech}</div>
+                            <p>${desc}</p>
+                            <button class="btn btn-secondary order-btn" data-service="${p.title}" data-url="${p.link || '#contact'}">${t.orderBtn}</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            document.querySelectorAll('.order-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const url = btn.getAttribute('data-url');
+                    if (url && url.startsWith('#')) {
+                        scrollToSection(url.substring(1));
+                    } else if (url) {
+                        window.open(url, '_blank');
+                    } else {
+                        scrollToContactWithService(btn.getAttribute('data-service'));
+                    }
+                });
+            });
+        }
+        
+        function renderServices() {
+            const t = translations[currentLang];
+            const grid = document.getElementById('servicesGrid');
+            if (!grid) return;
+            grid.innerHTML = services.map(s => {
+                let name = s.nameAr, short = s.shortAr;
+                if (currentLang === 'en') { name = s.nameEn; short = s.shortEn; }
+                if (currentLang === 'ru') { name = s.nameRu; short = s.shortRu; }
+                return `
+                    <div class="service-card" data-service-id="${s.id}" data-url="${s.url || '#contact'}">
+                        <i class="${s.icon}"></i>
+                        <h3>${name}</h3>
+                        <p>${short}</p>
+                        <button class="btn btn-primary service-details-btn" data-service-id="${s.id}">${t.serviceDetails}</button>
+                    </div>
+                `;
+            }).join('');
+            
+            document.querySelectorAll('.service-details-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const id = parseInt(btn.getAttribute('data-service-id'));
+                    const service = services.find(s => s.id === id);
+                    if (service) openModal(service);
+                });
+            });
+        }
+        
+        function renderFooterLinks() {
+            const quickLinks = links.filter(l => l.section === 'quick');
+            const legalLinks = links.filter(l => l.section === 'legal');
+            const quickList = document.getElementById('quickLinksList');
+            const legalList = document.getElementById('legalLinksList');
+            
+            if (quickList) {
+                quickList.innerHTML = quickLinks.map(l => {
+                    let text = l.text;
+                    if (currentLang === 'en') text = l.textEn || l.text;
+                    if (currentLang === 'ru') text = l.textRu || l.text;
+                    return `<li><a href="${l.url}"><i class="${l.icon}"></i> <span>${text}</span></a></li>`;
+                }).join('');
+            }
+            if (legalList) {
+                legalList.innerHTML = legalLinks.map(l => {
+                    let text = l.text;
+                    if (currentLang === 'en') text = l.textEn || l.text;
+                    if (currentLang === 'ru') text = l.textRu || l.text;
+                    return `<li><a href="${l.url}"><i class="${l.icon}"></i> <span>${text}</span></a></li>`;
+                }).join('');
+            }
+        }
+        
+        function renderSocialLinks() {
+            const socialList = social.map(s => {
+                let name = s.name;
+                if (currentLang === 'ru') name = s.nameRu || s.name;
+                return `
+                    <a href="${s.url}" target="_blank" class="social-card">
+                        <div class="social-icon-circle"><i class="${s.icon}"></i></div>
+                        <span class="social-name">${name}</span>
+                    </a>
+                `;
+            }).join('');
+            document.getElementById('socialLinks').innerHTML = socialList;
+        }
+        
+        function renderAbout() {
+            const t = translations[currentLang];
+            document.getElementById('aboutTitle').textContent = t.aboutTitle;
+            document.getElementById('aboutName').textContent = t.aboutName;
+            document.getElementById('aboutDesc1').textContent = t.aboutDesc1;
+            document.getElementById('aboutDesc2').textContent = t.aboutDesc2;
+            document.getElementById('stat1').textContent = t.stat1;
+            document.getElementById('stat2').textContent = t.stat2;
+            document.getElementById('stat3').textContent = t.stat3;
+        }
+        
+        function renderFooter() {
+            const t = translations[currentLang];
+            document.getElementById('footerAboutTitle').textContent = t.footerAboutTitle;
+            document.getElementById('footerAboutText').textContent = t.footerAboutText;
+            document.getElementById('footerQuickLinks').textContent = t.footerQuickLinks;
+            document.getElementById('footerLegalTitle').textContent = t.footerLegalTitle;
+            document.getElementById('copyrightText').textContent = t.copyrightText;
+            document.getElementById('copyrightName').textContent = t.copyrightName;
+        }
+        
+        function renderContactForm() {
+            const t = translations[currentLang];
+            document.getElementById('contactTitle').textContent = t.contactTitle;
+            document.getElementById('contactInfoTitle').textContent = t.contactInfoTitle;
+            document.getElementById('sendBtn').innerHTML = `<i class="fas fa-paper-plane"></i> <span>${t.sendBtn}</span>`;
+            document.getElementById('contactName').placeholder = t.namePlaceholder;
+            document.getElementById('contactEmail').placeholder = t.emailPlaceholder;
+            document.getElementById('contactMsg').placeholder = t.messagePlaceholder;
+            
+            const select = document.getElementById('contactService');
+            if (select) {
+                select.innerHTML = `<option value="Web Development">${t.webOpt}</option><option value="Mobile Apps">${t.mobileOpt}</option><option value="Backend Systems">${t.backendOpt}</option><option value="Hire Me">${t.hireOpt}</option>`;
+            }
+        }
+        
+        function renderNav() {
+            const t = translations[currentLang];
+            const navItems = ['home', 'about', 'services', 'portfolio', 'contact'];
+            navItems.forEach(item => {
+                const el = document.getElementById(`nav${item.charAt(0).toUpperCase() + item.slice(1)}`);
+                const mobileEl = document.getElementById(`mobile${item.charAt(0).toUpperCase() + item.slice(1)}`);
+                if (el) el.textContent = t[item];
+                if (mobileEl) mobileEl.textContent = t[item];
+            });
+            document.getElementById('servicesTitle').textContent = t.servicesTitle;
+            document.getElementById('portfolioTitle').textContent = t.portfolioTitle;
+            document.getElementById('ctaTitle').textContent = t.ctaTitle;
+        }
+        
+        function updateAllContent() {
+            renderNav();
+            renderHero();
+            renderAbout();
+            renderProjects();
+            renderServices();
+            renderFooterLinks();
+            renderSocialLinks();
+            renderFooter();
+            renderContactForm();
+        }
+        
+        // ==================== المودال ====================
+        function openModal(service) {
+            if (!service) return;
+            let name = service.nameAr, features = service.features, price = service.priceAr;
+            if (currentLang === 'en') { name = service.nameEn; features = service.featuresEn; price = service.priceEn; }
+            if (currentLang === 'ru') { name = service.nameRu; features = service.featuresRu; price = service.priceRu; }
+            
+            document.getElementById('modalIcon').className = service.icon;
+            document.getElementById('modalTitle').textContent = name;
+            document.getElementById('modalDesc').textContent = service.shortAr;
+            document.getElementById('modalFeatures').innerHTML = features.map(f => `<li><i class="fas fa-check-circle"></i> <span>${f}</span></li>`).join('');
+            document.getElementById('modalPrice').textContent = price;
+            document.getElementById('modalBtnText').textContent = translations[currentLang].modalBtnText;
+            document.getElementById('serviceModal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+            
+            const modalBtn = document.getElementById('modalOrderBtn');
+            const newModalBtn = modalBtn.cloneNode(true);
+            modalBtn.parentNode.replaceChild(newModalBtn, modalBtn);
+            newModalBtn.addEventListener('click', () => {
+                closeModal();
+                const url = service.url || '#contact';
+                if (url.startsWith('#')) {
+                    scrollToSection(url.substring(1));
+                } else {
+                    window.open(url, '_blank');
+                }
+            });
+        }
+        
+        function closeModal() {
+            document.getElementById('serviceModal').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+        
+        // ==================== تغيير اللغة ====================
+        function changeLanguage(lang, dir, name) {
+            currentLang = lang;
+            document.getElementById('currentLangText').textContent = name;
+            document.body.className = '';
+            document.body.classList.add(dir, lang);
+            document.documentElement.setAttribute("lang", lang === 'ar' ? 'ar' : (lang === 'ru' ? 'ru' : 'en'));
+            document.documentElement.setAttribute("dir", dir);
+            updateAllContent();
+        }
+        
+        // ==================== حفظ الرسائل ====================
+        function saveMessage(message) {
+            let messages = JSON.parse(localStorage.getItem('admin_messages') || '[]');
+            message.id = Date.now();
+            message.date = new Date().toISOString();
+            message.read = false;
+            messages.push(message);
+            localStorage.setItem('admin_messages', JSON.stringify(messages));
+        }
+        
+        // ==================== تهيئة الصفحة ====================
+        function init() {
+            loadData();
+            
+            // Mobile menu
+            const mobileToggle = document.getElementById('mobileMenuToggle');
+            const mobileMenu = document.getElementById('mobileMenu');
+            if (mobileToggle) {
+                mobileToggle.addEventListener('click', () => { mobileMenu.classList.toggle('active'); });
+            }
+            
+            // Modal close
+            document.getElementById('modalClose').addEventListener('click', closeModal);
+            document.getElementById('serviceModal').addEventListener('click', (e) => {
+                if (e.target === document.getElementById('serviceModal')) closeModal();
+            });
+            
+            // Active link on scroll
+            const sections = document.querySelectorAll('section');
+            const navLinks = document.querySelectorAll('.main-nav a');
+            function updateActiveLink() {
+                let current = '';
+                sections.forEach(section => {
+                    if (window.scrollY >= section.offsetTop - 200) current = section.getAttribute('id');
+                });
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === `#${current}`) link.classList.add('active');
+                });
+            }
+            window.addEventListener('scroll', updateActiveLink);
+            updateActiveLink();
+            
+            // Smooth scroll for nav links
+            document.querySelectorAll('.mobile-menu a, .main-nav a, .footer-links a').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    const href = link.getAttribute('href');
+                    if (href && href.startsWith('#')) {
+                        if (mobileMenu) mobileMenu.classList.remove('active');
+                        e.preventDefault();
+                        scrollToSection(href.substring(1));
+                    }
+                });
+            });
+            
+            // Contact form submit
+            document.getElementById('contactForm').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const name = document.getElementById('contactName').value;
+                const email = document.getElementById('contactEmail').value;
+                const service = document.getElementById('contactService').value;
+                const message = document.getElementById('contactMsg').value;
+                
+                if (!name || !email || !message) {
+                    alert(currentLang === 'ar' ? "يرجى ملء جميع الحقول" : currentLang === 'ru' ? "Пожалуйста, заполните все поля" : "Please fill all fields");
+                    return;
+                }
+                
+                saveMessage({ name, email, service, message });
+                
+                const messages = {
+                    ar: "✅ تم إرسال رسالتك بنجاح! سأتواصل معك قريباً.",
+                    en: "✅ Your message has been sent successfully! I'll get back to you soon.",
+                    ru: "✅ Ваше сообщение отправлено успешно! Я свяжусь с вами в ближайшее время."
+                };
+                alert(messages[currentLang]);
+                e.target.reset();
+            });
+            
+            // Navbar scroll effect
+            window.addEventListener('scroll', () => {
+                const navbar = document.getElementById('navbar');
+                if (window.scrollY > 50) navbar.classList.add('scrolled');
+                else navbar.classList.remove('scrolled');
+                document.querySelectorAll('.fade-up').forEach(el => {
+                    if (el.getBoundingClientRect().top < window.innerHeight - 100) el.classList.add('active');
+                });
+            });
+            
+            // Language dropdown
+            const langDropdown = document.getElementById('langDropdown');
+            document.getElementById('langBtn').addEventListener('click', (e) => { e.stopPropagation(); langDropdown.classList.toggle('active'); });
+            document.querySelectorAll('.lang-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    changeLanguage(item.dataset.lang, item.dataset.dir, item.dataset.name);
+                    langDropdown.classList.remove('active');
+                });
+            });
+            document.addEventListener('click', (e) => { if (!langDropdown.contains(e.target)) langDropdown.classList.remove('active'); });
+            
+            // Initial language
+            const browserLang = navigator.language || 'en';
+            const initLang = browserLang.startsWith('ar') ? { lang: 'ar', dir: 'rtl', name: 'عربي' } : 
+                             browserLang.startsWith('ru') ? { lang: 'ru', dir: 'ltr', name: 'Русский' } : 
+                             { lang: 'en', dir: 'ltr', name: 'English' };
+            changeLanguage(initLang.lang, initLang.dir, initLang.name);
+            
+            setTimeout(() => {
+                document.querySelectorAll('.fade-up').forEach(el => {
+                    if (el.getBoundingClientRect().top < window.innerHeight - 100) el.classList.add('active');
+                });
+            }, 100);
+        }
+        
+        init();
+    </script>
+</body>
+</html>

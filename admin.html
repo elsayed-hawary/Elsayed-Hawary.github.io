@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>لوحة الإدارة المتكاملة - السيد الهواري</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Cairo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Cairo', 'Poppins', sans-serif;
+            background: #0A0A0A;
+            color: #FFFFFF;
+            line-height: 1.6;
+            padding: 2rem;
+        }
+        
+        .admin-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid rgba(0, 245, 160, 0.3);
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .admin-header h1 {
+            color: #00F5A0;
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .back-btn {
+            background: rgba(0, 245, 160, 0.1);
+            border: 1px solid rgba(0, 245, 160, 0.3);
+            color: #00F5A0;
+            padding: 10px 20px;
+            border-radius: 40px;
+            text-decoration: none;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .back-btn:hover {
+            background: #00F5A0;
+            color: #0A0A0A;
+            transform: translateY(-2px);
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 0.5rem;
+        }
+        
+        .tab-btn {
+            background: transparent;
+            border: none;
+            padding: 10px 20px;
+            color: #9CA3AF;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .tab-btn:hover {
+            color: #00F5A0;
+            background: rgba(0, 245, 160, 0.1);
+        }
+        
+        .tab-btn.active {
+            color: #00F5A0;
+            background: rgba(0, 245, 160, 0.15);
+            border: 1px solid rgba(0, 245, 160, 0.3);
+        }
+        
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 20px;
+            padding: 1.2rem;
+            text-align: center;
+            border: 1px solid rgba(0, 245, 160, 0.2);
+            transition: all 0.3s;
+        }
+        
+        .stat-card:hover {
+            border-color: rgba(0, 245, 160, 0.5);
+            transform: translateY(-3px);
+        }
+        
+        .stat-card i {
+            font-size: 2rem;
+            color: #00F5A0;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-number {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #00F5A0;
+        }
+        
+        .stat-label {
+            font-size: 0.8rem;
+            color: #9CA3AF;
+        }
+        
+        .form-section {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 24px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(0, 245, 160, 0.2);
+        }
+        
+        .form-section h2 {
+            color: #00F5A0;
+            margin-bottom: 1.2rem;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1rem;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+        
+        .form-group label {
+            font-size: 0.8rem;
+            color: #9CA3AF;
+            font-weight: 500;
+        }
+        
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            padding: 10px 14px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05);
+            color: #FFFFFF;
+            font-family: inherit;
+            font-size: 0.85rem;
+            transition: all 0.3s;
+        }
+        
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #00F5A0;
+            background: rgba(0, 245, 160, 0.05);
+        }
+        
+        .full-width {
+            grid-column: 1 / -1;
+        }
+        
+        .btn-submit {
+            background: linear-gradient(135deg, #00F5A0, #7C3AED);
+            color: #0A0A0A;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            margin-top: 1rem;
+        }
+        
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 245, 160, 0.3);
+        }
+        
+        .btn-danger {
+            background: rgba(255, 68, 68, 0.2);
+            border: 1px solid rgba(255, 68, 68, 0.5);
+            color: #ff4444;
+        }
+        
+        .btn-danger:hover {
+            background: #ff4444;
+            color: #fff;
+        }
+        
+        .btn-sm {
+            padding: 5px 12px;
+            font-size: 0.75rem;
+        }
+        
+        .data-section {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 24px;
+            padding: 1.5rem;
+            border: 1px solid rgba(0, 245, 160, 0.2);
+            margin-bottom: 2rem;
+        }
+        
+        .data-section h2 {
+            color: #00F5A0;
+            margin-bottom: 1.2rem;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .table-wrapper {
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            padding: 10px;
+            text-align: right;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 0.85rem;
+        }
+        
+        th {
+            color: #00F5A0;
+            font-weight: 600;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .action-btn {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 8px;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+        
+        .delete-btn { color: #ff4444; }
+        .delete-btn:hover { background: rgba(255, 68, 68, 0.2); transform: scale(1.1); }
+        .edit-btn { color: #00F5A0; }
+        .edit-btn:hover { background: rgba(0, 245, 160, 0.2); transform: scale(1.1); }
+        
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: #9CA3AF;
+        }
+        
+        .empty-state i {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            opacity: 0.5;
+        }
+        
+        .alert {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 12px 24px;
+            border-radius: 12px;
+            background: #00F5A0;
+            color: #0A0A0A;
+            font-weight: 500;
+            animation: slideIn 0.3s ease;
+            z-index: 1000;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        .url-hint {
+            font-size: 0.7rem;
+            color: #00F5A0;
+            margin-top: 4px;
+        }
+        
+        .url-hint i {
+            font-size: 0.65rem;
+        }
+        
+        @media (max-width: 768px) {
+            body { padding: 1rem; }
+            .tabs { justify-content: center; }
+            .tab-btn { padding: 8px 14px; font-size: 0.8rem; }
+            th, td { font-size: 0.75rem; padding: 8px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <div class="admin-header">
+            <h1><i class="fas fa-cog"></i> لوحة الإدارة المتكاملة</h1>
+            <a href="index.html" class="back-btn"><i class="fas fa-arrow-right"></i> العودة إلى الموقع</a>
+        </div>
+        
+        <div class="stats-grid" id="statsGrid"></div>
+        
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="hero"><i class="fas fa-home"></i> الأزرار الرئيسية</button>
+            <button class="tab-btn" data-tab="projects"><i class="fas fa-briefcase"></i> المشاريع</button>
+            <button class="tab-btn" data-tab="services"><i class="fas fa-concierge-bell"></i> الخدمات</button>
+            <button class="tab-btn" data-tab="links"><i class="fas fa-link"></i> الروابط</button>
+            <button class="tab-btn" data-tab="messages"><i class="fas fa-envelope"></i> الرسائل</button>
+            <button class="tab-btn" data-tab="social"><i class="fas fa-share-alt"></i> وسائل التواصل</button>
+        </div>
+        
+        <!-- ==================== تبويب الأزرار الرئيسية ==================== -->
+        <div id="hero-tab" class="tab-content active">
+            <div class="form-section">
+                <h2><i class="fas fa-edit"></i> تخصيص أزرار القسم الرئيسي</h2>
+                <form id="heroForm">
+                    <div class="form-grid">
+                        <div class="form-group"><label>نص زر التوظيف (عربي)</label><input type="text" id="hireBtnAr"></div>
+                        <div class="form-group"><label>نص زر التوظيف (English)</label><input type="text" id="hireBtnEn"></div>
+                        <div class="form-group"><label>نص زر التوظيف (Русский)</label><input type="text" id="hireBtnRu"></div>
+                        <div class="form-group"><label>رابط زر التوظيف</label><input type="text" id="hireBtnUrl" placeholder="#contact أو https://example.com/contact"><div class="url-hint"><i class="fas fa-info-circle"></i> يمكنك استخدام #contact للتمرير لنموذج الاتصال، أو رابط كامل</div></div>
+                        
+                        <div class="form-group"><label>نص زر عرض الأعمال (عربي)</label><input type="text" id="portfolioBtnAr"></div>
+                        <div class="form-group"><label>نص زر عرض الأعمال (English)</label><input type="text" id="portfolioBtnEn"></div>
+                        <div class="form-group"><label>نص زر عرض الأعمال (Русский)</label><input type="text" id="portfolioBtnRu"></div>
+                        <div class="form-group"><label>رابط زر عرض الأعمال</label><input type="text" id="portfolioBtnUrl" placeholder="#portfolio أو https://example.com/portfolio"><div class="url-hint"><i class="fas fa-info-circle"></i> يمكنك استخدام #portfolio للتمرير لقسم الأعمال</div></div>
+                        
+                        <div class="form-group"><label>نص زر CTA (عربي)</label><input type="text" id="ctaBtnAr"></div>
+                        <div class="form-group"><label>نص زر CTA (English)</label><input type="text" id="ctaBtnEn"></div>
+                        <div class="form-group"><label>نص زر CTA (Русский)</label><input type="text" id="ctaBtnRu"></div>
+                        <div class="form-group"><label>رابط زر CTA</label><input type="text" id="ctaBtnUrl" placeholder="#contact أو https://example.com/contact"><div class="url-hint"><i class="fas fa-info-circle"></i> يمكنك استخدام #contact للتمرير لنموذج الاتصال</div></div>
+                    </div>
+                    <button type="submit" class="btn-submit"><i class="fas fa-save"></i> حفظ روابط الأزرار</button>
+                </form>
+            </div>
+        </div>
+        
+        <!-- ==================== تبويب المشاريع ==================== -->
+        <div id="projects-tab" class="tab-content">
+            <div class="form-section">
+                <h2><i class="fas fa-plus-circle"></i> إضافة مشروع جديد</h2>
+                <form id="addProjectForm">
+                    <div class="form-grid">
+                        <div class="form-group"><label>العنوان (عربي)</label><input type="text" id="projTitleAr" required></div>
+                        <div class="form-group"><label>العنوان (English)</label><input type="text" id="projTitleEn" required></div>
+                        <div class="form-group"><label>العنوان (Русский)</label><input type="text" id="projTitleRu" required></div>
+                        <div class="form-group"><label>التقنيات</label><input type="text" id="projTech" required></div>
+                        <div class="form-group"><label>رابط المشروع (زر الطلب)</label><input type="text" id="projLink" placeholder="#contact أو https://example.com/project"></div>
+                        <div class="form-group"><label>رابط GitHub</label><input type="text" id="projGithub" placeholder="https://github.com/username/project"></div>
+                        <div class="form-group full-width"><label>الوصف (عربي)</label><textarea id="projDescAr" rows="2"></textarea></div>
+                        <div class="form-group full-width"><label>الوصف (English)</label><textarea id="projDescEn" rows="2"></textarea></div>
+                        <div class="form-group full-width"><label>الوصف (Русский)</label><textarea id="projDescRu" rows="2"></textarea></div>
+                        <div class="form-group"><label>صورة المشروع</label><input type="text" id="projImg" placeholder="a.png أو رابط"></div>
+                    </div>
+                    <button type="submit" class="btn-submit"><i class="fas fa-plus"></i> إضافة المشروع</button>
+                </form>
+            </div>
+            <div class="data-section">
+                <h2>قائمة المشاريع <button id="resetProjectsBtn" class="btn-submit btn-danger btn-sm"><i class="fas fa-undo-alt"></i> استعادة الافتراضي</button></h2>
+                <div class="table-wrapper"><table id="projectsTable"><thead><tr><th>الصورة</th><th>العنوان</th><th>التقنيات</th><th>رابط المشروع</th><th>GitHub</th><th>الإجراءات</th> </thead><tbody id="projectsTableBody"></tbody> </table></div>
+            </div>
+        </div>
+        
+        <!-- ==================== تبويب الخدمات ==================== -->
+        <div id="services-tab" class="tab-content">
+            <div class="form-section">
+                <h2><i class="fas fa-plus-circle"></i> إضافة خدمة جديدة</h2>
+                <form id="addServiceForm">
+                    <div class="form-grid">
+                        <div class="form-group"><label>الاسم (عربي)</label><input type="text" id="servNameAr" required></div>
+                        <div class="form-group"><label>الاسم (English)</label><input type="text" id="servNameEn" required></div>
+                        <div class="form-group"><label>الاسم (Русский)</label><input type="text" id="servNameRu" required></div>
+                        <div class="form-group"><label>الوصف القصير (عربي)</label><input type="text" id="servShortAr" required></div>
+                        <div class="form-group"><label>الوصف القصير (English)</label><input type="text" id="servShortEn" required></div>
+                        <div class="form-group"><label>الوصف القصير (Русский)</label><input type="text" id="servShortRu" required></div>
+                        <div class="form-group"><label>رابط الخدمة</label><input type="text" id="servUrl" placeholder="#contact أو https://example.com/service"><div class="url-hint"><i class="fas fa-info-circle"></i> الرابط الذي سيتم التوجه إليه عند الضغط على زر طلب الخدمة</div></div>
+                        <div class="form-group"><label>الأيقونة</label><select id="servIcon"><option value="fas fa-code">💻 Code</option><option value="fas fa-mobile-alt">📱 Mobile</option><option value="fas fa-server">🖥️ Server</option><option value="fas fa-paint-brush">🎨 Design</option><option value="fas fa-chart-line">📊 Analytics</option></select></div>
+                        <div class="form-group full-width"><label>المميزات (سطر لكل ميزة)</label><textarea id="servFeatures" rows="3"></textarea></div>
+                        <div class="form-group"><label>السعر (عربي)</label><input type="text" id="servPriceAr"></div>
+                        <div class="form-group"><label>السعر (English)</label><input type="text" id="servPriceEn"></div>
+                        <div class="form-group"><label>السعر (Русский)</label><input type="text" id="servPriceRu"></div>
+                    </div>
+                    <button type="submit" class="btn-submit"><i class="fas fa-plus"></i> إضافة الخدمة</button>
+                </form>
+            </div>
+            <div class="data-section">
+                <h2>قائمة الخدمات <button id="resetServicesBtn" class="btn-submit btn-danger btn-sm"><i class="fas fa-undo-alt"></i> استعادة الافتراضي</button></h2>
+                <div class="table-wrapper"><table id="servicesTable"><thead> <tr><th>الأيقونة</th><th>الاسم</th><th>الوصف</th><th>الرابط</th><th>الإجراءات</th></tr> </thead><tbody id="servicesTableBody"></tbody> </table></div>
+            </div>
+        </div>
+        
+        <!-- ==================== تبويب الروابط ==================== -->
+        <div id="links-tab" class="tab-content">
+            <div class="form-section">
+                <h2><i class="fas fa-plus-circle"></i> إضافة رابط جديد</h2>
+                <form id="addLinkForm">
+                    <div class="form-grid">
+                        <div class="form-group"><label>نص الرابط (عربي)</label><input type="text" id="linkTextAr" required></div>
+                        <div class="form-group"><label>نص الرابط (English)</label><input type="text" id="linkTextEn"></div>
+                        <div class="form-group"><label>نص الرابط (Русский)</label><input type="text" id="linkTextRu"></div>
+                        <div class="form-group"><label>الرابط URL</label><input type="text" id="linkUrl" placeholder="#home أو https://example.com" required></div>
+                        <div class="form-group"><label>الأيقونة</label><select id="linkIcon"><option value="fas fa-link">🔗 Link</option><option value="fas fa-home">🏠 Home</option><option value="fas fa-user">👤 User</option><option value="fas fa-cog">⚙️ Cog</option><option value="fas fa-briefcase">💼 Briefcase</option><option value="fas fa-envelope">✉️ Envelope</option><option value="fas fa-file-contract">📄 Contract</option><option value="fas fa-shield-alt">🛡️ Shield</option><option value="fas fa-cookie-bite">🍪 Cookie</option><option value="fas fa-info-circle">ℹ️ Info</option></select></div>
+                        <div class="form-group"><label>القسم</label><select id="linkSection"><option value="quick">روابط سريعة</option><option value="legal">صفحات قانونية</option></select></div>
+                    </div>
+                    <button type="submit" class="btn-submit"><i class="fas fa-plus"></i> إضافة الرابط</button>
+                </form>
+            </div>
+            <div class="data-section">
+                <h2>قائمة الروابط <button id="resetLinksBtn" class="btn-submit btn-danger btn-sm"><i class="fas fa-undo-alt"></i> استعادة الافتراضي</button></h2>
+                <div class="table-wrapper"><table id="linksTable"><thead> <tr><th>الأيقونة</th><th>النص</th><th>الرابط</th><th>القسم</th><th>الإجراءات</th></tr> </thead><tbody id="linksTableBody"></tbody> </table></div>
+            </div>
+        </div>
+        
+        <!-- ==================== تبويب الرسائل ==================== -->
+        <div id="messages-tab" class="tab-content">
+            <div class="data-section">
+                <h2><i class="fas fa-envelope"></i> الرسائل الواردة <button id="clearAllMessagesBtn" class="btn-submit btn-danger btn-sm"><i class="fas fa-trash-alt"></i> حذف الكل</button></h2>
+                <div class="table-wrapper"><table id="messagesTable"><thead> <tr><th>الحالة</th><th>الاسم</th><th>البريد</th><th>الخدمة</th><th>الرسالة</th><th>التاريخ</th><th>الإجراءات</th></tr> </thead><tbody id="messagesTableBody"></tbody> </table></div>
+            </div>
+        </div>
+        
+        <!-- ==================== تبويب وسائل التواصل ==================== -->
+        <div id="social-tab" class="tab-content">
+            <div class="form-section">
+                <h2><i class="fas fa-plus-circle"></i> إضافة حساب تواصل جديد</h2>
+                <form id="addSocialForm">
+                    <div class="form-grid">
+                        <div class="form-group"><label>اسم المنصة</label><input type="text" id="socialName" required></div>
+                        <div class="form-group"><label>الاسم (Русский)</label><input type="text" id="socialNameRu"></div>
+                        <div class="form-group"><label>رابط الملف الشخصي</label><input type="url" id="socialUrl" required></div>
+                        <div class="form-group"><label>أيقونة Font Awesome</label><input type="text" id="socialIcon" value="fab fa-instagram" required><div class="url-hint"><i class="fas fa-info-circle"></i> أمثلة: fab fa-instagram, fab fa-github, fab fa-telegram, fab fa-vk</div></div>
+                    </div>
+                    <button type="submit" class="btn-submit"><i class="fas fa-plus"></i> إضافة حساب</button>
+                </form>
+            </div>
+            <div class="data-section">
+                <h2>قائمة وسائل التواصل <button id="resetSocialBtn" class="btn-submit btn-danger btn-sm"><i class="fas fa-undo-alt"></i> استعادة الافتراضي</button></h2>
+                <div class="table-wrapper"><table id="socialTable"><thead> <tr><th>الأيقونة</th><th>الاسم</th><th>الرابط</th><th>الإجراءات</th></tr> </thead><tbody id="socialTableBody"></tbody> </table></div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // ==================== البيانات الافتراضية ====================
+        const defaultButtons = {
+            hireBtnAr: "توظيفي", hireBtnEn: "Hire Me", hireBtnRu: "Нанять", hireBtnUrl: "#contact",
+            portfolioBtnAr: "عرض الأعمال", portfolioBtnEn: "View Work", portfolioBtnRu: "Портфолио", portfolioBtnUrl: "#portfolio",
+            ctaBtnAr: "ابدأ مشروعك", ctaBtnEn: "Start Project", ctaBtnRu: "Начать проект", ctaBtnUrl: "#contact"
+        };
+        
+        const defaultProjects = [
+            { id: 1, title: "منصة تجارة إلكترونية", titleEn: "E-Commerce Platform", titleRu: "Платформа электронной коммерции", tech: "React, Node.js, MongoDB", desc: "منصة متكاملة للبيع", descEn: "Complete e-commerce solution", descRu: "Комплексное решение", img: "a.png", link: "https://example.com/project1", github: "https://github.com/project1" },
+            { id: 2, title: "تطبيق بنكي", titleEn: "Banking App", titleRu: "Банковское приложение", tech: "React Native, Firebase", desc: "تطبيق مصرفي متكامل", descEn: "Complete banking app", descRu: "Полное банковское приложение", img: "a.png", link: "https://example.com/project2", github: "https://github.com/project2" },
+            { id: 3, title: "لوحة تحكم ذكاء اصطناعي", titleEn: "AI Dashboard", titleRu: "Панель управления ИИ", tech: "Python, TensorFlow", desc: "تحليل البيانات بالذكاء الاصطناعي", descEn: "AI data analysis", descRu: "Анализ данных ИИ", img: "a.png", link: "#contact", github: "" }
+        ];
+        
+        const defaultServices = [
+            { id: 1, nameAr: "تطوير الويب", nameEn: "Web Development", nameRu: "Веб-разработка", shortAr: "مواقع حديثة بأداء عالي", shortEn: "Modern high-performance websites", shortRu: "Современные сайты", icon: "fas fa-code", url: "#contact", features: ["تصميم متجاوب مع جميع الأجهزة", "تحسين محركات البحث SEO", "أداء فائق وسرعة تحميل عالية"], featuresEn: ["Responsive Design", "SEO Optimization", "High Performance"], featuresRu: ["Адаптивный дизайн", "SEO оптимизация", "Высокая производительность"], priceAr: "يبدأ من $999", priceEn: "Starting from $999", priceRu: "От $999" },
+            { id: 2, nameAr: "تطبيقات الجوال", nameEn: "Mobile Apps", nameRu: "Мобильные приложения", shortAr: "تطبيقات Android و iOS احترافية", shortEn: "Professional Android & iOS apps", shortRu: "Профессиональные приложения для Android и iOS", icon: "fas fa-mobile-alt", url: "#contact", features: ["تطبيقات Android و iOS", "واجهة مستخدم جذابة", "إشعارات فورية", "أداء عالي"], featuresEn: ["Android & iOS Apps", "Attractive UI", "Push Notifications", "High Performance"], featuresRu: ["Приложения для Android и iOS", "Привлекательный интерфейс", "Push-уведомления", "Высокая производительность"], priceAr: "يبدأ من $1999", priceEn: "Starting from $1999", priceRu: "От $1999" },
+            { id: 3, nameAr: "أنظمة الخلفية", nameEn: "Backend Systems", nameRu: "Backend системы", shortAr: "واجهات برمجية آمنة وقابلة للتوسع", shortEn: "Secure & Scalable APIs", shortRu: "Безопасные и масштабируемые API", icon: "fas fa-server", url: "#contact", features: ["واجهات برمجية RESTful API", "قواعد بيانات عالية الأداء", "نظام مصادقة آمن", "قابلية التوسع"], featuresEn: ["RESTful APIs", "High-performance Databases", "Secure Authentication", "Scalability"], featuresRu: ["RESTful API", "Высокопроизводительные БД", "Безопасная аутентификация", "Масштабируемость"], priceAr: "يبدأ من $1499", priceEn: "Starting from $1499", priceRu: "От $1499" }
+        ];
+        
+        const defaultLinks = [
+            { id: 1, text: "الرئيسية", textEn: "Home", textRu: "Главная", url: "#home", icon: "fas fa-home", section: "quick" },
+            { id: 2, text: "عني", textEn: "About", textRu: "Обо мне", url: "#about", icon: "fas fa-user", section: "quick" },
+            { id: 3, text: "الخدمات", textEn: "Services", textRu: "Услуги", url: "#services", icon: "fas fa-cog", section: "quick" },
+            { id: 4, text: "الأعمال", textEn: "Work", textRu: "Работы", url: "#portfolio", icon: "fas fa-briefcase", section: "quick" },
+            { id: 5, text: "اتصل", textEn: "Contact", textRu: "Контакты", url: "#contact", icon: "fas fa-envelope", section: "quick" },
+            { id: 6, text: "الشروط والأحكام", textEn: "Terms & Conditions", textRu: "Условия использования", url: "#", icon: "fas fa-file-contract", section: "legal" },
+            { id: 7, text: "سياسة الخصوصية", textEn: "Privacy Policy", textRu: "Политика конфиденциальности", url: "#", icon: "fas fa-shield-alt", section: "legal" },
+            { id: 8, text: "سياسة ملفات الارتباط", textEn: "Cookie Policy", textRu: "Cookie политика", url: "#", icon: "fas fa-cookie-bite", section: "legal" },
+            { id: 9, text: "بيان النشر", textEn: "Imprint", textRu: "Выходные данные", url: "#", icon: "fas fa-info-circle", section: "legal" }
+        ];
+        
+        const defaultSocial = [
+            { id: 1, name: "Instagram", nameRu: "Instagram", url: "https://instagram.com", icon: "fab fa-instagram" },
+            { id: 2, name: "Telegram", nameRu: "Telegram", url: "https://t.me", icon: "fab fa-telegram" },
+            { id: 3, name: "VK", nameRu: "ВК", url: "https://vk.com", icon: "fab fa-vk" },
+            { id: 4, name: "GitHub", nameRu: "GitHub", url: "https://github.com", icon: "fab fa-github" }
+        ];
+        
+        let messages = JSON.parse(localStorage.getItem('admin_messages') || '[]');
+        let buttons = JSON.parse(localStorage.getItem('admin_buttons') || JSON.stringify(defaultButtons));
+        let projects = JSON.parse(localStorage.getItem('admin_projects') || JSON.stringify(defaultProjects));
+        let services = JSON.parse(localStorage.getItem('admin_services') || JSON.stringify(defaultServices));
+        let links = JSON.parse(localStorage.getItem('admin_links') || JSON.stringify(defaultLinks));
+        let social = JSON.parse(localStorage.getItem('admin_social') || JSON.stringify(defaultSocial));
+        
+        let nextId = { projects: Math.max(...projects.map(p=>p.id),0)+1, services: Math.max(...services.map(s=>s.id),0)+1, links: Math.max(...links.map(l=>l.id),0)+1, social: Math.max(...social.map(s=>s.id),0)+1 };
+        
+        function saveAll() {
+            localStorage.setItem('admin_buttons', JSON.stringify(buttons));
+            localStorage.setItem('admin_projects', JSON.stringify(projects));
+            localStorage.setItem('admin_services', JSON.stringify(services));
+            localStorage.setItem('admin_links', JSON.stringify(links));
+            localStorage.setItem('admin_social', JSON.stringify(social));
+            localStorage.setItem('admin_messages', JSON.stringify(messages));
+            updateStats();
+            renderAll();
+        }
+        
+        function updateStats() {
+            document.getElementById('statsGrid').innerHTML = `
+                <div class="stat-card"><i class="fas fa-briefcase"></i><div class="stat-number">${projects.length}</div><div class="stat-label">المشاريع</div></div>
+                <div class="stat-card"><i class="fas fa-concierge-bell"></i><div class="stat-number">${services.length}</div><div class="stat-label">الخدمات</div></div>
+                <div class="stat-card"><i class="fas fa-link"></i><div class="stat-number">${links.length}</div><div class="stat-label">الروابط</div></div>
+                <div class="stat-card"><i class="fas fa-envelope"></i><div class="stat-number">${messages.filter(m=>!m.read).length}</div><div class="stat-label">رسائل غير مقروءة</div></div>
+                <div class="stat-card"><i class="fas fa-share-alt"></i><div class="stat-number">${social.length}</div><div class="stat-label">وسائل التواصل</div></div>
+            `;
+        }
+        
+        function renderAll() {
+            renderButtonsForm();
+            renderProjects();
+            renderServices();
+            renderLinks();
+            renderMessages();
+            renderSocial();
+        }
+        
+        function renderButtonsForm() {
+            document.getElementById('hireBtnAr').value = buttons.hireBtnAr || '';
+            document.getElementById('hireBtnEn').value = buttons.hireBtnEn || '';
+            document.getElementById('hireBtnRu').value = buttons.hireBtnRu || '';
+            document.getElementById('hireBtnUrl').value = buttons.hireBtnUrl || '#contact';
+            document.getElementById('portfolioBtnAr').value = buttons.portfolioBtnAr || '';
+            document.getElementById('portfolioBtnEn').value = buttons.portfolioBtnEn || '';
+            document.getElementById('portfolioBtnRu').value = buttons.portfolioBtnRu || '';
+            document.getElementById('portfolioBtnUrl').value = buttons.portfolioBtnUrl || '#portfolio';
+            document.getElementById('ctaBtnAr').value = buttons.ctaBtnAr || '';
+            document.getElementById('ctaBtnEn').value = buttons.ctaBtnEn || '';
+            document.getElementById('ctaBtnRu').value = buttons.ctaBtnRu || '';
+            document.getElementById('ctaBtnUrl').value = buttons.ctaBtnUrl || '#contact';
+        }
+        
+        function renderProjects() {
+            const tbody = document.getElementById('projectsTableBody');
+            if(!projects.length){ tbody.innerHTML='<tr><td colspan="6"><div class="empty-state"><i class="fas fa-folder-open"></i><p>لا توجد مشاريع</p></div></td></tr>'; return; }
+            tbody.innerHTML = projects.map(p => `
+                <tr>
+                    <td><img src="${p.img}" style="width:40px;height:40px;object-fit:cover;border-radius:8px" onerror="this.src='a.png'"></td>
+                    <td><strong>${p.title}</strong><br><small style="color:#6B7280">${p.titleEn} | ${p.titleRu}</small></td>
+                    <td>${p.tech}</td>
+                    <td>${p.link ? `<a href="${p.link}" target="_blank" style="color:#00F5A0">رابط</a>` : '-'}</td>
+                    <td>${p.github ? `<a href="${p.github}" target="_blank" style="color:#00F5A0">GitHub</a>` : '-'}</td>
+                    <td><button class="action-btn delete-btn" onclick="deleteProject(${p.id})"><i class="fas fa-trash"></i></button></td>
+                </tr>
+            `).join('');
+        }
+        
+        function renderServices() {
+            const tbody = document.getElementById('servicesTableBody');
+            if(!services.length){ tbody.innerHTML='<tr><td colspan="5"><div class="empty-state"><i class="fas fa-concierge-bell"></i><p>لا توجد خدمات</p></div></td></tr>'; return; }
+            tbody.innerHTML = services.map(s => `
+                <tr>
+                    <td><i class="${s.icon}" style="font-size:1.3rem;color:#00F5A0"></i></td>
+                    <td><strong>${s.nameAr}</strong><br><small>${s.nameEn}</small></td>
+                    <td>${s.shortAr}</td>
+                    <td>${s.url ? `<a href="${s.url}" target="_blank" style="color:#00F5A0">${s.url.length>30 ? s.url.substring(0,30)+'...' : s.url}</a>` : '-'}</td>
+                    <td><button class="action-btn delete-btn" onclick="deleteService(${s.id})"><i class="fas fa-trash"></i></button></td>
+                </tr>
+            `).join('');
+        }
+        
+        function renderLinks() {
+            const tbody = document.getElementById('linksTableBody');
+            if(!links.length){ tbody.innerHTML='<tr><td colspan="5"><div class="empty-state"><i class="fas fa-link"></i><p>لا توجد روابط</p></div></td></tr>'; return; }
+            tbody.innerHTML = links.map(l => `
+                <tr>
+                    <td><i class="${l.icon}"></i></td>
+                    <td><strong>${l.text}</strong><br><small>${l.textEn||''}</small></td>
+                    <td><a href="${l.url}" target="_blank" style="color:#00F5A0">${l.url.length>30 ? l.url.substring(0,30)+'...' : l.url}</a></td>
+                    <td>${l.section==='quick'?'روابط سريعة':'صفحات قانونية'}</td>
+                    <td><button class="action-btn delete-btn" onclick="deleteLink(${l.id})"><i class="fas fa-trash"></i></button></td>
+                </tr>
+            `).join('');
+        }
+        
+        function renderMessages() {
+            const tbody = document.getElementById('messagesTableBody');
+            if(!messages.length){ tbody.innerHTML='<tr><td colspan="7"><div class="empty-state"><i class="fas fa-envelope-open-text"></i><p>لا توجد رسائل</p></div></td></tr>'; return; }
+            tbody.innerHTML = messages.map(m => `
+                <tr class="${m.read ? '' : 'message-unread'}" style="${!m.read ? 'background: rgba(0,245,160,0.05); border-right: 3px solid #00F5A0' : ''}">
+                    <td>${m.read ? '<i class="fas fa-check-circle" style="color:#00F5A0"></i>' : '<i class="fas fa-circle" style="color:#00F5A0; font-size:10px"></i>'}</td>
+                    <td>${m.name}</td>
+                    <td>${m.email}</td>
+                    <td>${m.service}</td>
+                    <td>${m.message.substring(0,50)}${m.message.length>50?'...':''}</td>
+                    <td>${new Date(m.date).toLocaleDateString('ar')}</td>
+                    <td><button class="action-btn delete-btn" onclick="deleteMessage(${m.id})"><i class="fas fa-trash"></i></button></td>
+                </tr>
+            `).join('');
+        }
+        
+        function renderSocial() {
+            const tbody = document.getElementById('socialTableBody');
+            if(!social.length){ tbody.innerHTML='<tr><td colspan="4"><div class="empty-state"><i class="fas fa-share-alt"></i><p>لا توجد حسابات</p></div></td></tr>'; return; }
+            tbody.innerHTML = social.map(s => `
+                <tr>
+                    <td><i class="${s.icon}" style="font-size:1.3rem"></i></td>
+                    <td><strong>${s.name}</strong><br><small>${s.nameRu||''}</small></td>
+                    <td><a href="${s.url}" target="_blank" style="color:#00F5A0">${s.url.length>40 ? s.url.substring(0,40)+'...' : s.url}</a></td>
+                    <td><button class="action-btn delete-btn" onclick="deleteSocial(${s.id})"><i class="fas fa-trash"></i></button></td>
+                </tr>
+            `).join('');
+        }
+        
+        // CRUD operations
+        function deleteProject(id){ projects = projects.filter(p=>p.id!==id); saveAll(); showAlert('تم حذف المشروع'); }
+        function deleteService(id){ services = services.filter(s=>s.id!==id); saveAll(); showAlert('تم حذف الخدمة'); }
+        function deleteLink(id){ links = links.filter(l=>l.id!==id); saveAll(); showAlert('تم حذف الرابط'); }
+        function deleteMessage(id){ messages = messages.filter(m=>m.id!==id); saveAll(); showAlert('تم حذف الرسالة'); }
+        function deleteSocial(id){ social = social.filter(s=>s.id!==id); saveAll(); showAlert('تم حذف الحساب'); }
+        
+        function resetProjects(){ projects = JSON.parse(JSON.stringify(defaultProjects)); nextId.projects = Math.max(...projects.map(p=>p.id),0)+1; saveAll(); showAlert('تم استعادة المشاريع الافتراضية'); }
+        function resetServices(){ services = JSON.parse(JSON.stringify(defaultServices)); nextId.services = Math.max(...services.map(s=>s.id),0)+1; saveAll(); showAlert('تم استعادة الخدمات الافتراضية'); }
+        function resetLinks(){ links = JSON.parse(JSON.stringify(defaultLinks)); nextId.links = Math.max(...links.map(l=>l.id),0)+1; saveAll(); showAlert('تم استعادة الروابط الافتراضية'); }
+        function resetSocial(){ social = JSON.parse(JSON.stringify(defaultSocial)); nextId.social = Math.max(...social.map(s=>s.id),0)+1; saveAll(); showAlert('تم استعادة وسائل التواصل'); }
+        function clearAllMessages(){ if(confirm('حذف جميع الرسائل؟')){ messages = []; saveAll(); showAlert('تم حذف جميع الرسائل'); } }
+        
+        // Add handlers
+        document.getElementById('heroForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            buttons = {
+                hireBtnAr: document.getElementById('hireBtnAr').value, hireBtnEn: document.getElementById('hireBtnEn').value, hireBtnRu: document.getElementById('hireBtnRu').value, hireBtnUrl: document.getElementById('hireBtnUrl').value,
+                portfolioBtnAr: document.getElementById('portfolioBtnAr').value, portfolioBtnEn: document.getElementById('portfolioBtnEn').value, portfolioBtnRu: document.getElementById('portfolioBtnRu').value, portfolioBtnUrl: document.getElementById('portfolioBtnUrl').value,
+                ctaBtnAr: document.getElementById('ctaBtnAr').value, ctaBtnEn: document.getElementById('ctaBtnEn').value, ctaBtnRu: document.getElementById('ctaBtnRu').value, ctaBtnUrl: document.getElementById('ctaBtnUrl').value
+            };
+            saveAll(); showAlert('تم حفظ روابط الأزرار');
+        });
+        
+        document.getElementById('addProjectForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            projects.push({ 
+                id: nextId.projects++, 
+                title: document.getElementById('projTitleAr').value, 
+                titleEn: document.getElementById('projTitleEn').value, 
+                titleRu: document.getElementById('projTitleRu').value, 
+                tech: document.getElementById('projTech').value, 
+                desc: document.getElementById('projDescAr').value, 
+                descEn: document.getElementById('projDescEn').value, 
+                descRu: document.getElementById('projDescRu').value, 
+                img: document.getElementById('projImg').value || 'a.png', 
+                link: document.getElementById('projLink').value, 
+                github: document.getElementById('projGithub').value 
+            });
+            saveAll(); e.target.reset(); showAlert('تم إضافة المشروع');
+        });
+        
+        document.getElementById('addServiceForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const features = document.getElementById('servFeatures').value.split('\n').filter(f=>f.trim());
+            services.push({ 
+                id: nextId.services++, 
+                nameAr: document.getElementById('servNameAr').value, 
+                nameEn: document.getElementById('servNameEn').value, 
+                nameRu: document.getElementById('servNameRu').value, 
+                shortAr: document.getElementById('servShortAr').value, 
+                shortEn: document.getElementById('servShortEn').value, 
+                shortRu: document.getElementById('servShortRu').value, 
+                icon: document.getElementById('servIcon').value, 
+                url: document.getElementById('servUrl').value, 
+                features: features, 
+                featuresEn: features, 
+                featuresRu: features, 
+                priceAr: document.getElementById('servPriceAr').value, 
+                priceEn: document.getElementById('servPriceEn').value, 
+                priceRu: document.getElementById('servPriceRu').value 
+            });
+            saveAll(); e.target.reset(); showAlert('تم إضافة الخدمة');
+        });
+        
+        document.getElementById('addLinkForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            links.push({ 
+                id: nextId.links++, 
+                text: document.getElementById('linkTextAr').value, 
+                textEn: document.getElementById('linkTextEn').value, 
+                textRu: document.getElementById('linkTextRu').value, 
+                url: document.getElementById('linkUrl').value, 
+                icon: document.getElementById('linkIcon').value, 
+                section: document.getElementById('linkSection').value 
+            });
+            saveAll(); e.target.reset(); showAlert('تم إضافة الرابط');
+        });
+        
+        document.getElementById('addSocialForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            social.push({ 
+                id: nextId.social++, 
+                name: document.getElementById('socialName').value, 
+                nameRu: document.getElementById('socialNameRu').value, 
+                url: document.getElementById('socialUrl').value, 
+                icon: document.getElementById('socialIcon').value 
+            });
+            saveAll(); e.target.reset(); showAlert('تم إضافة حساب التواصل');
+        });
+        
+        document.getElementById('resetProjectsBtn').onclick = resetProjects;
+        document.getElementById('resetServicesBtn').onclick = resetServices;
+        document.getElementById('resetLinksBtn').onclick = resetLinks;
+        document.getElementById('resetSocialBtn').onclick = resetSocial;
+        document.getElementById('clearAllMessagesBtn').onclick = clearAllMessages;
+        
+        // Tabs
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
+                btn.classList.add('active');
+                document.getElementById(`${btn.dataset.tab}-tab`).classList.add('active');
+            });
+        });
+        
+        function showAlert(msg, type='success'){ const div=document.createElement('div'); div.className='alert'; div.innerHTML=`<i class="fas fa-${type==='success'?'check-circle':'exclamation-triangle'}"></i> ${msg}`; div.style.background=type==='success'?'#00F5A0':'#ff4444'; div.style.color='#0A0A0A'; document.body.appendChild(div); setTimeout(()=>div.remove(),3000); }
+        
+        saveAll();
+    </script>
+</body>
+</html>
